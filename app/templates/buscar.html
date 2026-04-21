@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="text-danger mb-4 text-center fw-bold">Viajes Disponibles</h2>
+
+<div class="row">
+    {% for viaje in viajes %}
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h5 class="card-title text-danger fw-bold">
+                    {{ viaje.origen }} <span class="text-dark">➔</span> {{ viaje.destino }}
+                </h5>
+                <hr>
+                <p class="card-text mb-1"><strong>🕗 Salida:</strong> {{ viaje.hora_salida }}</p>
+                <p class="card-text mb-1"><strong>👤 Conductor:</strong> {{ viaje.conductor.nombre }}</p>
+                <p class="card-text mb-3">
+                    <strong>💺 Asientos:</strong> {{ viaje.asientos_disponibles }} | 
+                    <strong>💰 Costo:</strong> ${{ "%.2f"|format(viaje.precio) }}
+                </p>
+
+                <form action="{{ url_for('main.reservar', viaje_id=viaje.id) }}" method="POST">
+                    <button type="submit" class="btn btn-danger w-100 py-2 shadow-sm" 
+                            {% if viaje.asientos_disponibles == 0 or viaje.conductor_id == current_user.id %}disabled{% endif %}>
+                        {% if viaje.conductor_id == current_user.id %}
+                            <div class="alert alert-secondary text-center py-2">
+                                <strong>Este es tu viaje</strong>
+                            </div>
+                        {% else %}
+                            <form action="{{ url_for('main.reservar', viaje_id=viaje.id) }}" method="POST">
+                                <button type="submit" class="btn btn-danger w-100" 
+                                        {% if viaje.asientos_disponibles == 0 %}disabled{% endif %}>
+                                    {% if viaje.asientos_disponibles == 0 %}Agotado{% else %}Reservar Asiento{% endif %}
+                                </button>
+                            </form>
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center mt-5">
+        <p class="fs-4 text-muted">No hay viajes publicados por ahora en la UTA. ¡Sé el primero!</p>
+        <a href="{{ url_for('main.publicar_viaje') }}" class="btn btn-outline-danger">Publicar una Ruta</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

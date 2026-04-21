@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% set rol = session.get('rol_activo', 'pasajero') %}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow border-0 overflow-hidden">
+            <div class="card-header {% if rol == 'pasajero' %}bg-danger{% else %}bg-primary{% endif %} p-5 text-center text-white">
+                <img src="https://ui-avatars.com/api/?name={{ current_user.nombre }}&background=fff&color={% if rol == 'pasajero' %}dc3545{% else %}0d6efd{% endif %}&size=128" 
+                     class="rounded-circle shadow mb-3" alt="Avatar">
+                <h2 class="fw-bold mb-0">{{ current_user.nombre }}</h2>
+                <p class="opacity-75">{{ current_user.email }}</p>
+                <span class="badge bg-white text-dark rounded-pill px-3">Estudiante UTA</span>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="text-center mb-5">
+                    <h5 class="text-muted text-uppercase small fw-bold mb-3">Cambiar Modo de Uso</h5>
+                    <div class="btn-group w-100 shadow-sm" role="group">
+                        <a href="{{ url_for('main.cambiar_rol', nuevo_rol='pasajero') }}" 
+                           class="btn {% if rol == 'pasajero' %}btn-danger{% else %}btn-outline-danger{% endif %} py-2">
+                            🎫 Modo Pasajero
+                        </a>
+                        <a href="{{ url_for('main.cambiar_rol', nuevo_rol='conductor') }}" 
+                           class="btn {% if rol == 'conductor' %}btn-primary{% else %}btn-outline-primary{% endif %} py-2">
+                            🚗 Modo Conductor
+                        </a>
+                    </div>
+                    <p class="mt-2 small text-muted">
+                        Actualmente estás en modo <strong>{{ rol|upper }}</strong>
+                    </p>
+                </div>
+
+                <div class="row text-center g-3 mb-5">
+                    <div class="col-6">
+                        <div class="p-3 border rounded bg-light">
+                            <h3 class="fw-bold text-primary mb-0">{{ num_viajes }}</h3>
+                            <small class="text-muted">Viajes Publicados</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 border rounded bg-light">
+                            <h3 class="fw-bold text-danger mb-0">{{ num_reservas }}</h3>
+                            <small class="text-muted">Viajes Tomados</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-top pt-4">
+                    <h6 class="fw-bold text-muted mb-3">Configuración de Cuenta</h6>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('main.logout') }}" class="btn btn-dark py-2">
+                            ❌ Cerrar Sesión de U-Ride
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <small class="text-muted font-monospace">Universidad Técnica de Ambato - Facultad de Ingeniería</small>
+        </div>
+    </div>
+</div>
+{% endblock %}

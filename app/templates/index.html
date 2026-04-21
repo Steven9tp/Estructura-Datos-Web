@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow-sm p-5 text-center bg-white border-0">
+    <h1 class="text-danger fw-bold display-5">Bienvenido a U-Ride</h1>
+    <p class="lead text-muted">Sistema de transporte para la comunidad de la Universidad Técnica de Ambato.</p>
+    
+    <div class="mt-4 d-flex justify-content-center gap-3">
+        <a href="{{ url_for('main.buscar_viaje') }}" class="btn btn-danger btn-lg px-4">
+            Buscar un Viaje
+        </a>
+        
+        <a href="{{ url_for('main.publicar_viaje') }}" class="btn btn-outline-dark btn-lg px-4">
+            Publicar Ruta
+        </a>
+    </div>
+</div>
+{% endblock %}

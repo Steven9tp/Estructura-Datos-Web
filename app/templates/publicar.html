@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow border-0">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">Publicar Nueva Ruta</h4>
+            </div>
+            <div class="card-body p-4 bg-white">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.origen.label(class="form-label") }}
+                        {{ form.origen(class="form-control", placeholder="Ej: Campus Huachi") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.destino.label(class="form-label") }}
+                        {{ form.destino(class="form-control", placeholder="Ej: Ingahurco") }}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.hora_salida.label(class="form-label") }}
+                            {{ form.hora_salida(class="form-control") }}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            {{ form.asientos.label(class="form-label") }}
+                            {{ form.asientos(class="form-control") }}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            {{ form.precio.label(class="form-label") }}
+                            {{ form.precio(class="form-control") }}
+                        </div>
+                    </div>
+                    <div class="d-grid mt-3">
+                        {{ form.submit(class="btn btn-danger btn-lg") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

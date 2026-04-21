@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="text-danger mb-4 fw-bold">Mis Viajes Publicados</h2>
+
+<div class="row">
+    {% for viaje in viajes %}
+    <div class="col-md-12 mb-4">
+        <div class="card shadow-sm border-0 {% if not viaje.activo %}opacity-50{% endif %}">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <span><strong>Ruta:</strong> {{ viaje.origen }} ➔ {{ viaje.destino }}</span>
+                {% if viaje.activo %}
+                    <span class="badge bg-success">Activo</span>
+                {% else %}
+                    <span class="badge bg-secondary">Finalizado</span>
+                {% endif %}
+            </div>
+            <div class="card-body bg-white">
+                <h6><strong>Pasajeros Confirmados:</strong></h6>
+                <ul class="list-group mb-3">
+                    {% for reserva in viaje.pasajeros_reservados %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ reserva.pasajero.nombre }}</strong><br>
+                                <small class="text-muted">{{ reserva.pasajero.email }}</small>
+                            </div>
+                            <span class="text-success">✔</span>
+                        </li>
+                    {% else %}
+                        <li class="list-group-item text-muted">No hay pasajeros aún.</li>
+                    {% endfor %}
+                </ul>
+
+                <div class="d-flex gap-2 mt-3">
+                    {% if viaje.activo %}
+                        <form action="{{ url_for('main.finalizar_viaje', viaje_id=viaje.id) }}" method="POST" class="flex-grow-1">
+                            <button type="submit" class="btn btn-success w-100">Finalizar Viaje</button>
+                        </form>
+                    {% endif %}
+                    
+                    <form action="{{ url_for('main.eliminar_viaje', viaje_id=viaje.id) }}" method="POST" 
+                        onsubmit="return confirm('¿Estás seguro de eliminar este viaje? Se borrarán todas las reservas.');">
+                        <button type="submit" class="btn btn-outline-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p>No has publicado ningún viaje todavía.</p>
+    {% endfor %}
+</div>
+{% endblock %}
