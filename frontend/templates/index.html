@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — U-Ride{% endblock %}
+{% block page_title %}<i class="fas fa-th-large me-2" style="color:var(--accent)"></i>Dashboard{% endblock %}
+{% block content %}
+
+<!-- Stats rápidos -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon accent"><i class="fas fa-car-side"></i></div>
+            <div class="stat-info">
+                <div class="stat-num" id="stat-viajes-activos">…</div>
+                <div class="stat-label">Viajes activos</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+                <div class="stat-num" id="stat-usuarios">…</div>
+                <div class="stat-label">Estudiantes</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="fas fa-handshake"></i></div>
+            <div class="stat-info">
+                <div class="stat-num" id="stat-solicitudes">…</div>
+                <div class="stat-label">Solicitudes aceptadas</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon red"><i class="fas fa-star"></i></div>
+            <div class="stat-info">
+                <div class="stat-num" id="stat-calificaciones">…</div>
+                <div class="stat-label">Calificaciones</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sección principal: viajes + mapa -->
+<div class="row g-4">
+    <!-- Lista de viajes disponibles -->
+    <div class="col-lg-5">
+        <div class="card-uride h-100">
+            <div class="card-header-uride">
+                <h6 class="fw-bold mb-0"><i class="fas fa-list me-2" style="color:var(--accent)"></i>Viajes Disponibles</h6>
+                <a href="{{ url_for('viajes.buscar_viajes') }}" class="btn-uride btn-outline-uride" style="padding:6px 14px;font-size:.75rem">
+                    Ver todos
+                </a>
+            </div>
+            <div class="card-body-uride" id="viajes-lista" style="max-height:520px;overflow-y:auto">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mapa interactivo -->
+    <div class="col-lg-7">
+        <div class="card-uride">
+            <div class="card-header-uride">
+                <h6 class="fw-bold mb-0"><i class="fas fa-map-marked-alt me-2" style="color:var(--accent)"></i>Mapa de Zonas</h6>
+                <small class="text-muted">Click en un viaje para ver la ruta</small>
+            </div>
+            <div class="card-body-uride p-0">
+                <div id="mapa-viaje" style="height:420px;border-radius:0 0 14px 14px"></div>
+            </div>
+        </div>
+        <!-- Stats del viaje seleccionado -->
+        <div class="card-uride mt-3" style="background:var(--sidebar-bg);color:#fff;">
+            <div class="card-body-uride py-3">
+                <div id="mapa-stats" class="text-center text-muted" style="color:#9ca3af !important;font-size:.85rem">
+                    <i class="fas fa-hand-pointer me-2"></i>Selecciona un viaje para ver estadísticas de ruta
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones rápidas -->
+<div class="row g-3 mt-2">
+    <div class="col-12">
+        <h6 class="fw-bold text-muted mb-2" style="font-size:.8rem;text-transform:uppercase;letter-spacing:.8px">
+            Acciones Rápidas
+        </h6>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('viajes.publicar_viaje') }}" class="btn-uride btn-primary-uride btn-full btn-lg-uride" style="border-radius:12px">
+            <i class="fas fa-plus-circle"></i> Publicar Viaje
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('viajes.buscar_viajes') }}" class="btn-uride btn-ghost btn-full btn-lg-uride" style="border-radius:12px">
+            <i class="fas fa-search"></i> Buscar Viaje
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('viajes.mis_viajes') }}" class="btn-uride btn-ghost btn-full btn-lg-uride" style="border-radius:12px">
+            <i class="fas fa-route"></i> Mis Viajes
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('seguridad.reglas_seguridad') }}" class="btn-uride btn-ghost btn-full btn-lg-uride" style="border-radius:12px">
+            <i class="fas fa-shield-alt"></i> Reglas
+        </a>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Cargar estadísticas desde API
+fetch('/api/v1/estadisticas')
+    .then(r => r.json())
+    .then(d => {
+        document.getElementById('stat-viajes-activos').textContent = d.viajes_activos;
+        document.getElementById('stat-usuarios').textContent        = d.usuarios;
+        document.getElementById('stat-solicitudes').textContent     = d.solicitudes_aceptadas;
+        document.getElementById('stat-calificaciones').textContent  = d.calificaciones;
+    }).catch(() => {});
+
+// Cargar lista de viajes
+fetch('/api/v1/viajes')
+    .then(r => r.json())
+    .then(d => {
+        const cont = document.getElementById('viajes-lista');
+        if (!d.viajes || d.viajes.length === 0) {
+            cont.innerHTML = `<div style="text-align:center;padding:40px;color:#9ca3af">
+                <i class="fas fa-car" style="font-size:2.5rem;color:#c9a227;opacity:.5"></i>
+                <p style="margin-top:12px">No hay viajes disponibles</p>
+                <a href="/viajes/publicar" class="btn-uride btn-primary-uride" style="margin-top:12px">Publicar el primero</a>
+            </div>`;
+            return;
+        }
+        cont.innerHTML = d.viajes.map(v => `
+        <div class="viaje-card" onclick="seleccionarViaje(${v.id}, '${v.origen}', '${v.destino}')"
+             style="border-radius:10px;margin-bottom:8px">
+            <div class="viaje-route" style="flex:1">
+                <div class="viaje-origin-dest">
+                    <span>${v.origen}</span>
+                    <i class="fas fa-long-arrow-alt-right route-arrow"></i>
+                    <span>${v.destino}</span>
+                </div>
+                <div class="viaje-meta">
+                    <span class="meta-item">
+                        <i class="fas fa-clock"></i>${v.fecha}
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-user"></i>${v.conductor}
+                    </span>
+                    ${v.reputacion > 0 ? `<span class="meta-item" style="color:#c9a227"><i class="fas fa-star"></i>${v.reputacion}</span>` : ''}
+                </div>
+            </div>
+            <div class="cupos-badge">
+                <span class="cupos-num">${v.cupos}</span>
+                <span class="cupos-label">cupos</span>
+            </div>
+        </div>`).join('');
+
+        // Cargar el primer viaje en el mapa
+        if (d.viajes[0]) {
+            URideMapa.cargarViaje(d.viajes[0].id, 'mapa-viaje', 'mapa-stats');
+        }
+    })
+    .catch(() => {
+        // Si API falla, inicializar mapa vacío centrado en ecuador
+        if (typeof URideMapa !== 'undefined') {
+            URideMapa.init('mapa-viaje', {
+                origen: { zona: 'Universidad', coords: [-0.2105, -78.4925] },
+                destino: { zona: 'Centro',     coords: [-0.2299, -78.5249] },
+                centro: [-0.2202, -78.5087]
+            });
+        }
+    });
+
+function seleccionarViaje(id, origen, destino) {
+    // Resaltar card seleccionada
+    document.querySelectorAll('.viaje-card').forEach(c => c.style.borderColor = '');
+    event.currentTarget.style.borderColor = '#c9a227';
+
+    // Cargar mapa
+    URideMapa.cargarViaje(id, 'mapa-viaje', 'mapa-stats');
+}
+</script>
+{% endblock %}

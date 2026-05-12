@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Reportes — Admin{% endblock %}
+{% block page_title %}<i class="fas fa-flag me-2" style="color:var(--accent)"></i>Reportes{% endblock %}
+{% block content %}
+
+<div class="row g-4">
+    <!-- Pendientes -->
+    <div class="col-12">
+        <div class="card-uride">
+            <div class="card-header-uride">
+                <h6 class="fw-bold mb-0">
+                    <i class="fas fa-exclamation-triangle me-2" style="color:#ef4444"></i>
+                    Pendientes ({{ pendientes|length }})
+                </h6>
+            </div>
+            <div class="card-body-uride p-0">
+                <div class="table-responsive">
+                    <table class="table-uride">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Fecha</th>
+                                <th>Reportante</th>
+                                <th>Reportado</th>
+                                <th>Motivo</th>
+                                <th>Evidencia</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in pendientes %}
+                            <tr>
+                                <td>{{ r.id }}</td>
+                                <td style="font-size:.8rem">{{ r.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>{{ r.reportante_id }}</td>
+                                <td>{{ r.reportado_id }}</td>
+                                <td>{{ r.motivo }}</td>
+                                <td>
+                                    {% if r.evidencia_url %}
+                                    <a href="{{ r.evidencia_url }}" target="_blank" class="btn btn-link btn-sm p-0" title="Ver evidencia">
+                                        <i class="fas fa-external-link-alt"></i> Ver
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted" style="font-size:.78rem">Sin evidencia</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <!-- RF11: Acciones diferenciadas: Advertir / Suspender -->
+                                    <form method="POST"
+                                          action="{{ url_for('admin.resolver_reporte', reporte_id=r.id) }}"
+                                          style="display:flex;flex-direction:column;gap:6px">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="text" name="accion" class="form-control"
+                                               style="width:160px;font-size:.8rem"
+                                               placeholder="Descripción de acción" required>
+                                        <div style="display:flex;gap:4px">
+                                            <!-- Advertir: registro sin suspender -->
+                                            <button type="submit" name="tipo_sancion" value="advertencia"
+                                                    class="btn btn-warning btn-sm fw-bold"
+                                                    style="font-size:.75rem;white-space:nowrap"
+                                                    title="Enviar advertencia formal sin suspender">
+                                                <i class="fas fa-exclamation me-1"></i>Advertir
+                                            </button>
+                                            <!-- Suspender: suspender cuenta -->
+                                            <button type="submit" name="tipo_sancion" value="suspension"
+                                                    class="btn btn-danger btn-sm fw-bold"
+                                                    style="font-size:.75rem;white-space:nowrap"
+                                                    onclick="return confirm('¿Estás seguro de suspender a este usuario?')"
+                                                    title="Suspender cuenta del reportado">
+                                                <i class="fas fa-ban me-1"></i>Suspender
+                                            </button>
+                                            <!-- Resolver sin sanción -->
+                                            <button type="submit" name="tipo_sancion" value="ninguna"
+                                                    class="btn btn-secondary btn-sm"
+                                                    style="font-size:.75rem;white-space:nowrap">
+                                                <i class="fas fa-check me-1"></i>OK
+                                            </button>
+                                        </div>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4" style="color:var(--text-secondary)">
+                                    <i class="fas fa-check-circle me-2" style="color:#22c55e"></i>
+                                    No hay reportes pendientes.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revisados recientes -->
+    <div class="col-12">
+        <div class="card-uride">
+            <div class="card-header-uride">
+                <h6 class="fw-bold mb-0">
+                    <i class="fas fa-history me-2" style="color:var(--accent)"></i>
+                    Resueltos recientes ({{ revisados|length }})
+                </h6>
+            </div>
+            <div class="card-body-uride p-0">
+                <div class="table-responsive">
+                    <table class="table-uride">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Fecha</th>
+                                <th>Reportante</th>
+                                <th>Reportado</th>
+                                <th>Motivo</th>
+                                <th>Sanción</th>
+                                <th>Estado</th>
+                                <th>Acción tomada</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in revisados %}
+                            <tr>
+                                <td>{{ r.id }}</td>
+                                <td style="font-size:.8rem">{{ r.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>{{ r.reportante_id }}</td>
+                                <td>{{ r.reportado_id }}</td>
+                                <td>{{ r.motivo }}</td>
+                                <td>
+                                    {% if r.tipo_sancion == 'suspension' %}
+                                    <span class="badge bg-danger">Suspendido</span>
+                                    {% elif r.tipo_sancion == 'advertencia' %}
+                                    <span class="badge bg-warning text-dark">Advertido</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Sin sanción</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge bg-success">{{ r.estado }}</span></td>
+                                <td style="font-size:.8rem">{{ r.accion_tomada or '—' }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4" style="color:var(--text-secondary)">
+                                    Sin historial aún.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

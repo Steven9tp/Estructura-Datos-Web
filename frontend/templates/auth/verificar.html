@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Verificar Correo — U-Ride{% endblock %}
+{% block content %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px">
+    <div style="background:#fff;border-radius:20px;padding:48px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);text-align:center">
+        <div style="width:80px;height:80px;border-radius:50%;background:rgba(220,38,38,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:2.5rem;color:#dc2626">
+            <i class="fas fa-envelope-open-text"></i>
+        </div>
+        <h2 style="font-weight:800;font-size:1.6rem;margin-bottom:10px">¡Revisa tu correo!</h2>
+        <p style="color:#6b7280;font-size:.9rem;line-height:1.7;margin-bottom:24px">
+            Te hemos enviado un enlace de verificación a tu <strong>correo institucional</strong>.
+            Haz clic en el enlace para activar tu cuenta.
+        </p>
+        <div style="background:#fef3c7;border-radius:10px;padding:14px;font-size:.82rem;color:#92400e;margin-bottom:20px">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            El enlace expira en <strong>24 horas</strong>. Revisa también la carpeta de spam.
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+            <a href="{{ url_for('auth.login') }}" class="btn-uride btn-primary-uride btn-full btn-lg-uride" style="justify-content:center">
+                <i class="fas fa-sign-in-alt"></i> Ir a Iniciar Sesión
+            </a>
+            <a href="{{ url_for('auth.reenviar_verificacion') }}" class="btn-uride btn-ghost btn-full" style="justify-content:center">
+                <i class="fas fa-redo me-1"></i>¿No recibiste el correo? Reenviar
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

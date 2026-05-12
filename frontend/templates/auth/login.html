@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Iniciar Sesión — U-Ride{% endblock %}
+{% block content %}
+<div class="auth-split" style="min-height:calc(100vh - 80px)">
+    <!-- Panel izquierdo promo -->
+    <div class="auth-promo">
+        <div style="font-size:3rem;margin-bottom:20px">🚗</div>
+        <h1>Viaja <span>seguro</span><br>con otros estudiantes</h1>
+        <p>U-Ride conecta estudiantes universitarios para compartir viajes verificados, económicos y confiables.</p>
+        <div class="auth-promo-stat">
+            <div class="promo-stat">
+                <div class="num">100%</div>
+                <div class="lbl">Verificado</div>
+            </div>
+            <div class="promo-stat">
+                <div class="num">0 $</div>
+                <div class="lbl">Sin comisión</div>
+            </div>
+            <div class="promo-stat">
+                <div class="num">⭐ 4.8</div>
+                <div class="lbl">Reputación</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel derecho: formulario -->
+    <div style="background:#fff;display:flex;align-items:center;justify-content:center;padding:48px">
+        <div style="width:100%;max-width:380px">
+            <div class="auth-logo"><i class="fas fa-car-side"></i></div>
+            <div class="auth-title">
+                <h2>Bienvenido de vuelta</h2>
+                <p>Ingresa con tu correo institucional</p>
+            </div>
+
+            <form method="post" autocomplete="off">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    <label class="form-label-uride"><i class="fas fa-envelope me-1" style="color:var(--accent)"></i>Correo institucional</label>
+                    {{ form.email(class="form-control-uride", placeholder="tu@uta.edu.ec", id="email") }}
+                    {% for e in form.email.errors %}<span style="color:#ef4444;font-size:.8rem">{{ e }}</span>{% endfor %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label-uride"><i class="fas fa-lock me-1" style="color:var(--accent)"></i>Contraseña</label>
+                    <div style="position:relative">
+                        {{ form.password(class="form-control-uride", placeholder="••••••••", id="password", style="padding-right:44px") }}
+                        <button type="button" onclick="togglePass('password')"
+                            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#9ca3af;cursor:pointer">
+                            <i class="fas fa-eye" id="eye-password"></i>
+                        </button>
+                    </div>
+                    {% for e in form.password.errors %}<span style="color:#ef4444;font-size:.8rem">{{ e }}</span>{% endfor %}
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+                    <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer">
+                        {{ form.remember_me() }} Recordarme
+                    </label>
+                    <a href="{{ url_for('auth.recuperar_password') }}" style="color:var(--accent);font-size:.82rem;font-weight:600;text-decoration:none">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+                <button type="submit" class="btn-uride btn-primary-uride btn-full btn-lg-uride" id="btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+            </form>
+
+            <!-- Reenviar verificación -->
+            <div style="text-align:center;margin-top:16px">
+                <a href="{{ url_for('auth.reenviar_verificacion') }}" style="color:#6b7280;font-size:.8rem;text-decoration:none">
+                    <i class="fas fa-redo me-1"></i>¿No recibiste el correo de verificación?
+                </a>
+            </div>
+
+            <div style="text-align:center;margin-top:16px;padding-top:20px;border-top:1px solid var(--border)">
+                <span style="color:var(--text-secondary);font-size:.875rem">¿No tienes cuenta?</span>
+                <a href="{{ url_for('auth.registro') }}" style="color:var(--accent);font-weight:600;margin-left:6px;font-size:.875rem">
+                    Registrarse
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function togglePass(id) {
+    const inp = document.getElementById(id);
+    const eye = document.getElementById('eye-' + id);
+    if (inp.type === 'password') { inp.type = 'text'; eye.className = 'fas fa-eye-slash'; }
+    else { inp.type = 'password'; eye.className = 'fas fa-eye'; }
+}
+</script>
+{% endblock %}
