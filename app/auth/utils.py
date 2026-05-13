@@ -38,27 +38,34 @@ def _smtp_configurado() -> bool:
 
 
 def _enviar_smtp(destinatario: str, asunto: str, html: str, texto: str) -> bool:
-    """Envia email usando Flask-Mail para mayor confiabilidad."""
-    from app import mail
-    from flask_mail import Message
-    from flask import current_app
-
+    """Envia email usando Flask-Mail con manejo de errores robusto."""
     try:
-        # El objeto 'mail' ya está configurado en app/__init__.py
+        from app import mail
+        from flask_mail import Message
+        from flask import current_app
+
+        # Verificar si mail está configurado
+        if mail is None:
+            print("[EMAIL ERROR] El sistema de correo no está inicializado (mail es None)")
+            return False
+
         msg = Message(
             subject=asunto,
             recipients=[destinatario],
             body=texto,
             html=html,
-            sender=current_app.config.get('MAIL_DEFAULT_SENDER')
+            sender=current_app.config.get('MAIL_DEFAULT_SENDER', 'U-Ride <noreply@uta.edu.ec>')
         )
         
-        mail.send(msg)
-        print(f"[EMAIL] Exito al enviar a {destinatario} usando Flask-Mail")
+        # El envío de correo puede fallar por timeout o credenciales
+        with current_app.app_context():
+            mail.send(msg)
+            
+        print(f"[EMAIL] Éxito al enviar a {destinatario}")
         return True
 
     except Exception as e:
-        error_msg = f"Error enviando email con Flask-Mail: {type(e).__name__}: {str(e)}"
+        error_msg = f"Fallo crítico en el envío de correo: {type(e).__name__}: {str(e)}"
         logger.error(error_msg)
         print(f"[EMAIL ERROR] {error_msg}")
         return False
