@@ -57,7 +57,7 @@ def create_app(config_name=None):
         # Configurar SSL correctamente a través de connect_args (PyMySQL espera un booleano, no un string)
         engine_options = app.config.get('SQLALCHEMY_ENGINE_OPTIONS', {}).copy()
         connect_args = engine_options.get('connect_args', {}).copy()
-        connect_args['ssl'] = True  # Esto activa SSL correctamente en PyMySQL
+        connect_args['ssl'] = {}  # Esto activa SSL correctamente en PyMySQL (espera dict)
         engine_options['connect_args'] = connect_args
         app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
         
