@@ -37,37 +37,40 @@ def _smtp_configurado() -> bool:
     return True
 
 
+import threading
+
+def _enviar_async(app, msg):
+    with app.app_context():
+        try:
+            from app import mail
+            mail.send(msg)
+            print(f"[EMAIL] Envío asíncrono completado con éxito")
+        except Exception as e:
+            print(f"[EMAIL ERROR] Fallo en hilo secundario: {e}")
+
 def _enviar_smtp(destinatario: str, asunto: str, html: str, texto: str) -> bool:
-    """Envia email usando Flask-Mail con manejo de errores robusto."""
+    """Envia email asincrónicamente para evitar bloqueos del servidor."""
     try:
-        from app import mail
         from flask_mail import Message
         from flask import current_app
 
-        # Verificar si mail está configurado
-        if mail is None:
-            print("[EMAIL ERROR] El sistema de correo no está inicializado (mail es None)")
-            return False
-
+        app = current_app._get_current_object()
         msg = Message(
             subject=asunto,
             recipients=[destinatario],
             body=texto,
             html=html,
-            sender=current_app.config.get('MAIL_DEFAULT_SENDER', 'U-Ride <noreply@uta.edu.ec>')
+            sender=app.config.get('MAIL_DEFAULT_SENDER', 'U-Ride <noreply@uta.edu.ec>')
         )
         
-        # El envío de correo puede fallar por timeout o credenciales
-        with current_app.app_context():
-            mail.send(msg)
-            
-        print(f"[EMAIL] Éxito al enviar a {destinatario}")
+        # Iniciar hilo para envío asíncrono
+        threading.Thread(target=_enviar_async, args=(app, msg)).start()
+        
+        print(f"[EMAIL] Proceso de envío iniciado en segundo plano para {destinatario}")
         return True
 
     except Exception as e:
-        error_msg = f"Fallo crítico en el envío de correo: {type(e).__name__}: {str(e)}"
-        logger.error(error_msg)
-        print(f"[EMAIL ERROR] {error_msg}")
+        print(f"[EMAIL ERROR] No se pudo iniciar el hilo de envío: {e}")
         return False
 
 
