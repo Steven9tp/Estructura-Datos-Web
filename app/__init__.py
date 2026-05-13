@@ -49,12 +49,17 @@ def create_app(config_name=None):
         db_uri = db_uri.replace('mysql://', 'mysql+pymysql://', 1)
         
     # Limpieza de parámetros de SSL para compatibilidad con PyMySQL (Aiven)
-    if db_uri and 'ssl-mode' in db_uri:
+    if db_uri and ('ssl-mode' in db_uri or 'aivencloud.com' in db_uri):
         import re
-        # Reemplazamos ssl-mode=... por ssl=true que PyMySQL sí entiende
-        db_uri = re.sub(r'ssl-mode=[^&?]+', 'ssl=true', db_uri)
-        # Eliminar duplicados si los hubiera
-        db_uri = db_uri.replace('ssl=true&ssl=true', 'ssl=true')
+        # Eliminar ssl-mode de la URI para que no cause conflicto
+        db_uri = re.sub(r'[?&]ssl-mode=[^&?]+', '', db_uri)
+        
+        # Configurar SSL correctamente a través de connect_args (PyMySQL espera un booleano, no un string)
+        engine_options = app.config.get('SQLALCHEMY_ENGINE_OPTIONS', {}).copy()
+        connect_args = engine_options.get('connect_args', {}).copy()
+        connect_args['ssl'] = True  # Esto activa SSL correctamente en PyMySQL
+        engine_options['connect_args'] = connect_args
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
         
     app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 
