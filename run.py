@@ -22,7 +22,11 @@ _env = os.getenv('FLASK_ENV', 'development')
 _config_map = {'development': 'development', 'production': 'production', 'testing': 'testing'}
 app = create_app(_config_map.get(_env, 'default'))
 
+<<<<<<< HEAD
 
+=======
+#hola
+>>>>>>> 87f32736b7c0e6682665910319a0985c428306c8
 @app.shell_context_processor
 def make_shell_context():
     return {
@@ -90,7 +94,14 @@ if __name__ == '__main__':
     dominio = os.getenv('DOMINIO_INSTITUCIONAL', '@uta.edu.ec')
     print(f'🎓 Dominio: {dominio}')
     print(f'👤 Admin: admin{dominio} / admin123')
+<<<<<<< HEAD
     print(f'🚀 http://0.0.0.0:{port}')
     print('=' * 50)
     print()
     app.run(host='0.0.0.0', port=port, debug=False)
+=======
+    print(f'🚀 http://127.0.0.1:{port}')
+    print('=' * 50)
+    print()
+    app.run(host='127.0.0.1', port=port, debug=True)
+>>>>>>> 87f32736b7c0e6682665910319a0985c428306c8

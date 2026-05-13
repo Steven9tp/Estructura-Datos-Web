@@ -5,21 +5,31 @@
 
 // ── Sidebar Toggle ───────────────────────────────────────────
 function toggleSidebar() {
-    document.body.classList.toggle('sidebar-collapsed');
+    if (window.innerWidth <= 768) {
+        document.body.classList.toggle('mobile-nav-open');
+    } else {
+        document.body.classList.toggle('sidebar-collapsed');
+        localStorage.setItem('sidebar-collapsed', document.body.classList.contains('sidebar-collapsed'));
+    }
+    
     const icon = document.querySelector('#sidebarToggle i');
     if (icon) {
-        icon.className = document.body.classList.contains('sidebar-collapsed')
+        icon.className = document.body.classList.contains('sidebar-collapsed') || document.body.classList.contains('mobile-nav-open')
             ? 'fas fa-bars'
             : 'fas fa-times';
     }
-    localStorage.setItem('sidebar-collapsed',
-        document.body.classList.contains('sidebar-collapsed'));
 }
 
 // Restaurar estado del sidebar al cargar
 (function () {
-    if (localStorage.getItem('sidebar-collapsed') === 'true') {
-        document.body.classList.add('sidebar-collapsed');
+    if (window.innerWidth > 768) {
+        if (localStorage.getItem('sidebar-collapsed') === 'true') {
+            document.body.classList.add('sidebar-collapsed');
+        }
+    } else {
+        // En móviles siempre empieza oculto, el ícono muestra las barras
+        const icon = document.querySelector('#sidebarToggle i');
+        if (icon) icon.className = 'fas fa-bars';
     }
 })();
 

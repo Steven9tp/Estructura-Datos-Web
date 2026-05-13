@@ -500,19 +500,42 @@ body.sidebar-collapsed .sidebar { width: var(--sidebar-collapsed); }
 /* ══════════════════════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════════════════════ */
-@media (max-width: 768px) {
-    .sidebar { width: var(--sidebar-collapsed); }
-    .sidebar .brand-text, .sidebar .nav-link-item span,
-    .sidebar .user-info, .sidebar .nav-section-label { opacity: 0; width: 0; pointer-events: none; }
-    .main-wrapper { margin-left: var(--sidebar-collapsed); }
-    .page-content { padding: 16px; }
-
-    .auth-split { grid-template-columns: 1fr; }
-    .auth-promo { display: none; }
-    .mapa-data-grid { grid-template-columns: 1fr 1fr; }
-    #mapa-viaje { height: 280px; }
+@media (max-width: 992px) {
+    .stat-card { flex-direction: column; text-align: center; justify-content: center; padding: 16px; }
+    .stat-icon { margin-bottom: 8px; }
 }
 
+@media (max-width: 768px) {
+    /* Ocultar barra lateral en móviles en lugar de colapsarla */
+    .sidebar { transform: translateX(-100%); width: var(--sidebar-width); }
+    body.mobile-nav-open .sidebar { transform: translateX(0); box-shadow: var(--shadow-lg); }
+    
+    /* El contenedor principal toma el 100% */
+    .main-wrapper { margin-left: 0; }
+    body.sidebar-collapsed .main-wrapper { margin-left: 0; }
+    
+    .page-content { padding: 16px 12px; }
+    
+    .topbar { padding: 0 16px; }
+    .topbar-title { font-size: 1rem; }
+    
+    .auth-split { grid-template-columns: 1fr; margin: 20px; }
+    .auth-promo { display: none; }
+    
+    .mapa-data-grid { grid-template-columns: 1fr; gap: 8px; }
+    #mapa-viaje { height: 300px; }
+    
+    .card-header-uride { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .viaje-card { flex-direction: column; align-items: flex-start; }
+    .cupos-badge { width: 100%; flex-direction: row; justify-content: center; gap: 10px; padding: 6px; }
+}
+
+@media (max-width: 480px) {
+    .auth-card { padding: 24px 20px; }
+    .auth-title h2 { font-size: 1.3rem; }
+    .btn-uride { padding: 10px 16px; width: 100%; justify-content: center; }
+    .topbar-user { display: none; /* Ocultar nombre en móviles muy pequeños */ }
+}
 /* ══════════════════════════════════════════════════════════════
    LOADER / SPINNER
 ══════════════════════════════════════════════════════════════ */

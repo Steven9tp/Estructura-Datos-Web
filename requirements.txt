@@ -3,6 +3,7 @@
 #  Instalar: pip install -r requirements.txt
 # ─────────────────────────────────────────────
 
+<<<<<<< HEAD
 # Framework
 Flask==2.3.3
 Werkzeug==2.3.7
@@ -15,10 +16,30 @@ PyMySQL==1.1.0
 Flask-Login==0.6.2
 # Seguridad de contraseñas
 bcrypt==4.0.1
+=======
+# Framework web
+Flask==2.3.3
+Werkzeug==2.3.7
+
+# Base de datos
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.5
+
+# MySQL (única base de datos soportada — obligatorio)
+PyMySQL==1.1.0
+
+# Autenticación
+Flask-Login==0.6.2
+
+# Seguridad de contraseñas
+bcrypt==4.0.1
+
+>>>>>>> 87f32736b7c0e6682665910319a0985c428306c8
 # Formularios con protección CSRF
 Flask-WTF==1.1.1
 WTForms==3.0.1
 email-validator==2.0.0
+<<<<<<< HEAD
 # Correo electrónico
 Flask-Mail==0.9.1
 # Variables de entorno
@@ -29,3 +50,15 @@ Jinja2==3.1.2
 
 
 gunicorn==21.2.0
+=======
+
+# Correo electrónico
+Flask-Mail==0.9.1
+
+# Variables de entorno
+python-dotenv==1.0.0
+
+# Utilidades
+itsdangerous==2.1.2
+Jinja2==3.1.2
+>>>>>>> 87f32736b7c0e6682665910319a0985c428306c8
