@@ -17,7 +17,7 @@ Flujo de recuperación:
 
 Nota DEV: sin SMTP configurado los enlaces se imprimen en la consola del servidor.
 """
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, current_user, login_required
 from urllib.parse import urlparse
 

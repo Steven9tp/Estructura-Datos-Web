@@ -16,7 +16,7 @@ ZONAS_VALIDAS = [
 
 def _utcnow():
     """Helper para obtener la hora UTC actual (compatible Python 3.12+)."""
-    return datetime.now(timezone.utc)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 @login_manager.user_loader
