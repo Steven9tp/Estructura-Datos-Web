@@ -38,38 +38,46 @@ def _smtp_configurado() -> bool:
 
 
 def _enviar_smtp(destinatario: str, asunto: str, html: str, texto: str) -> bool:
-    """Envia email via SMTP — identico a test_email.py para maxima compatibilidad."""
-    server_host = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+    """Envia email via SMTP — mejorado con logs detallados."""
+    server_host = os.getenv('MAIL_SERVER', 'smtp.gmail.com').strip()
     server_port = int(os.getenv('MAIL_PORT', 587))
     username    = os.getenv('MAIL_USERNAME', '').strip()
     password    = os.getenv('MAIL_PASSWORD', '').strip()
 
+    print(f"[DEBUG EMAIL] Intentando enviar a {destinatario} via {server_host}:{server_port}")
+
     try:
         msg = MIMEMultipart('alternative')
         msg['Subject'] = asunto
-        msg['From']    = f'U-Ride <{username}>'
+        msg['From']    = f"U-Ride <{username}>"
         msg['To']      = destinatario
 
         msg.attach(MIMEText(texto, 'plain', 'utf-8'))
         msg.attach(MIMEText(html,  'html',  'utf-8'))
 
-        # Conexion identica a test_email.py
-        server = smtplib.SMTP(server_host, server_port, timeout=15)
-        server.starttls()
+        # Conexion con el servidor
+        if server_port == 465:
+            server = smtplib.SMTP_SSL(server_host, server_port, timeout=20)
+        else:
+            server = smtplib.SMTP(server_host, server_port, timeout=20)
+            server.starttls()
+            
         server.login(username, password)
         server.sendmail(username, [destinatario], msg.as_string())
         server.quit()
 
-        logger.info(f'[EMAIL] Enviado a {destinatario}: {asunto}')
+        print(f"[EMAIL] Exito al enviar a {destinatario}")
         return True
 
     except smtplib.SMTPAuthenticationError as e:
-        logger.error(f'[EMAIL] Error de autenticacion: {e}')
-        print(f'[EMAIL ERROR] Autenticacion fallida: {e}')
+        error_msg = f"Error de autenticacion SMTP: {e}. Verifique su MAIL_USERNAME y MAIL_PASSWORD (debe ser una 'Contraseña de Aplicación' de 16 caracteres)."
+        logger.error(error_msg)
+        print(f"[EMAIL ERROR] {error_msg}")
         return False
     except Exception as e:
-        logger.error(f'[EMAIL] Error enviando a {destinatario}: {e}')
-        print(f'[EMAIL ERROR] {type(e).__name__}: {e}')
+        error_msg = f"Error inesperado enviando email: {type(e).__name__}: {str(e)}"
+        logger.error(error_msg)
+        print(f"[EMAIL ERROR] {error_msg}")
         return False
 
 
