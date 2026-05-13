@@ -43,10 +43,11 @@ def _enviar_async(app, msg):
     with app.app_context():
         try:
             from app import mail
+            print(f"[DEBUG EMAIL] Hilo iniciado. Intentando conectar con Gmail...")
             mail.send(msg)
-            print(f"[EMAIL] Envío asíncrono completado con éxito")
+            print(f"[DEBUG EMAIL] ¡Enviado con éxito a {msg.recipients}!")
         except Exception as e:
-            print(f"[EMAIL ERROR] Fallo en hilo secundario: {e}")
+            print(f"[DEBUG EMAIL ERROR] No se pudo enviar: {type(e).__name__}: {e}")
 
 def _enviar_smtp(destinatario: str, asunto: str, html: str, texto: str) -> bool:
     """Envia email asincrónicamente para evitar bloqueos del servidor."""
