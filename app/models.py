@@ -21,16 +21,6 @@ class Viaje(db.Model):
     __table_args__ = {'extend_existing': True} 
     
     id = db.Column(db.Integer, primary_key=True)
-    origen = db.Column(db.String(100), nullable=False)
-    destino = db.Column(db.String(100), nullable=False)
-    hora_salida = db.Column(db.String(20), nullable=False)
-    asientos_disponibles = db.Column(db.Integer, default=4)
-    precio = db.Column(db.Float, default=0.0)
-    
-    # Campo de estado (Activo/Finalizado)
-    activo = db.Column(db.Boolean, default=True) 
-    
-    # Relación: Conductor
     conductor_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     conductor = db.relationship('Usuario', backref='viajes_publicados')
 
