@@ -129,6 +129,15 @@ def create_app(config_name=None):
     @app.errorhandler(500)
     def internal_error(error):
         db.session.rollback()
-        return render_template('errors/500.html'), 500
+        import traceback
+        error_details = traceback.format_exc()
+        return f"<pre>500 Internal Server Error\n\n{error_details}</pre>", 500
+
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        db.session.rollback()
+        import traceback
+        error_details = traceback.format_exc()
+        return f"<pre>Unhandled Exception\n\n{error_details}</pre>", 500
 
     return app
