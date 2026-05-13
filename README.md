@@ -19,6 +19,7 @@
 11. [Frontend y Diseño](#-11-frontend-y-diseño)
 12. [Tests](#-12-tests)
 13. [Solución de Problemas](#-13-solución-de-problemas)
+14. [Despliegue en Producción (Render + Aiven)](#-14-despliegue-en-producción-render--aiven)
 
 ---
 
@@ -461,11 +462,12 @@ Base URL: `/api/v1`
 ### Tipografía
 - **Inter** (Google Fonts) — pesos 400, 600, 700, 800
 
-### Layout
-- Sidebar fija (240px, colapsable a 70px)
-- Topbar sticky con título de página
-- Contenido principal responsive
-- Mobile: sidebar se colapsa automáticamente
+### Layout y Responsividad (Mobile First)
+- Diseño 100% responsivo adaptable a **Celulares, Tablets y Laptops**.
+- Sidebar fija (240px) en escritorio.
+- En móviles (≤ 768px): La barra lateral se oculta completamente fuera de pantalla (slide-out) para maximizar el área de uso. Menú "hamburguesa" deslizable.
+- Tarjetas de estadísticas y formularios adaptables apilables (Stacking) en pantallas pequeñas.
+- Topbar sticky con título de página.
 
 ---
 
@@ -555,3 +557,29 @@ La URL `DATABASE_URL` en `.env` no apunta a MySQL. Verifica que contenga `mysql+
 ### Errores en rojo en VSCode (Pylance)
 Selecciona el intérprete correcto:
 `Ctrl+Shift+P` → **Python: Select Interpreter** → `.\venv\Scripts\python.exe`
+
+---
+
+## ☁️ 14. Despliegue en Producción (Render + Aiven)
+
+El proyecto está configurado y optimizado para ser desplegado de forma gratuita en la nube usando **Render.com** para el servidor web y **Aiven** para la base de datos MySQL.
+
+### Características del Despliegue:
+- **Gunicorn:** Se agregó `gunicorn` al `requirements.txt` como servidor WSGI listo para producción.
+- **Creación de Tablas Automática:** El archivo `run.py` fue modificado para ejecutar `db.create_all()` automáticamente cuando Gunicorn inicializa la aplicación, garantizando que Aiven tenga las tablas listas al instante.
+- **Blueprint Render:** Se incluye `render.yaml` como plantilla para despliegue automatizado.
+- **Escucha Global:** La aplicación se enlaza a `0.0.0.0` para poder exponer el puerto correctamente en el contenedor de Render.
+
+### Pasos Rápidos de Despliegue:
+1. Subir el repositorio completo a GitHub.
+2. Crear un servicio de base de datos **MySQL 8** gratuito en [Aiven](https://aiven.io/mysql).
+3. Obtener la `Service URI` de Aiven y prefijarla con `+pymysql` (Ej: `mysql+pymysql://avnadmin:password@host...`).
+4. En **Render.com**, crear un nuevo *Web Service* conectado al repositorio de GitHub.
+5. Configurar el *Build Command*: `pip install -r requirements.txt`
+6. Configurar el *Start Command*: `gunicorn run:app`
+7. Agregar las Variables de Entorno en Render:
+   - `DATABASE_URL` = URL de Aiven (mysql+pymysql://...)
+   - `PYTHON_VERSION` = 3.10.0
+   - `SECRET_KEY` = (Una clave larga de seguridad)
+   - `FLASK_ENV` = production
+8. Hacer deploy. La aplicación estará viva en un enlace `.onrender.com`.

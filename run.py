@@ -17,16 +17,18 @@ except ImportError:
 from app import create_app, db
 from app.models import Usuario, Viaje, Solicitud, Calificacion, Reporte, Mensaje, EventoTrazabilidad
 
-# Mapear FLASK_ENV a nombre de configuración válido
 _env = os.getenv('FLASK_ENV', 'development')
 _config_map = {'development': 'development', 'production': 'production', 'testing': 'testing'}
 app = create_app(_config_map.get(_env, 'default'))
 
-<<<<<<< HEAD
-
-=======
-#hola
->>>>>>> 87f32736b7c0e6682665910319a0985c428306c8
+# Asegurar que las tablas se creen incluso cuando se usa Gunicorn en Render
+with app.app_context():
+    try:
+        db.create_all()
+        from app.init_db import create_admin_user
+        create_admin_user()
+    except Exception as e:
+        print(f"Error inicializando DB: {e}")
 @app.shell_context_processor
 def make_shell_context():
     return {
@@ -94,14 +96,7 @@ if __name__ == '__main__':
     dominio = os.getenv('DOMINIO_INSTITUCIONAL', '@uta.edu.ec')
     print(f'🎓 Dominio: {dominio}')
     print(f'👤 Admin: admin{dominio} / admin123')
-<<<<<<< HEAD
     print(f'🚀 http://0.0.0.0:{port}')
     print('=' * 50)
     print()
     app.run(host='0.0.0.0', port=port, debug=False)
-=======
-    print(f'🚀 http://127.0.0.1:{port}')
-    print('=' * 50)
-    print()
-    app.run(host='127.0.0.1', port=port, debug=True)
->>>>>>> 87f32736b7c0e6682665910319a0985c428306c8
