@@ -50,14 +50,14 @@ def create_app(config_name=None):
         if db_uri.startswith('mysql://'):
             db_uri = db_uri.replace('mysql://', 'mysql+pymysql://', 1)
         
-        # 2. Limpieza robusta de parámetros no compatibles (ssl-mode)
+        # 2. Limpieza de parámetros ssl-mode
         if 'ssl-mode' in db_uri:
             if '?' in db_uri:
                 base_part, query_part = db_uri.split('?', 1)
                 params = [p for p in query_part.split('&') if not p.startswith('ssl-mode')]
                 db_uri = base_part + ('?' + '&'.join(params) if params else '')
 
-        # 3. Forzar SSL para Aiven (PyMySQL 1.1.0+ requiere dict)
+        # 3. Forzar SSL para Aiven
         if 'aivencloud.com' in db_uri or 'ssl' in db_uri:
             engine_options = app.config.get('SQLALCHEMY_ENGINE_OPTIONS', {}).copy()
             connect_args = engine_options.get('connect_args', {}).copy()
@@ -67,7 +67,7 @@ def create_app(config_name=None):
             
     app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
     
-    # Log de seguridad (password oculto)
+    # Log de inicio
     masked_uri = re.sub(r':([^@:]+)@', ':****@', db_uri)
     print(f"INFO: Base de datos configurada -> {masked_uri}")
 
@@ -89,18 +89,24 @@ def create_app(config_name=None):
     login_manager.login_message = 'Por favor inicia sesión para acceder.'
     login_manager.login_message_category = 'warning'
 
-    # Registro de Blueprints
-    from app.auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix='/auth')
+    # Registro de Blueprints (Nombres corregidos a 'bp')
+    from app.auth import bp as auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/auth')
 
-    from app.main import main as main_blueprint
-    app.register_blueprint(main_blueprint)
+    from app.main import bp as main_bp
+    app.register_blueprint(main_bp)
 
-    from app.admin import admin as admin_blueprint
-    app.register_blueprint(admin_blueprint, url_prefix='/admin')
+    from app.admin import bp as admin_bp
+    app.register_blueprint(admin_bp, url_prefix='/admin')
 
-    from app.profile import profile as profile_blueprint
-    app.register_blueprint(profile_blueprint, url_prefix='/perfil')
+    from app.viajes import bp as viajes_bp
+    app.register_blueprint(viajes_bp, url_prefix='/viajes')
+
+    from app.seguridad import bp as seguridad_bp
+    app.register_blueprint(seguridad_bp, url_prefix='/seguridad')
+
+    from app.api import bp as api_bp
+    app.register_blueprint(api_bp, url_prefix='/api')
 
     return app
 
