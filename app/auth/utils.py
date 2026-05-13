@@ -38,44 +38,27 @@ def _smtp_configurado() -> bool:
 
 
 def _enviar_smtp(destinatario: str, asunto: str, html: str, texto: str) -> bool:
-    """Envia email via SMTP — mejorado con logs detallados."""
-    server_host = os.getenv('MAIL_SERVER', 'smtp.gmail.com').strip()
-    server_port = int(os.getenv('MAIL_PORT', 587))
-    username    = os.getenv('MAIL_USERNAME', '').strip()
-    password    = os.getenv('MAIL_PASSWORD', '').strip()
-
-    print(f"[DEBUG EMAIL] Intentando enviar a {destinatario} via {server_host}:{server_port}")
+    """Envia email usando Flask-Mail para mayor confiabilidad."""
+    from app import mail
+    from flask_mail import Message
+    from flask import current_app
 
     try:
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = asunto
-        msg['From']    = f"U-Ride <{username}>"
-        msg['To']      = destinatario
-
-        msg.attach(MIMEText(texto, 'plain', 'utf-8'))
-        msg.attach(MIMEText(html,  'html',  'utf-8'))
-
-        # Conexion con el servidor
-        if server_port == 465:
-            server = smtplib.SMTP_SSL(server_host, server_port, timeout=20)
-        else:
-            server = smtplib.SMTP(server_host, server_port, timeout=20)
-            server.starttls()
-            
-        server.login(username, password)
-        server.sendmail(username, [destinatario], msg.as_string())
-        server.quit()
-
-        print(f"[EMAIL] Exito al enviar a {destinatario}")
+        # El objeto 'mail' ya está configurado en app/__init__.py
+        msg = Message(
+            subject=asunto,
+            recipients=[destinatario],
+            body=texto,
+            html=html,
+            sender=current_app.config.get('MAIL_DEFAULT_SENDER')
+        )
+        
+        mail.send(msg)
+        print(f"[EMAIL] Exito al enviar a {destinatario} usando Flask-Mail")
         return True
 
-    except smtplib.SMTPAuthenticationError as e:
-        error_msg = f"Error de autenticacion SMTP: {e}. Verifique su MAIL_USERNAME y MAIL_PASSWORD (debe ser una 'Contraseña de Aplicación' de 16 caracteres)."
-        logger.error(error_msg)
-        print(f"[EMAIL ERROR] {error_msg}")
-        return False
     except Exception as e:
-        error_msg = f"Error inesperado enviando email: {type(e).__name__}: {str(e)}"
+        error_msg = f"Error enviando email con Flask-Mail: {type(e).__name__}: {str(e)}"
         logger.error(error_msg)
         print(f"[EMAIL ERROR] {error_msg}")
         return False
