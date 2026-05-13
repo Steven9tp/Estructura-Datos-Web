@@ -3,12 +3,13 @@ Fábrica de la aplicación Flask para U-Ride
 Frontend y Backend separados
 """
 import os
+import re
+import logging
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from config import config
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -41,35 +42,34 @@ def create_app(config_name=None):
     )
     app.config.from_object(config[config_name])
 
-    # ── Garantizar MySQL exclusivamente ─────────────────────────
+    # ── Configuración de Base de Datos (MySQL + SSL Aiven) ────────
     db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
     
-    # Auto-corregir si el usuario olvidó especificar el driver pymysql
-    if db_uri and db_uri.startswith('mysql://'):
-        db_uri = db_uri.replace('mysql://', 'mysql+pymysql://', 1)
+    if db_uri:
+        # 1. Asegurar driver pymysql
+        if db_uri.startswith('mysql://'):
+            db_uri = db_uri.replace('mysql://', 'mysql+pymysql://', 1)
         
-    # Limpieza de parámetros de SSL para compatibilidad con PyMySQL (Aiven)
-    if db_uri and ('ssl-mode' in db_uri or 'aivencloud.com' in db_uri):
-        import re
-        # Eliminar ssl-mode de la URI para que no cause conflicto
-        db_uri = re.sub(r'[?&]ssl-mode=[^&?]+', '', db_uri)
-        
-        # Configurar SSL correctamente a través de connect_args (PyMySQL espera un booleano, no un string)
-        engine_options = app.config.get('SQLALCHEMY_ENGINE_OPTIONS', {}).copy()
-        connect_args = engine_options.get('connect_args', {}).copy()
-        connect_args['ssl'] = {}  # Esto activa SSL correctamente en PyMySQL (espera dict)
-        engine_options['connect_args'] = connect_args
-        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
-        
-    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+        # 2. Limpieza robusta de parámetros no compatibles (ssl-mode)
+        if 'ssl-mode' in db_uri:
+            if '?' in db_uri:
+                base_part, query_part = db_uri.split('?', 1)
+                params = [p for p in query_part.split('&') if not p.startswith('ssl-mode')]
+                db_uri = base_part + ('?' + '&'.join(params) if params else '')
 
-    if 'mysql' not in db_uri:
-        raise RuntimeError(
-            f'\n❌ ERROR: Esta aplicación SOLO funciona con MySQL.\n'
-            f'   URI configurada: "{db_uri}"\n'
-            f'   Asegúrate de que DATABASE_URL en .env apunte a MySQL.\n'
-            f'   Ejemplo: mysql+pymysql://root:@localhost:3306/u_ride_db'
-        )
+        # 3. Forzar SSL para Aiven (PyMySQL 1.1.0+ requiere dict)
+        if 'aivencloud.com' in db_uri or 'ssl' in db_uri:
+            engine_options = app.config.get('SQLALCHEMY_ENGINE_OPTIONS', {}).copy()
+            connect_args = engine_options.get('connect_args', {}).copy()
+            connect_args['ssl'] = {} 
+            engine_options['connect_args'] = connect_args
+            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
+            
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+    
+    # Log de seguridad (password oculto)
+    masked_uri = re.sub(r':([^@:]+)@', ':****@', db_uri)
+    print(f"INFO: Base de datos configurada -> {masked_uri}")
 
     from flask_wtf.csrf import CSRFProtect
     csrf = CSRFProtect()
@@ -80,78 +80,31 @@ def create_app(config_name=None):
     csrf.init_app(app)
 
     if HAS_MAIL and mail is not None:
-        # Configurar TLS/SSL según el puerto (587=TLS, 465=SSL)
         port = int(os.getenv('MAIL_PORT', 587))
         app.config['MAIL_USE_TLS'] = (port == 587)
         app.config['MAIL_USE_SSL'] = (port == 465)
-        app.config['MAIL_TIMEOUT'] = 10
         mail.init_app(app)
-
-        # Log del estado del sistema de email al arrancar
-        mail_user = os.getenv('MAIL_USERNAME', '').strip()
-        placeholders_log = ('TU_CORREO_REAL', 'tu_correo', 'your_email', 'example')
-        if mail_user and not any(p.lower() in mail_user.lower() for p in placeholders_log):
-            print(f'  ✉️  Email SMTP activo: {mail_user}')
-            logger.info(f'[EMAIL] SMTP configurado: {mail_user}')
-        else:
-            print('  ✉️  Email: modo consola DEV (sin SMTP configurado)')
-            logger.info('[EMAIL] Sin SMTP → tokens impresos en terminal')
 
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Por favor inicia sesión para acceder.'
     login_manager.login_message_category = 'warning'
 
-    # ── Blueprints ──────────────────────────────────────────────
-    from app.auth import bp as auth_bp
-    app.register_blueprint(auth_bp, url_prefix='/auth')
+    # Registro de Blueprints
+    from app.auth import auth as auth_blueprint
+    app.register_blueprint(auth_blueprint, url_prefix='/auth')
 
-    from app.main import bp as main_bp
-    app.register_blueprint(main_bp)
+    from app.main import main as main_blueprint
+    app.register_blueprint(main_blueprint)
 
-    from app.viajes import bp as viajes_bp
-    app.register_blueprint(viajes_bp, url_prefix='/viajes')
+    from app.admin import admin as admin_blueprint
+    app.register_blueprint(admin_blueprint, url_prefix='/admin')
 
-    from app.seguridad import bp as seguridad_bp
-    app.register_blueprint(seguridad_bp, url_prefix='/seguridad')
-
-    from app.admin import bp as admin_bp
-    app.register_blueprint(admin_bp, url_prefix='/admin')
-
-    from app.api import bp as api_bp
-    app.register_blueprint(api_bp, url_prefix='/api/v1')
-
-    # ── Context processors ──────────────────────────────────────
-    @app.context_processor
-    def utility_processor():
-        from datetime import datetime
-        return {
-            'now': datetime.now(),
-            'reglas_seguridad': [
-                'Comparte solo tu zona, no tu dirección exacta',
-                'No compartas información personal sensible',
-                'Respeta la puntualidad acordada',
-                'Mantén comportamiento respetuoso dentro del vehículo',
-                'Reporta conductas inapropiadas inmediatamente'
-            ]
-        }
-
-    # ── Errores ─────────────────────────────────────────────────
-    @app.errorhandler(404)
-    def not_found_error(error):
-        return render_template('errors/404.html'), 404
-
-    @app.errorhandler(500)
-    def internal_error(error):
-        db.session.rollback()
-        import traceback
-        error_details = traceback.format_exc()
-        return f"<pre>500 Internal Server Error\n\n{error_details}</pre>", 500
-
-    @app.errorhandler(Exception)
-    def handle_exception(e):
-        db.session.rollback()
-        import traceback
-        error_details = traceback.format_exc()
-        return f"<pre>Unhandled Exception\n\n{error_details}</pre>", 500
+    from app.profile import profile as profile_blueprint
+    app.register_blueprint(profile_blueprint, url_prefix='/perfil')
 
     return app
+
+@login_manager.user_loader
+def load_user(user_id):
+    from app.models import Usuario
+    return db.session.get(Usuario, int(user_id))
