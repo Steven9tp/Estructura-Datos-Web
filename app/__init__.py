@@ -43,6 +43,12 @@ def create_app(config_name=None):
 
     # ── Garantizar MySQL exclusivamente ─────────────────────────
     db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
+    
+    # Auto-corregir si el usuario olvidó especificar el driver pymysql
+    if db_uri and db_uri.startswith('mysql://'):
+        db_uri = db_uri.replace('mysql://', 'mysql+pymysql://', 1)
+        app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+
     if 'mysql' not in db_uri:
         raise RuntimeError(
             f'\n❌ ERROR: Esta aplicación SOLO funciona con MySQL.\n'

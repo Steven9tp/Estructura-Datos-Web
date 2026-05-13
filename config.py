@@ -10,6 +10,10 @@ class Config:
     """Configuración base"""
     SECRET_KEY = os.getenv('SECRET_KEY', 'uride-dev-secret-key-2024-cambiar-en-produccion')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_recycle': 280,
+        'pool_pre_ping': True,
+    }
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 
     # Mail — Gmail SMTP (puerto 587 = TLS, no SSL)
