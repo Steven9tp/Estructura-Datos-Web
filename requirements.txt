@@ -13,6 +13,7 @@ Flask-Migrate==4.0.5
 
 # MySQL (única base de datos soportada — obligatorio)
 PyMySQL==1.1.0
+cryptography==42.0.5
 
 # Autenticación
 Flask-Login==0.6.2
