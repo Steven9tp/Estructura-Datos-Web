@@ -1,7 +1,70 @@
+"""
+Configuración del proyecto U-Ride
+Base de datos: MySQL exclusivamente
+"""
 import os
+from datetime import timedelta
+
 
 class Config:
-    SECRET_KEY = 'u_ride_key_2026'
-    # Esta es la línea que estabas pegando en la terminal:
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:@localhost/u_ride_db'
+    """Configuración base"""
+    SECRET_KEY = os.getenv('SECRET_KEY', 'uride-dev-secret-key-2024-cambiar-en-produccion')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    PERMANENT_SESSION_LIFETIME = timedelta(days=7)
+
+    # Mail — Gmail SMTP (puerto 587 = TLS, no SSL)
+    MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.getenv('MAIL_PORT', 587))
+    MAIL_USE_TLS = True   # Puerto 587 requiere TLS
+    MAIL_USE_SSL = False  # Puerto 587 NO usa SSL (solo puerto 465)
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', 'noreply@u-ride.com')
+    MAIL_TIMEOUT = 10
+
+    # App
+    DOMINIO_INSTITUCIONAL = os.getenv('DOMINIO_INSTITUCIONAL', '@uta.edu.ec')
+    VIAJES_POR_PAGINA = 10
+
+
+class DevelopmentConfig(Config):
+    """Desarrollo con MySQL"""
+    DEBUG = True
+    TESTING = False
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        'DATABASE_URL',
+        'mysql+pymysql://root:@localhost:3307/u_ride_db'
+    )
+    # URL base para los enlaces en emails (url_for con _external=True)
+    PREFERRED_URL_SCHEME = 'http'
+
+
+class TestingConfig(Config):
+    """Configuración para pruebas"""
+    TESTING = True
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        'DATABASE_URL',
+        'mysql+pymysql://root:@localhost:3307/u_ride_db'
+    )
+    WTF_CSRF_ENABLED = False
+
+
+class ProductionConfig(Config):
+    """Producción con MySQL"""
+    DEBUG = False
+    TESTING = False
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        'DATABASE_URL',
+        'mysql+pymysql://root:@localhost:3307/u_ride_db'
+    )
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+
+
+config = {
+    'development': DevelopmentConfig,
+    'testing': TestingConfig,
+    'production': ProductionConfig,
+    'default': DevelopmentConfig
+}

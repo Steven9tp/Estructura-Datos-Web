@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Buscar Viajes — U-Ride{% endblock %}
+{% block page_title %}<i class="fas fa-search me-2" style="color:var(--accent)"></i>Ver Viajes Disponibles{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Filtros -->
+    <div class="col-lg-3">
+        <div class="card-uride shadow-sm border-0">
+            <div class="card-header-uride d-flex align-items-center bg-white border-bottom">
+                <i class="fas fa-filter me-2 text-primary"></i>
+                <h6 class="fw-bold mb-0 text-dark">Filtrar Búsqueda</h6>
+            </div>
+            <div class="card-body-uride">
+                <form method="post">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Zona de Origen</label>
+                        {{ form.origen_zona(class="form-select bg-light border-0 py-2") }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Zona de Destino</label>
+                        {{ form.destino_zona(class="form-select bg-light border-0 py-2") }}
+                    </div>
+                    <!-- RF4: Filtro por fecha -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Fecha del viaje</label>
+                        {{ form.fecha(class="form-control bg-light border-0 py-2") }}
+                    </div>
+                    <!-- RF4: Filtro por disponibilidad -->
+                    <div class="mb-3 form-check" style="padding-left:1.5rem">
+                        {{ form.solo_disponibles(class="form-check-input") }}
+                        <label class="form-check-label small text-secondary" for="{{ form.solo_disponibles.id }}">
+                            Solo con cupos disponibles
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                        <i class="fas fa-search me-2"></i>Aplicar Filtros
+                    </button>
+                    <a href="{{ url_for('viajes.buscar_viajes') }}" class="btn btn-link w-100 mt-2 text-decoration-none text-secondary small">
+                        Limpiar filtros
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Resultados -->
+    <div class="col-lg-9">
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-dark">{{ viajes|length }} viajes encontrados</h6>
+                    <a href="{{ url_for('viajes.publicar_viaje') }}" class="btn btn-warning btn-sm fw-bold px-3">
+                        <i class="fas fa-plus me-1"></i>Publicar Viaje
+                    </a>
+                </div>
+
+                {% if viajes %}
+                    {% for v in viajes %}
+                    <div class="card-uride mb-3 border-0 shadow-sm p-3 js-viaje-card" 
+                         style="cursor: pointer;" 
+                         data-viaje-id="{{ v.id }}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-light text-dark px-3 py-2 rounded-3 fw-bold border me-2">{{ v.origen_zona }}</span>
+                                    <i class="fas fa-arrow-right text-muted mx-2" style="font-size: .8rem"></i>
+                                    <span class="badge bg-light text-dark px-3 py-2 rounded-3 fw-bold border">{{ v.destino_zona }}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-3 text-secondary" style="font-size: .8rem">
+                                    <span><i class="far fa-calendar-alt me-1"></i>{{ v.fecha_hora.strftime('%d/%m %H:%M') }}</span>
+                                    <span><i class="far fa-user me-1"></i>{{ v.conductor.nombre.split()[0] }}</span>
+                                </div>
+                            </div>
+                            <div class="text-center p-2 rounded-3" style="min-width: 65px; background: rgba(201,162,39,0.1)">
+                                <div class="fw-bold h4 mb-0" style="color:var(--accent)">{{ v.cupos_disponibles }}</div>
+                                <div class="small fw-bold opacity-75" style="font-size: .6rem; color:var(--accent)">CUPOS</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3 pt-3 border-top d-flex justify-content-end">
+                            <a href="{{ url_for('viajes.detalle_viaje', viaje_id=v.id) }}" class="btn btn-primary btn-sm px-4 fw-bold shadow-sm">
+                                VER DETALLES Y UNIRME <i class="fas fa-chevron-right ms-2" style="font-size:.7rem"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 bg-white rounded-4 border" style="border-style: dashed !important">
+                        <i class="fas fa-car-side fa-3x text-muted opacity-25 mb-3"></i>
+                        <h5 class="text-secondary">No hay viajes disponibles</h5>
+                        <p class="text-muted small">Prueba con otras zonas de búsqueda</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Mapa -->
+            <div class="col-lg-5">
+                <div class="card-uride shadow-sm p-0 sticky-top" style="top: 20px; border-radius: 18px; overflow: hidden; border: 0">
+                    <div id="mapa-viaje" style="height: 380px; background: #eee"></div>
+                    <div class="p-3 bg-white text-center border-top">
+                        <div id="mapa-stats" class="text-secondary small">
+                            {% if viajes %}
+                            <i class="fas fa-info-circle me-1 text-primary"></i>Ruta seleccionada
+                            {% else %}
+                            <i class="fas fa-map-marker-alt me-1"></i>Sin ruta que mostrar
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pasar el primer viaje ID al script de forma limpia -->
+{% if viajes %}
+<div id="primer-viaje-id" data-id="{{ viajes[0].id }}"></div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function() {
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cargar mapa del primero si existe
+            const firstIdEl = document.getElementById('primer-viaje-id');
+            if (firstIdEl) {
+                const firstId = firstIdEl.getAttribute('data-id');
+                URideMapa.cargarViaje(firstId, 'mapa-viaje', 'mapa-stats');
+            }
+
+            // Gestionar clics en tarjetas para actualizar mapa
+            document.querySelectorAll('.js-viaje-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const id = this.getAttribute('data-viaje-id');
+                    
+                    // Efecto visual de selección
+                    document.querySelectorAll('.js-viaje-card').forEach(c => c.classList.remove('border-primary', 'shadow'));
+                    this.classList.add('border-primary', 'shadow');
+                    
+                    URideMapa.cargarViaje(id, 'mapa-viaje', 'mapa-stats');
+                });
+            });
+        });
+    })();
+</script>
+{% endblock %}

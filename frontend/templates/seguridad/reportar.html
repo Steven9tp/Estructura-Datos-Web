@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Reportar Usuario — U-Ride{% endblock %}
+{% block page_title %}<i class="fas fa-flag me-2" style="color:#ef4444"></i>Reportar Usuario{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card-uride p-4" style="border-color:rgba(239,68,68,.3)">
+            <h5 class="fw-bold mb-1">Reportar a {{ reportado.nombre }}</h5>
+            <div style="background:#fee2e2;border-radius:8px;padding:12px;font-size:.82rem;color:#991b1b;margin-bottom:20px">
+                <i class="fas fa-exclamation-triangle me-2"></i>Los reportes falsos pueden resultar en la suspensión de tu cuenta.
+            </div>
+            <form method="post">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    <label class="form-label-uride">Motivo del reporte</label>
+                    {{ form.motivo(class="form-control-uride form-select-uride") }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label-uride">Descripción detallada</label>
+                    {{ form.descripcion(class="form-control-uride", rows=4, placeholder="Describe detalladamente lo que ocurrió...") }}
+                    {% for e in form.descripcion.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
+                </div>
+                <!-- RF10: Evidencia opcional -->
+                <div class="form-group">
+                    <label class="form-label-uride">Evidencia (URL de captura o imagen) — Opcional</label>
+                    {{ form.evidencia_url(class="form-control-uride", placeholder="https://ejemplo.com/captura.png") }}
+                    <small style="color:var(--text-secondary);font-size:.78rem">
+                        <i class="fas fa-info-circle me-1"></i>Puedes subir la imagen a Imgur u otro servicio y pegar el enlace aquí.
+                    </small>
+                    {% for e in form.evidencia_url.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
+                </div>
+                <div class="d-flex gap-3 mt-3">
+                    {{ form.submit(class="btn-uride btn-danger-uride btn-lg-uride") }}
+                    <a href="{{ url_for('main.index') }}" class="btn-uride btn-ghost btn-lg-uride">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

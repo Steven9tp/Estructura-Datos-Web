@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: u-ride-app
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false # Debes configurar esto en el dashboard de Render
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DOMINIO_INSTITUCIONAL
+        value: "@uta.edu.ec"
+      - key: PYTHON_VERSION
+        value: "3.10.0"

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Reglas de Seguridad — U-Ride{% endblock %}
+{% block page_title %}<i class="fas fa-shield-alt me-2" style="color:var(--accent)"></i>Reglas de Seguridad{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card-uride">
+            <div class="card-header-uride">
+                <h6 class="fw-bold mb-0"><i class="fas fa-list-check me-2" style="color:var(--accent)"></i>Normas de Convivencia</h6>
+            </div>
+            <div class="card-body-uride">
+                {% for regla in reglas_seguridad %}
+                <div style="display:flex;align-items:flex-start;gap:14px;padding:14px 0;{% if not loop.last %}border-bottom:1px solid var(--border){% endif %}">
+                    <div style="width:32px;height:32px;border-radius:50%;background:rgba(201,162,39,.15);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0;font-weight:700">
+                        {{ loop.index }}
+                    </div>
+                    <div style="padding-top:5px">{{ regla }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card-uride" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.25)">
+            <div class="card-body-uride">
+                <h6 style="color:#ef4444;font-weight:700;margin-bottom:12px"><i class="fas fa-exclamation-triangle me-2"></i>Importante</h6>
+                <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.7">
+                    Cualquier conducta inapropiada puede ser reportada y resultará en la <strong>suspensión permanente</strong> de la cuenta.
+                    U-Ride es una comunidad de confianza basada en el respeto mutuo.
+                </p>
+                <a href="{{ url_for('main.index') }}" class="btn-uride btn-primary-uride btn-full mt-3">
+                    <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Publicar Viaje — U-Ride{% endblock %}
+{% block page_title %}<i class="fas fa-plus-circle me-2" style="color:var(--accent)"></i>Publicar Viaje{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card-uride">
+            <div class="card-header-uride">
+                <h6 class="fw-bold mb-0"><i class="fas fa-route me-2" style="color:var(--accent)"></i>Datos del Viaje</h6>
+            </div>
+            <div class="card-body-uride">
+                <form method="post" id="form-viaje">
+                    {{ form.hidden_tag() }}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label-uride"><i class="fas fa-map-marker-alt me-1" style="color:var(--accent)"></i>Zona Origen</label>
+                                {{ form.origen_zona(class="form-control-uride form-select-uride", id="origen_zona") }}
+                                {% for e in form.origen_zona.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label-uride"><i class="fas fa-flag me-1" style="color:var(--accent)"></i>Zona Destino</label>
+                                {{ form.destino_zona(class="form-control-uride form-select-uride", id="destino_zona") }}
+                                {% for e in form.destino_zona.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label class="form-label-uride"><i class="fas fa-clock me-1" style="color:var(--accent)"></i>Fecha y Hora de Salida</label>
+                                {{ form.fecha_hora(class="form-control-uride", type="datetime-local", id="fecha_hora") }}
+                                {% for e in form.fecha_hora.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label-uride"><i class="fas fa-users me-1" style="color:var(--accent)"></i>Cupos disponibles</label>
+                                {{ form.cupos_totales(class="form-control-uride", type="number", min=1, max=8, value=3, id="cupos") }}
+                                {% for e in form.cupos_totales.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label class="form-label-uride"><i class="fas fa-sticky-note me-1" style="color:var(--accent)"></i>Notas o reglas (opcional)</label>
+                                {{ form.notas_reglas(class="form-control-uride", rows=3, placeholder="Ej: Llevar carnet universitario, no fumar…") }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 mt-2">
+                        <button type="submit" class="btn-uride btn-primary-uride btn-lg-uride flex-fill" id="btn-publicar">
+                            <i class="fas fa-paper-plane"></i> Publicar Viaje
+                        </button>
+                        <a href="{{ url_for('main.index') }}" class="btn-uride btn-ghost btn-lg-uride">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vista previa del mapa -->
+    <div class="col-lg-6">
+        <div class="card-uride" style="position:sticky;top:80px">
+            <div class="card-header-uride">
+                <h6 class="fw-bold mb-0" style="font-size:.85rem">
+                    <i class="fas fa-map me-2" style="color:var(--accent)"></i>Vista previa de la ruta
+                </h6>
+            </div>
+            <div id="mapa-preview" style="height:320px"></div>
+            <div style="background:var(--sidebar-bg);padding:14px 20px;border-radius:0 0 14px 14px">
+                <div id="preview-info" style="color:#9ca3af;font-size:.8rem;text-align:center">
+                    Selecciona origen y destino para ver la ruta
+                </div>
+            </div>
+        </div>
+
+        <!-- Reglas de seguridad recordatorio -->
+        <div class="card-uride mt-3" style="background:rgba(201,162,39,.06);border-color:rgba(201,162,39,.3)">
+            <div class="card-body-uride py-3">
+                <h6 style="color:var(--accent);font-size:.85rem;font-weight:700;margin-bottom:10px">
+                    <i class="fas fa-shield-alt me-2"></i>Recuerda al publicar:
+                </h6>
+                {% for r in reglas_seguridad %}
+                <div style="display:flex;gap:8px;font-size:.8rem;color:var(--text-secondary);margin-bottom:6px">
+                    <i class="fas fa-check-circle" style="color:var(--accent);margin-top:1px;flex-shrink:0"></i>{{ r }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+// Mapa de preview con zonas - Coordenadas base (Ecuador - Quito)
+const ZONAS_COORDS_BASE = {
+    'Centro':[-0.2299,-78.5249],'Norte':[-0.1807,-78.4678],'Sur':[-0.3017,-78.5522],
+    'Este':[-0.2299,-78.4678],'Oeste':[-0.2299,-78.5678],'Universidad':[-0.2105,-78.4925],
+    'Terminal':[-0.2448,-78.5230],'Mercado Central':[-0.2305,-78.5124],
+    'Parque Principal':[-0.2222,-78.5125],'Hospital':[-0.2166,-78.5003],'Plaza Mayor':[-0.2170,-78.5001]
+};
+
+let ZONAS_COORDS = JSON.parse(JSON.stringify(ZONAS_COORDS_BASE));
+let mapaPreview = null;
+let gpsAplicado = false;
+
+function actualizarMapaPreview() {
+    const o = document.getElementById('origen_zona').value;
+    const d = document.getElementById('destino_zona').value;
+    if (!o || !d || o === d) return;
+    const oc = [...ZONAS_COORDS[o]], dc = [...ZONAS_COORDS[d]]; // clonar arrays
+    if (!oc || !dc) return;
+    const centro = [(oc[0]+dc[0])/2, (oc[1]+dc[1])/2];
+    
+    // Evitar que Leaflet tire error si init aún no carga.
+    if (typeof URideMapa !== 'undefined') {
+        URideMapa.init('mapa-preview', {
+            origen: { zona: o, coords: oc },
+            destino: { zona: d, coords: dc },
+            centro: centro
+        });
+    }
+    
+    document.getElementById('preview-info').innerHTML =
+        `<span style="color:var(--accent);font-weight:600">${o}</span> →
+         <span style="color:#fff;font-weight:600">${d}</span>`;
+}
+
+document.getElementById('origen_zona').addEventListener('change', actualizarMapaPreview);
+document.getElementById('destino_zona').addEventListener('change', actualizarMapaPreview);
+
+// Iniciar pidiendo geolocalización al publicador
+window.addEventListener('load', function() {
+    if ('geolocation' in navigator) {
+        document.getElementById('preview-info').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Cargando tu ubicación real...`;
+        navigator.geolocation.getCurrentPosition(pos => { // Si concede permiso...
+            const uLat = pos.coords.latitude;
+            const uLng = pos.coords.longitude;
+            const dLat = uLat - ZONAS_COORDS_BASE['Centro'][0] - 0.007; // Offset global
+            const dLng = uLng - ZONAS_COORDS_BASE['Centro'][1] - 0.007;
+            
+            // Trasladar todos los puntos al radio de la ciudad real del publicador
+            for (let key in ZONAS_COORDS) {
+                ZONAS_COORDS[key][0] += dLat;
+                ZONAS_COORDS[key][1] += dLng;
+            }
+            gpsAplicado = true;
+            actualizarMapaPreview(); // Refrescar el mapa con nueva escala
+        }, err => {
+            console.log("GPS no otorgado, usando base");
+            actualizarMapaPreview();
+        }, { timeout: 7000 });
+    } else {
+        actualizarMapaPreview();
+    }
+});
+</script>
+{% endblock %}
