@@ -16,11 +16,11 @@ class Config:
     }
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 
-    # Mail — Gmail SMTP (puerto 587 = TLS, no SSL)
+    # Mail — Gmail SMTP (465=SSL, 587=TLS)
     MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
-    MAIL_PORT = int(os.getenv('MAIL_PORT', 587))
-    MAIL_USE_TLS = True   # Puerto 587 requiere TLS
-    MAIL_USE_SSL = False  # Puerto 587 NO usa SSL (solo puerto 465)
+    MAIL_PORT = int(os.getenv('MAIL_PORT', 465))
+    MAIL_USE_TLS = (MAIL_PORT == 587)
+    MAIL_USE_SSL = (MAIL_PORT == 465)
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', 'noreply@u-ride.com')
