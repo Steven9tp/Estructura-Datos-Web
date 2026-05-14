@@ -70,3 +70,20 @@ El módulo de perfil de usuario evolucionó de un sistema rígido de selección 
 ### 3.3. Estructuración y Seguridad en Archivos
 - El diseño web fue fragmentado en componentes de **Jinja2** (Herencia de plantillas con `base.html`), lo que permitió escalar la aplicación a más de 20 vistas sin repetir código estructural (como las barras de navegación).
 - Para las imágenes de perfil, se configuraron rutas dinámicas relativas, asegurando que los archivos subidos estén protegidos por `secure_filename` (evitando vulnerabilidades de inyección de código) y aterricen explícitamente en el directorio estático público del frontend (`frontend/static/img/perfiles`), logrando un servicio de archivos seguro y rápido.
+
+---
+
+## 4. Experiencia de Usuario Móvil y Tablet (Responsive Design)
+
+La plataforma fue diseñada siguiendo un enfoque de "adaptabilidad total" para asegurar que los estudiantes puedan gestionar sus viajes desde cualquier dispositivo.
+
+### 4.1. Navegación Inteligente y Sidebar Dinámico
+- Se implementó un sistema de navegación que detecta el ancho de pantalla en tiempo real mediante **Media Queries** y JavaScript.
+- En dispositivos móviles, el sidebar tradicional se transforma en un **menú lateral oculto** que se activa con un gesto de pulsación (Menú hamburguesa). Para mejorar la UX, se añadió un **Backdrop (capa de fondo)** que permite cerrar el menú con un solo toque fuera de él, una convención estándar en aplicaciones móviles modernas.
+
+### 4.2. Layout Fluido y Cards Adaptables
+- Se utilizaron rejillas de **CSS Grid y Flexbox** que reordenan los elementos automáticamente. Por ejemplo, en pantallas grandes, la lista de viajes y el mapa aparecen lado a lado; en móviles, se apilan verticalmente para maximizar el área de visualización del mapa y la legibilidad del texto.
+- Las tarjetas de estadísticas y viajes fueron rediseñadas para pantallas táctiles, aumentando el tamaño de los "puntos de contacto" (botones y enlaces) para evitar errores de navegación.
+
+### 4.3. Tablas de Datos Responsivas
+- Se desarrolló la clase técnica `.table-responsive-uride`, la cual aplica un contenedor con desplazamiento horizontal controlado (`overflow-x: auto`). Esto garantiza que, incluso en tablas con mucha información (como el panel de administración o reportes), el diseño general de la web nunca se rompa y la información sea siempre accesible.

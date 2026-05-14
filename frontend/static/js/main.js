@@ -5,7 +5,9 @@
 
 // ── Sidebar Toggle ───────────────────────────────────────────
 function toggleSidebar() {
-    if (window.innerWidth <= 768) {
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
         document.body.classList.toggle('mobile-nav-open');
     } else {
         document.body.classList.toggle('sidebar-collapsed');
@@ -14,24 +16,42 @@ function toggleSidebar() {
     
     const icon = document.querySelector('#sidebarToggle i');
     if (icon) {
-        icon.className = document.body.classList.contains('sidebar-collapsed') || document.body.classList.contains('mobile-nav-open')
-            ? 'fas fa-bars'
-            : 'fas fa-times';
+        // En móvil: si está abierto (mobile-nav-open), mostrar X.
+        // En desktop: si está colapsado (sidebar-collapsed), mostrar barras.
+        if (isMobile) {
+            icon.className = document.body.classList.contains('mobile-nav-open') ? 'fas fa-times' : 'fas fa-bars';
+        } else {
+            icon.className = document.body.classList.contains('sidebar-collapsed') ? 'fas fa-bars' : 'fas fa-times';
+        }
     }
 }
 
 // Restaurar estado del sidebar al cargar
 (function () {
-    if (window.innerWidth > 768) {
+    const isMobile = window.innerWidth <= 768;
+    if (!isMobile) {
         if (localStorage.getItem('sidebar-collapsed') === 'true') {
             document.body.classList.add('sidebar-collapsed');
+            const icon = document.querySelector('#sidebarToggle i');
+            if (icon) icon.className = 'fas fa-bars';
+        } else {
+            const icon = document.querySelector('#sidebarToggle i');
+            if (icon) icon.className = 'fas fa-times';
         }
     } else {
-        // En móviles siempre empieza oculto, el ícono muestra las barras
         const icon = document.querySelector('#sidebarToggle i');
         if (icon) icon.className = 'fas fa-bars';
     }
 })();
+
+// Cerrar sidebar al hacer click en link (solo móvil)
+document.addEventListener('click', function(e) {
+    if (window.innerWidth <= 768 && e.target.closest('.nav-link-item')) {
+        document.body.classList.remove('mobile-nav-open');
+        const icon = document.querySelector('#sidebarToggle i');
+        if (icon) icon.className = 'fas fa-bars';
+    }
+});
 
 // ── Auto-dismiss flash messages ──────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {

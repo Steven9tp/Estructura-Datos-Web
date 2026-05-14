@@ -469,6 +469,8 @@ Base URL: `/api/v1`
 - En móviles (≤ 768px): La barra lateral se oculta completamente fuera de pantalla (slide-out) para maximizar el área de uso. Menú "hamburguesa" deslizable.
 - Tarjetas de estadísticas y formularios adaptables apilables (Stacking) en pantallas pequeñas.
 - Topbar sticky con título de página.
+- **Backdrop Móvil:** Capa de fondo semi-transparente para cerrar el menú lateral en móviles al tocar fuera.
+- **Botones Adaptables:** Botones que se expanden a ancho completo en dispositivos pequeños para mejorar la usabilidad.
 
 ---
 

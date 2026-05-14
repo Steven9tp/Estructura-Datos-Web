@@ -36,3 +36,9 @@ Si el sistema web se cae, revisa en este orden:
 - **Migración Dinámica DB:** Para evitar errores 500 (Unknown column) tras actualizaciones del modelo, se implementó un sistema de auto-migración manual inyectado directamente en `run.py` y `init_db.py`. Esto ejecuta `ALTER TABLE` agregando columnas si faltan en tiempo de ejecución.
 - **Geolocalización:** Se eliminó el uso rígido de la columna `zona_barrio`. El perfil ahora usa Leaflet.js interactivo y la API de Nominatim de OpenStreetMap para autocompletar la `direccion`, capturando y guardando coordenadas exactas (`direccion_lat`, `direccion_lng`).
 - **Nuevos Campos de Seguridad:** Se han agregado a la tabla `usuarios` los campos `contacto_emergencia_nombre`, `contacto_emergencia_telefono`, `calles_secundarias`, `cedula` y `tipo_sangre`. El manejo de la carga de fotos (`foto_url`) fue corregido para guardar en `frontend/static/img/perfiles` y evitar desajustes entre backend y frontend.
+
+## 7. Diseño Responsivo y UX Móvil
+- **Sidebar Adaptable:** En dispositivos móviles (<768px), el sidebar se oculta automáticamente y se activa mediante un menú hamburguesa con un backdrop semi-transparente.
+- **Optimización de Cards:** Los elementos de la interfaz (stats, tarjetas de viajes) se reordenan verticalmente en pantallas pequeñas para mantener la legibilidad.
+- **Tablas Fluidas:** Se implementó la clase `.table-responsive-uride` para permitir el desplazamiento horizontal en tablas extensas sin romper el diseño general.
+- **Interacción Táctil:** Los botones y enlaces fueron ajustados en tamaño y espaciado para facilitar su uso con dedos en pantallas táctiles.
