@@ -9,8 +9,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# URL secreta de la API generada por el usuario
-GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwnd4Oaqby2NCP6JRHMMMyzy0MWCXuTyMck4kHFECvQGC6-CC2URT5vePh9-pixUs9C/exec"
+GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwnd4Oaqby2NCP6JRHMMyzy0MWCXuTyMck4kHFECvQGC6-CC2URT5vePh9-pixUs9C/exec"
 
 def _enviar_http(destinatario: str, asunto: str, html: str) -> bool:
     """Envía el correo usando la API HTTP para esquivar los bloqueos de Render."""
