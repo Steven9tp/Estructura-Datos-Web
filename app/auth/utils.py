@@ -20,7 +20,7 @@ def _smtp_configurado() -> bool:
 def _enviar_smtp(destinatario: str, asunto: str, html: str, texto: str) -> bool:
     """Lógica exacta de test_email.py para máxima compatibilidad."""
     server_host = os.getenv('MAIL_SERVER', 'smtp.gmail.com').strip()
-    server_port = int(os.getenv('MAIL_PORT', 465))
+    server_port = int(os.getenv('MAIL_PORT', 587))
     username    = os.getenv('MAIL_USERNAME', '').strip()
     password    = os.getenv('MAIL_PASSWORD', '').strip()
 
@@ -33,11 +33,13 @@ def _enviar_smtp(destinatario: str, asunto: str, html: str, texto: str) -> bool:
         msg.attach(MIMEText(texto, 'plain', 'utf-8'))
         msg.attach(MIMEText(html,  'html',  'utf-8'))
 
-        # Usar SSL directo (puerto 465) o TLS (587)
+        print(f"[EMAIL] Conectando a {server_host}:{server_port}...")
+        
+        # Soportar explícitamente ambos puertos (Render recomienda 465)
         if server_port == 465:
-            server = smtplib.SMTP_SSL(server_host, server_port, timeout=20)
+            server = smtplib.SMTP_SSL(server_host, server_port, timeout=15)
         else:
-            server = smtplib.SMTP(server_host, server_port, timeout=20)
+            server = smtplib.SMTP(server_host, server_port, timeout=15)
             server.starttls()
             
         server.login(username, password)
