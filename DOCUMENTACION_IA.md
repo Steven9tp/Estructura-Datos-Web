@@ -31,3 +31,8 @@ Si el sistema web se cae, revisa en este orden:
 1. **Logs de Render:** Si marca `ETIMEDOUT` en peticiones, Aiven pudo haber pausado el servicio MySQL o cambiado la contraseña admin.
 2. **Registro de Usuarios Roto:** Si el registro falla, revisa que la URI de base de datos en las Variables de Entorno de Render comience estrictamente con `mysql+pymysql://` (Render a veces sobreescribe esto y pone `mysql://` a secas, lo que crashea el ORM).
 3. **Falla de Correos:** Si `urllib` da error 404, significa que el usuario borró o alteró el proyecto en Google Apps Script. Deberá crear uno nuevo y actualizar la constante `GOOGLE_SCRIPT_URL` en `app/auth/utils.py`.
+
+## 6. Evolución Reciente (Modernización del Perfil)
+- **Migración Dinámica DB:** Para evitar errores 500 (Unknown column) tras actualizaciones del modelo, se implementó un sistema de auto-migración manual inyectado directamente en `run.py` y `init_db.py`. Esto ejecuta `ALTER TABLE` agregando columnas si faltan en tiempo de ejecución.
+- **Geolocalización:** Se eliminó el uso rígido de la columna `zona_barrio`. El perfil ahora usa Leaflet.js interactivo y la API de Nominatim de OpenStreetMap para autocompletar la `direccion`, capturando y guardando coordenadas exactas (`direccion_lat`, `direccion_lng`).
+- **Nuevos Campos de Seguridad:** Se han agregado a la tabla `usuarios` los campos `contacto_emergencia_nombre`, `contacto_emergencia_telefono`, `calles_secundarias`, `cedula` y `tipo_sangre`. El manejo de la carga de fotos (`foto_url`) fue corregido para guardar en `frontend/static/img/perfiles` y evitar desajustes entre backend y frontend.

@@ -112,7 +112,7 @@ Las tablas se crean **automáticamente** al ejecutar `python run.py`:
 
 | Tabla | Descripción | Campos Principales |
 |-------|-------------|-------------------|
-| `usuarios` | Cuentas de estudiantes y admin | email, nombre, apellido, género, carrera, zona, reputación, estado |
+| `usuarios` | Cuentas de estudiantes y admin | email, nombre, dirección (geolocalizada), teléfono emergencia, reputación, estado |
 | `viajes` | Viajes publicados por conductores | origen, destino, fecha_hora, cupos, estado |
 | `solicitudes` | Peticiones para unirse a viajes | viaje_id, pasajero_id, estado |
 | `calificaciones` | Valoraciones entre usuarios | puntuación (1-5), comentario |
@@ -195,8 +195,9 @@ APP modelado de software Proyecto/
 | Ruta | Método | Descripción |
 |------|--------|-------------|
 | `/` | GET | Dashboard con viajes recientes |
-| `/perfil` | GET | Ver perfil del usuario |
-| `/perfil/editar` | GET/POST | Editar información personal |
+| `/perfil` | GET | Ver perfil del usuario con mapa estático |
+| `/perfil/editar` | GET/POST | Editar información personal, autocompletado de direcciones (Nominatim) y mapa interactivo (Leaflet.js) |
+
 
 ### Módulo Viajes (`/viajes`)
 | Ruta | Método | Descripción |

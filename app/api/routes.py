@@ -73,8 +73,8 @@ def mapa_viaje(viaje_id):
     """Datos geográficos de un viaje para renderizar en Leaflet."""
     viaje = db.get_or_404(Viaje, viaje_id)
 
-    oc = ZONAS_COORDS.get(viaje.origen_zona,  [-0.2299, -78.5249])
-    dc = ZONAS_COORDS.get(viaje.destino_zona, [-0.2105, -78.4925])
+    oc = [viaje.origen_lat, viaje.origen_lng] if viaje.origen_lat else ZONAS_COORDS.get(viaje.origen_zona,  [-0.2299, -78.5249])
+    dc = [viaje.destino_lat, viaje.destino_lng] if viaje.destino_lat else ZONAS_COORDS.get(viaje.destino_zona, [-0.2105, -78.4925])
     dist = _haversine_km(oc, dc)
     tiempo_min = round((dist / 40) * 60)  # Velocidad promedio ciudad: 40 km/h
 

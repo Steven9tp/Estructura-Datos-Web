@@ -11,18 +11,24 @@
             <div class="card-body-uride">
                 <form method="post" id="form-viaje">
                     {{ form.hidden_tag() }}
+                    {{ form.origen_lat(id="origen_lat", type="hidden") }}
+                    {{ form.origen_lng(id="origen_lng", type="hidden") }}
+                    {{ form.destino_lat(id="destino_lat", type="hidden") }}
+                    {{ form.destino_lng(id="destino_lng", type="hidden") }}
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label-uride"><i class="fas fa-map-marker-alt me-1" style="color:var(--accent)"></i>Zona Origen</label>
-                                {{ form.origen_zona(class="form-control-uride form-select-uride", id="origen_zona") }}
+                            <div class="form-group position-relative">
+                                <label class="form-label-uride"><i class="fas fa-map-marker-alt me-1" style="color:var(--accent)"></i>Dirección Origen</label>
+                                {{ form.origen_zona(class="form-control-uride", id="origen_zona", placeholder="Ej: Ficoa, Ambato", autocomplete="off") }}
+                                <ul id="origen-suggestions" class="list-group position-absolute w-100" style="z-index:1000; display:none; max-height: 200px; overflow-y: auto;"></ul>
                                 {% for e in form.origen_zona.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label-uride"><i class="fas fa-flag me-1" style="color:var(--accent)"></i>Zona Destino</label>
-                                {{ form.destino_zona(class="form-control-uride form-select-uride", id="destino_zona") }}
+                            <div class="form-group position-relative">
+                                <label class="form-label-uride"><i class="fas fa-flag me-1" style="color:var(--accent)"></i>Dirección Destino</label>
+                                {{ form.destino_zona(class="form-control-uride", id="destino_zona", placeholder="Ej: Universidad Técnica de Ambato", autocomplete="off") }}
+                                <ul id="destino-suggestions" class="list-group position-absolute w-100" style="z-index:1000; display:none; max-height: 200px; overflow-y: auto;"></ul>
                                 {% for e in form.destino_zona.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
                             </div>
                         </div>
@@ -66,10 +72,10 @@
                     <i class="fas fa-map me-2" style="color:var(--accent)"></i>Vista previa de la ruta
                 </h6>
             </div>
-            <div id="mapa-preview" style="height:320px"></div>
-            <div style="background:var(--sidebar-bg);padding:14px 20px;border-radius:0 0 14px 14px">
-                <div id="preview-info" style="color:#9ca3af;font-size:.8rem;text-align:center">
-                    Selecciona origen y destino para ver la ruta
+            <div id="mapa-preview" style="height:320px; border-radius: 0 0 0 0; z-index: 1;"></div>
+            <div style="background:var(--sidebar-bg);padding:14px 20px;border-radius:0 0 14px 14px; text-align: center;">
+                <div id="preview-info" style="color:var(--text-primary);font-size:.85rem; font-weight: 600;">
+                    <i class="fas fa-hand-pointer me-1 text-primary"></i> ¡Arrastra los marcadores en el mapa para ajustar la ruta exacta!
                 </div>
             </div>
         </div>
@@ -92,66 +98,184 @@
 {% endblock %}
 {% block scripts %}
 <script>
-// Mapa de preview con zonas - Coordenadas base (Ecuador - Quito)
-const ZONAS_COORDS_BASE = {
-    'Centro':[-0.2299,-78.5249],'Norte':[-0.1807,-78.4678],'Sur':[-0.3017,-78.5522],
-    'Este':[-0.2299,-78.4678],'Oeste':[-0.2299,-78.5678],'Universidad':[-0.2105,-78.4925],
-    'Terminal':[-0.2448,-78.5230],'Mercado Central':[-0.2305,-78.5124],
-    'Parque Principal':[-0.2222,-78.5125],'Hospital':[-0.2166,-78.5003],'Plaza Mayor':[-0.2170,-78.5001]
-};
+let map = null;
+let markerOrigen = null;
+let markerDestino = null;
+let routeLayer = null;
 
-let ZONAS_COORDS = JSON.parse(JSON.stringify(ZONAS_COORDS_BASE));
-let mapaPreview = null;
-let gpsAplicado = false;
+// Iconos estilo U-Ride
+const iconOrigen = L.divIcon({
+    className: '',
+    html: `<div style="width:34px;height:34px;border-radius:50% 50% 50% 0;background:#dc2626;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>`,
+    iconSize: [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -38]
+});
 
-function actualizarMapaPreview() {
-    const o = document.getElementById('origen_zona').value;
-    const d = document.getElementById('destino_zona').value;
-    if (!o || !d || o === d) return;
-    const oc = [...ZONAS_COORDS[o]], dc = [...ZONAS_COORDS[d]]; // clonar arrays
-    if (!oc || !dc) return;
-    const centro = [(oc[0]+dc[0])/2, (oc[1]+dc[1])/2];
-    
-    // Evitar que Leaflet tire error si init aún no carga.
-    if (typeof URideMapa !== 'undefined') {
-        URideMapa.init('mapa-preview', {
-            origen: { zona: o, coords: oc },
-            destino: { zona: d, coords: dc },
-            centro: centro
-        });
-    }
-    
-    document.getElementById('preview-info').innerHTML =
-        `<span style="color:var(--accent);font-weight:600">${o}</span> →
-         <span style="color:#fff;font-weight:600">${d}</span>`;
+const iconDestino = L.divIcon({
+    className: '',
+    html: `<div style="width:34px;height:34px;border-radius:50% 50% 50% 0;background:#1f2937;transform:rotate(-45deg);border:3px solid #dc2626;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>`,
+    iconSize: [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -38]
+});
+
+// Autocomplete con Nominatim
+let timeoutOrigen, timeoutDestino;
+
+function setupAutocomplete(inputId, listId, isOrigen) {
+    const input = document.getElementById(inputId);
+    const list = document.getElementById(listId);
+
+    input.addEventListener('input', function() {
+        clearTimeout(isOrigen ? timeoutOrigen : timeoutDestino);
+        const query = this.value;
+        if (query.length < 4) { list.style.display = 'none'; return; }
+
+        const timeoutId = setTimeout(() => {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`)
+                .then(r => r.json())
+                .then(data => {
+                    list.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(item => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item list-group-item-action';
+                            li.style.cursor = 'pointer';
+                            li.style.fontSize = '0.85rem';
+                            li.innerText = item.display_name;
+                            li.addEventListener('click', () => {
+                                input.value = item.display_name;
+                                list.style.display = 'none';
+                                const lat = parseFloat(item.lat);
+                                const lon = parseFloat(item.lon);
+                                
+                                if (isOrigen) {
+                                    markerOrigen.setLatLng([lat, lon]);
+                                    map.setView([lat, lon], 14);
+                                } else {
+                                    markerDestino.setLatLng([lat, lon]);
+                                }
+                                updateHiddenFields();
+                                drawRoute();
+                            });
+                            list.appendChild(li);
+                        });
+                        list.style.display = 'block';
+                    } else {
+                        list.style.display = 'none';
+                    }
+                });
+        }, 500);
+
+        if (isOrigen) timeoutOrigen = timeoutId; else timeoutDestino = timeoutId;
+    });
+
+    document.addEventListener('click', e => {
+        if (!input.contains(e.target) && !list.contains(e.target)) {
+            list.style.display = 'none';
+        }
+    });
 }
 
-document.getElementById('origen_zona').addEventListener('change', actualizarMapaPreview);
-document.getElementById('destino_zona').addEventListener('change', actualizarMapaPreview);
-
-// Iniciar pidiendo geolocalización al publicador
-window.addEventListener('load', function() {
-    if ('geolocation' in navigator) {
-        document.getElementById('preview-info').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Cargando tu ubicación real...`;
-        navigator.geolocation.getCurrentPosition(pos => { // Si concede permiso...
-            const uLat = pos.coords.latitude;
-            const uLng = pos.coords.longitude;
-            const dLat = uLat - ZONAS_COORDS_BASE['Centro'][0] - 0.007; // Offset global
-            const dLng = uLng - ZONAS_COORDS_BASE['Centro'][1] - 0.007;
-            
-            // Trasladar todos los puntos al radio de la ciudad real del publicador
-            for (let key in ZONAS_COORDS) {
-                ZONAS_COORDS[key][0] += dLat;
-                ZONAS_COORDS[key][1] += dLng;
+function reverseGeocode(lat, lng, isOrigen) {
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data && data.display_name) {
+                // Simplificamos la dirección para que no sea excesivamente larga
+                let address = data.address.road || data.address.neighbourhood || data.address.suburb || data.display_name;
+                if (data.address.city || data.address.town) {
+                    address += `, ${data.address.city || data.address.town}`;
+                }
+                if (isOrigen) {
+                    document.getElementById('origen_zona').value = address;
+                } else {
+                    document.getElementById('destino_zona').value = address;
+                }
             }
-            gpsAplicado = true;
-            actualizarMapaPreview(); // Refrescar el mapa con nueva escala
+        });
+}
+
+function initInteractiveMap(lat, lng) {
+    if (map) { map.remove(); }
+    
+    map = L.map('mapa-preview').setView([lat, lng], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap', maxZoom: 19
+    }).addTo(map);
+
+    const latDestino = lat + 0.005;
+    const lngDestino = lng + 0.005;
+
+    markerOrigen = L.marker([lat, lng], { icon: iconOrigen, draggable: true }).addTo(map)
+        .bindPopup("<b>Arrastra</b> para ubicar el <b>Origen</b> exacto").openPopup();
+        
+    markerDestino = L.marker([latDestino, lngDestino], { icon: iconDestino, draggable: true }).addTo(map)
+        .bindPopup("<b>Arrastra</b> para ubicar el <b>Destino</b> exacto");
+
+    updateHiddenFields();
+    
+    // Obtener las direcciones iniciales por Reverse Geocoding
+    if (!document.getElementById('origen_zona').value) reverseGeocode(lat, lng, true);
+    if (!document.getElementById('destino_zona').value) reverseGeocode(latDestino, lngDestino, false);
+
+    drawRoute();
+
+    markerOrigen.on('dragend', function() { 
+        const p = markerOrigen.getLatLng();
+        updateHiddenFields(); 
+        reverseGeocode(p.lat, p.lng, true);
+        drawRoute(); 
+    });
+    markerDestino.on('dragend', function() { 
+        const p = markerDestino.getLatLng();
+        updateHiddenFields(); 
+        reverseGeocode(p.lat, p.lng, false);
+        drawRoute(); 
+    });
+}
+
+function updateHiddenFields() {
+    const pO = markerOrigen.getLatLng();
+    const pD = markerDestino.getLatLng();
+    
+    document.getElementById('origen_lat').value = pO.lat.toFixed(6);
+    document.getElementById('origen_lng').value = pO.lng.toFixed(6);
+    
+    document.getElementById('destino_lat').value = pD.lat.toFixed(6);
+    document.getElementById('destino_lng').value = pD.lng.toFixed(6);
+}
+
+function drawRoute() {
+    if (routeLayer) { map.removeLayer(routeLayer); }
+    const pO = markerOrigen.getLatLng();
+    const pD = markerDestino.getLatLng();
+
+    const url = `https://router.project-osrm.org/route/v1/driving/${pO.lng},${pO.lat};${pD.lng},${pD.lat}?overview=full&geometries=geojson`;
+
+    fetch(url).then(r => r.json()).then(osrm => {
+        if (osrm.code === 'Ok' && osrm.routes[0]) {
+            const routeCoords = osrm.routes[0].geometry.coordinates;
+            const latLngs = routeCoords.map(coord => [coord[1], coord[0]]);
+            routeLayer = L.polyline(latLngs, { color: '#dc2626', weight: 5, opacity: 0.85 }).addTo(map);
+            map.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
+        }
+    }).catch(err => console.error('OSRM route error', err));
+}
+
+window.addEventListener('load', function() {
+    setupAutocomplete('origen_zona', 'origen-suggestions', true);
+    setupAutocomplete('destino_zona', 'destino-suggestions', false);
+    
+    document.getElementById('preview-info').innerHTML = `<i class="fas fa-spinner fa-spin text-primary me-2"></i> Obteniendo ubicación exacta...`;
+    
+    if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(pos => {
+            document.getElementById('preview-info').innerHTML = `<i class="fas fa-hand-pointer me-1 text-primary"></i> ¡Arrastra los marcadores o busca una dirección!`;
+            initInteractiveMap(pos.coords.latitude, pos.coords.longitude);
         }, err => {
-            console.log("GPS no otorgado, usando base");
-            actualizarMapaPreview();
+            document.getElementById('preview-info').innerHTML = `<i class="fas fa-exclamation-triangle text-warning me-1"></i> Sin GPS. Arrastra los marcadores libremente o busca.`;
+            initInteractiveMap(-1.24908, -78.62518); // Coordenadas centrales UTA o similar
         }, { timeout: 7000 });
     } else {
-        actualizarMapaPreview();
+        initInteractiveMap(-1.24908, -78.62518);
     }
 });
 </script>

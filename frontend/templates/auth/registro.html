@@ -66,10 +66,57 @@
                         {{ form.telefono(class="form-control-uride", placeholder="09…") }}
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label-uride">Zona de residencia</label>
-                    {{ form.zona_barrio(class="form-control-uride form-select-uride") }}
+                <div class="form-group position-relative">
+                    <label class="form-label-uride">Dirección o Sector de residencia</label>
+                    {{ form.direccion(class="form-control-uride", id="direccion_reg", placeholder="Ej: Ficoa, Ambato", autocomplete="off") }}
+                    <ul id="reg-suggestions" class="list-group position-absolute w-100" style="z-index:1000; display:none; max-height: 200px; overflow-y: auto;"></ul>
+                    {% for e in form.direccion.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
                 </div>
+
+                <script>
+                window.addEventListener('load', function() {
+                    const inputDir = document.getElementById('direccion_reg');
+                    const suggestions = document.getElementById('reg-suggestions');
+                    let timeout;
+
+                    inputDir.addEventListener('input', function() {
+                        clearTimeout(timeout);
+                        const query = this.value;
+                        if (query.length < 4) { suggestions.style.display = 'none'; return; }
+
+                        timeout = setTimeout(() => {
+                            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`)
+                                .then(r => r.json())
+                                .then(data => {
+                                    suggestions.innerHTML = '';
+                                    if (data.length > 0) {
+                                        data.forEach(item => {
+                                            const li = document.createElement('li');
+                                            li.className = 'list-group-item list-group-item-action';
+                                            li.style.cursor = 'pointer';
+                                            li.style.fontSize = '0.8rem';
+                                            li.innerText = item.display_name;
+                                            li.onclick = () => {
+                                                inputDir.value = item.display_name;
+                                                suggestions.style.display = 'none';
+                                            };
+                                            suggestions.appendChild(li);
+                                        });
+                                        suggestions.style.display = 'block';
+                                    } else {
+                                        suggestions.style.display = 'none';
+                                    }
+                                });
+                        }, 500);
+                    });
+
+                    document.addEventListener('click', e => {
+                        if (!inputDir.contains(e.target) && !suggestions.contains(e.target)) {
+                            suggestions.style.display = 'none';
+                        }
+                    });
+                });
+                </script>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
                     <div class="form-group">
                         <label class="form-label-uride">Contraseña</label>

@@ -6,10 +6,17 @@
     <!-- Panel izquierdo: avatar -->
     <div class="col-lg-3">
         <div class="card-uride text-center" style="padding:28px">
-            <div style="position:relative;display:inline-block;margin-bottom:14px">
-                <div style="width:90px;height:90px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:800;margin:0 auto;box-shadow:0 4px 20px rgba(220,38,38,.3)">
+            <div style="position:relative;display:inline-block;margin-bottom:14px;width:90px;height:90px;border-radius:50%;overflow:hidden;box-shadow:0 4px 20px rgba(220,38,38,.3)">
+                {% if current_user.foto_url %}
+                    <img src="{{ url_for('static', filename=current_user.foto_url) }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'; document.getElementById('fallback-avatar').style.display='flex';" alt="Avatar">
+                    <div id="fallback-avatar" style="width:100%;height:100%;background:var(--accent);color:#fff;display:none;align-items:center;justify-content:center;font-size:2.2rem;font-weight:800;margin:0 auto;">
+                        {{ current_user.nombre[0]|upper }}
+                    </div>
+                {% else %}
+                <div style="width:100%;height:100%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:800;margin:0 auto;">
                     {{ current_user.nombre[0]|upper }}
                 </div>
+                {% endif %}
             </div>
             <h6 class="fw-bold mb-0">{{ current_user.nombre_completo }}</h6>
             <p style="color:var(--text-secondary);font-size:.78rem;margin-top:2px">
@@ -48,8 +55,10 @@
                 <h6 class="fw-bold mb-0">Información Personal</h6>
             </div>
             <div class="card-body-uride">
-                <form method="POST" action="{{ url_for('main.editar_perfil') }}" novalidate>
+                <form method="POST" action="{{ url_for('main.editar_perfil') }}" enctype="multipart/form-data" novalidate>
                     {{ form.hidden_tag() }}
+                    {{ form.direccion_lat(id="direccion_lat", type="hidden") }}
+                    {{ form.direccion_lng(id="direccion_lng", type="hidden") }}
 
                     <!-- Género (radio buttons) -->
                     <div class="mb-4">
@@ -92,40 +101,88 @@
                         </div>
                     </div>
 
-                    <!-- Carrera -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold" style="font-size:.85rem">Carrera</label>
-                        {{ form.carrera(class="form-control", placeholder="Ej: Ingeniería en Sistemas", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:12px 16px") }}
-                    </div>
-
-                    <!-- Dirección -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold" style="font-size:.85rem">Dirección</label>
-                        {{ form.direccion(class="form-control", placeholder="Tu dirección", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:12px 16px") }}
-                    </div>
-
-                    <!-- Teléfono y Fecha de nacimiento -->
+                    <!-- Carrera y Facultad -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold" style="font-size:.85rem">Teléfono</label>
-                            {{ form.telefono(class="form-control", placeholder="+593 9…", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:12px 16px") }}
+                            <label class="form-label fw-semibold" style="font-size:.85rem">Carrera</label>
+                            {{ form.carrera(class="form-control", placeholder="Ej: Ingeniería en Sistemas", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:12px 16px") }}
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size:.85rem">Facultad / Campus</label>
+                            {{ form.facultad(class="form-select", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:12px 16px") }}
+                        </div>
+                    </div>
+                    
+                    <!-- Semestre y Cédula -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size:.85rem">Semestre / Nivel</label>
+                            {{ form.semestre(class="form-select", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:12px 16px") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size:.85rem">Cédula / ID Estudiantil <i class="fas fa-shield-alt text-success ms-1" title="Para tu seguridad"></i></label>
+                            {{ form.cedula(class="form-control", placeholder="0000000000", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:12px 16px") }}
+                        </div>
+                    </div>
+
+                    <!-- Dirección Principal y Calles -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size:.85rem">Dirección Principal (Ej: Ambato)</label>
+                            {{ form.direccion(class="form-control", placeholder="Tu ciudad o sector principal", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:12px 16px") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size:.85rem">Calles Principal y Secundaria</label>
+                            {{ form.calles_secundarias(class="form-control", placeholder="Ej: Av. Los Guaytambos y Montalvo", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:12px 16px") }}
+                        </div>
+                    </div>
+
+                    <!-- Mapa Interactivo para Ubicación Exacta -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold" style="font-size:.85rem"><i class="fas fa-map-marker-alt text-danger me-1"></i> Ubicación exacta (Busca o arrastra el pin)</label>
+                        <div id="mapa-residencia" style="height:280px; border-radius: 10px; border: 1px solid var(--border); z-index: 1;"></div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">
+                            <i class="fas fa-info-circle me-1"></i> Puedes buscar tu dirección arriba o arrastrar el marcador rojo directamente sobre tu casa.
+                        </div>
+                    </div>
+
+                    <!-- Teléfono y Contactos Emergencia -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" style="font-size:.85rem">Teléfono Personal</label>
+                        {{ form.telefono(class="form-control", placeholder="+593 9…", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:12px 16px") }}
+                    </div>
+                    
+                    <div class="card-uride mb-3" style="background: rgba(239,68,68,.03); border: 1px dashed rgba(239,68,68,.3); padding: 15px;">
+                        <h6 style="font-size: 0.9rem; font-weight: bold; color: var(--accent); margin-bottom: 12px;"><i class="fas fa-phone-alt me-2"></i>Contacto de Emergencia</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" style="font-size:.8rem">Nombre del Contacto</label>
+                                {{ form.contacto_emergencia_nombre(class="form-control", placeholder="Ej: María (Madre)", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:10px 14px") }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" style="font-size:.8rem">Teléfono de Emergencia</label>
+                                {{ form.contacto_emergencia_telefono(class="form-control", placeholder="+593 9…", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:10px 14px") }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fecha nacimiento y Tipo de Sangre -->
+                    <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold" style="font-size:.85rem">Fecha de Nacimiento</label>
                             {{ form.fecha_nacimiento(class="form-control", type="date", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:12px 16px") }}
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size:.85rem">Tipo de Sangre / Alergias</label>
+                            {{ form.tipo_sangre(class="form-select", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:12px 16px") }}
+                        </div>
                     </div>
 
-                    <!-- Zona y Foto URL -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold" style="font-size:.85rem">Zona/Barrio</label>
-                            {{ form.zona_barrio(class="form-select", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:12px 16px") }}
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold" style="font-size:.85rem">URL de foto de perfil</label>
-                            {{ form.foto_url(class="form-control", placeholder="https://...", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:12px 16px") }}
-                        </div>
+                    <!-- Foto Perfil -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold" style="font-size:.85rem">Actualizar foto de perfil</label>
+                        {{ form.foto_perfil(class="form-control", accept="image/*", style="background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:9px 16px") }}
+                        {% for e in form.foto_perfil.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
                     </div>
 
                     <!-- Botones estilo imagen de referencia -->
@@ -145,4 +202,112 @@
         </div>
     </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+let map = null;
+let marker = null;
+
+function initMap(lat, lng) {
+    if (map) map.remove();
+    map = L.map('mapa-residencia').setView([lat, lng], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    const iconUser = L.divIcon({
+        className: '',
+        html: `<div style="width:34px;height:34px;border-radius:50% 50% 50% 0;background:#dc2626;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>`,
+        iconSize: [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -38]
+    });
+
+    marker = L.marker([lat, lng], { icon: iconUser, draggable: true }).addTo(map)
+        .bindPopup("Ubicación de tu residencia").openPopup();
+
+    // Removido de aquí para estar en el scope superior
+    
+    // Set initial values if they don't exist
+    if (!document.getElementById('direccion_lat').value) updateCoords();
+
+    marker.on('dragend', updateCoords);
+}
+
+window.addEventListener('load', function() {
+    let lat = document.getElementById('direccion_lat').value;
+    let lng = document.getElementById('direccion_lng').value;
+
+    function updateCoords() {
+        if (!marker) return;
+        const p = marker.getLatLng();
+        document.getElementById('direccion_lat').value = p.lat.toFixed(6);
+        document.getElementById('direccion_lng').value = p.lng.toFixed(6);
+    }
+    
+    // Autocomplete logic
+    const inputDir = document.getElementById('direccion');
+    const suggestions = document.createElement('ul');
+    suggestions.className = 'list-group position-absolute w-100';
+    suggestions.style.zIndex = '1000';
+    suggestions.style.maxHeight = '200px';
+    suggestions.style.overflowY = 'auto';
+    suggestions.style.display = 'none';
+    inputDir.parentNode.style.position = 'relative';
+    inputDir.parentNode.appendChild(suggestions);
+
+    let timeout;
+    inputDir.addEventListener('input', function() {
+        clearTimeout(timeout);
+        const query = this.value;
+        if (query.length < 4) { suggestions.style.display = 'none'; return; }
+
+        timeout = setTimeout(() => {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`)
+                .then(r => r.json())
+                .then(data => {
+                    suggestions.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(item => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item list-group-item-action';
+                            li.style.cursor = 'pointer';
+                            li.style.fontSize = '0.85rem';
+                            li.innerText = item.display_name;
+                            li.onclick = () => {
+                                inputDir.value = item.display_name;
+                                suggestions.style.display = 'none';
+                                const nLat = parseFloat(item.lat);
+                                const nLng = parseFloat(item.lon);
+                                marker.setLatLng([nLat, nLng]);
+                                map.setView([nLat, nLng], 16);
+                                updateCoords();
+                            };
+                            suggestions.appendChild(li);
+                        });
+                        suggestions.style.display = 'block';
+                    } else {
+                        suggestions.style.display = 'none';
+                    }
+                });
+        }, 500);
+    });
+
+    document.addEventListener('click', e => {
+        if (!inputDir.contains(e.target) && !suggestions.contains(e.target)) {
+            suggestions.style.display = 'none';
+        }
+    });
+
+    if (lat && lng) {
+        initMap(parseFloat(lat), parseFloat(lng));
+    } else if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(pos => {
+            initMap(pos.coords.latitude, pos.coords.longitude);
+        }, err => {
+            initMap(-1.24908, -78.62518); // Default Ambato/UTA
+        }, { timeout: 7000 });
+    } else {
+        initMap(-1.24908, -78.62518);
+    }
+});
+</script>
 {% endblock %}

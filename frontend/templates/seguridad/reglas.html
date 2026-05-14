@@ -1,38 +1,102 @@
 {% extends "base.html" %}
-{% block title %}Reglas de Seguridad — U-Ride{% endblock %}
-{% block page_title %}<i class="fas fa-shield-alt me-2" style="color:var(--accent)"></i>Reglas de Seguridad{% endblock %}
+{% block title %}Centro de Seguridad — U-Ride{% endblock %}
+{% block page_title %}<i class="fas fa-shield-alt me-2" style="color:var(--accent)"></i>Centro de Seguridad{% endblock %}
 {% block content %}
 <div class="row g-4">
-    <div class="col-lg-7">
+    <!-- Panel Izquierdo: Funciones de Emergencia y Reportes -->
+    <div class="col-lg-4">
+        <!-- Botón de Pánico / Emergencia -->
+        <div class="card-uride mb-4" style="background:linear-gradient(135deg, rgba(239,68,68,.1) 0%, rgba(220,38,38,.05) 100%); border: 2px solid rgba(239,68,68,0.3); text-align: center; padding: 30px 20px;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ef4444; margin-bottom: 15px;"></i>
+            <h5 class="fw-bold text-danger mb-2">Línea de Emergencia</h5>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">
+                Si te encuentras en una situación de peligro inminente durante un viaje, contacta a las autoridades de inmediato.
+            </p>
+            <a href="tel:911" class="btn-uride btn-full" style="background: #ef4444; color: white; border-radius: 50px; font-weight: bold; font-size: 1.1rem; padding: 12px;">
+                <i class="fas fa-phone-alt me-2"></i> Llamar al 911
+            </a>
+        </div>
+
+        <!-- Confianza y Verificación -->
         <div class="card-uride">
             <div class="card-header-uride">
-                <h6 class="fw-bold mb-0"><i class="fas fa-list-check me-2" style="color:var(--accent)"></i>Normas de Convivencia</h6>
+                <h6 class="fw-bold mb-0"><i class="fas fa-user-check me-2 text-success"></i>Tu Estado de Seguridad</h6>
             </div>
             <div class="card-body-uride">
-                {% for regla in reglas_seguridad %}
-                <div style="display:flex;align-items:flex-start;gap:14px;padding:14px 0;{% if not loop.last %}border-bottom:1px solid var(--border){% endif %}">
-                    <div style="width:32px;height:32px;border-radius:50%;background:rgba(201,162,39,.15);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0;font-weight:700">
-                        {{ loop.index }}
-                    </div>
-                    <div style="padding-top:5px">{{ regla }}</div>
-                </div>
-                {% endfor %}
+                <ul class="list-unstyled mb-0" style="font-size: 0.9rem;">
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-envelope-circle-check text-success fs-5 me-3"></i>
+                        <div>
+                            <strong class="d-block">Correo Institucional</strong>
+                            <span class="text-secondary" style="font-size: 0.8rem;">Verificado (@uta.edu.ec)</span>
+                        </div>
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-id-card {% if current_user.cedula %}text-success{% else %}text-warning{% endif %} fs-5 me-3"></i>
+                        <div>
+                            <strong class="d-block">Identidad Registrada</strong>
+                            <span class="text-secondary" style="font-size: 0.8rem;">{% if current_user.cedula %}Completado{% else %}Falta completar en Perfil{% endif %}</span>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center">
+                        <i class="fas fa-star text-warning fs-5 me-3"></i>
+                        <div>
+                            <strong class="d-block">Reputación Promedio</strong>
+                            <span class="text-secondary" style="font-size: 0.8rem;">{{ current_user.reputacion_promedio }} estrellas</span>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
-    <div class="col-lg-5">
-        <div class="card-uride" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.25)">
+
+    <!-- Panel Derecho: Normas de Convivencia y Políticas -->
+    <div class="col-lg-8">
+        <div class="card-uride mb-4">
+            <div class="card-header-uride d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0"><i class="fas fa-clipboard-list me-2" style="color:var(--accent)"></i>Normas de Convivencia U-Ride</h6>
+                <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2">Políticas Oficiales</span>
+            </div>
             <div class="card-body-uride">
-                <h6 style="color:#ef4444;font-weight:700;margin-bottom:12px"><i class="fas fa-exclamation-triangle me-2"></i>Importante</h6>
-                <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.7">
-                    Cualquier conducta inapropiada puede ser reportada y resultará en la <strong>suspensión permanente</strong> de la cuenta.
-                    U-Ride es una comunidad de confianza basada en el respeto mutuo.
+                <div class="row g-3">
+                    {% for regla in reglas_seguridad %}
+                    <div class="col-md-6">
+                        <div style="background:var(--bg-main); border-radius:12px; padding:20px; height: 100%; border-left: 4px solid var(--accent); transition: all 0.3s ease;" class="hover-shadow">
+                            <div class="d-flex align-items-start gap-3">
+                                <div style="width:36px;height:36px;border-radius:50%;background:rgba(201,162,39,.15);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0;font-weight:800; font-size: 1.1rem;">
+                                    {{ loop.index }}
+                                </div>
+                                <div style="padding-top:6px; font-size: 0.9rem; color: var(--text-primary); line-height: 1.5;">
+                                    {{ regla }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sistema de Reportes -->
+        <div class="card-uride" style="border: 1px solid var(--border);">
+            <div class="card-body-uride">
+                <h6 class="fw-bold mb-3"><i class="fas fa-flag text-warning me-2"></i>¿Cómo funciona el Sistema de Reportes?</h6>
+                <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6; margin-bottom: 15px;">
+                    U-Ride es una comunidad exclusiva para estudiantes universitarios. Cualquier conducta inapropiada, acoso, conducción temeraria o violación de las normas puede ser reportada al finalizar un viaje desde la sección <strong>"Mis Viajes"</strong>.
                 </p>
-                <a href="{{ url_for('main.index') }}" class="btn-uride btn-primary-uride btn-full mt-3">
-                    <i class="fas fa-arrow-left"></i> Volver al Dashboard
-                </a>
+                <div class="d-flex gap-2">
+                    <span class="badge" style="background: rgba(239,68,68,.1); color: #ef4444;"><i class="fas fa-ban me-1"></i> Suspensión Temporal (1 Reporte)</span>
+                    <span class="badge" style="background: #ef4444; color: white;"><i class="fas fa-user-times me-1"></i> Expulsión Definitiva (Acumulación)</span>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.hover-shadow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+</style>
 {% endblock %}

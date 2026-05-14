@@ -1,0 +1,1152 @@
+2026-05-13 22:27:05,210 INFO werkzeug MainThread : [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.51:5000
+2026-05-13 22:27:05,211 INFO werkzeug MainThread : [33mPress CTRL+C to quit[0m
+2026-05-13 22:27:23,334 ERROR app Thread-1 (process_request_thread) : Exception on /auth/login [POST]
+Traceback (most recent call last):
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'usuarios.contacto_emergencia_nombre' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\app\auth\routes.py", line 54, in login
+    usuario = Usuario.query.filter_by(email=email).first()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2766, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2864, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+        params,
+        ^^^^^^^
+        execution_options={"_sa_orm_load_options": self.load_options},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1054, "Unknown column 'usuarios.contacto_emergencia_nombre' in 'field list'")
+[SQL: SELECT usuarios.id AS usuarios_id, usuarios.email AS usuarios_email, usuarios.password_hash AS usuarios_password_hash, usuarios.nombre AS usuarios_nombre, usuarios.apellido AS usuarios_apellido, usuarios.genero AS usuarios_genero, usuarios.fecha_nacimiento AS usuarios_fecha_nacimiento, usuarios.direccion AS usuarios_direccion, usuarios.carrera AS usuarios_carrera, usuarios.facultad AS usuarios_facultad, usuarios.semestre AS usuarios_semestre, usuarios.foto_url AS usuarios_foto_url, usuarios.telefono AS usuarios_telefono, usuarios.contacto_emergencia AS usuarios_contacto_emergencia, usuarios.contacto_emergencia_nombre AS usuarios_contacto_emergencia_nombre, usuarios.contacto_emergencia_telefono AS usuarios_contacto_emergencia_telefono, usuarios.calles_secundarias AS usuarios_calles_secundarias, usuarios.direccion_lat AS usuarios_direccion_lat, usuarios.direccion_lng AS usuarios_direccion_lng, usuarios.cedula AS usuarios_cedula, usuarios.tipo_sangre AS usuarios_tipo_sangre, usuarios.zona_barrio AS usuarios_zona_barrio, usuarios.reputacion_promedio AS usuarios_reputacion_promedio, usuarios.total_viajes AS usuarios_total_viajes, usuarios.esta_activo AS usuarios_esta_activo, usuarios.es_admin AS usuarios_es_admin, usuarios.email_verificado AS usuarios_email_verificado, usuarios.fecha_registro AS usuarios_fecha_registro 
+FROM usuarios 
+WHERE usuarios.email = %(email_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'email_1': 'admin@uta.edu.ec', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-05-13 22:27:23,358 INFO werkzeug Thread-1 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:27:23] "[35m[1mPOST /auth/login HTTP/1.1[0m" 500 -
+2026-05-13 22:27:28,637 INFO werkzeug Thread-2 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:27:28] "[32mGET / HTTP/1.1[0m" 302 -
+2026-05-13 22:27:28,990 INFO werkzeug Thread-3 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:27:28] "GET /auth/login HTTP/1.1" 200 -
+2026-05-13 22:27:29,306 INFO werkzeug Thread-4 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:27:29] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:27:29,326 INFO werkzeug Thread-5 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:27:29] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:27:29,327 INFO werkzeug Thread-6 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:27:29] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:27:31,334 ERROR app Thread-7 (process_request_thread) : Exception on /auth/login [POST]
+Traceback (most recent call last):
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'usuarios.contacto_emergencia_nombre' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\app\auth\routes.py", line 54, in login
+    usuario = Usuario.query.filter_by(email=email).first()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2766, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2864, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+        params,
+        ^^^^^^^
+        execution_options={"_sa_orm_load_options": self.load_options},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1054, "Unknown column 'usuarios.contacto_emergencia_nombre' in 'field list'")
+[SQL: SELECT usuarios.id AS usuarios_id, usuarios.email AS usuarios_email, usuarios.password_hash AS usuarios_password_hash, usuarios.nombre AS usuarios_nombre, usuarios.apellido AS usuarios_apellido, usuarios.genero AS usuarios_genero, usuarios.fecha_nacimiento AS usuarios_fecha_nacimiento, usuarios.direccion AS usuarios_direccion, usuarios.carrera AS usuarios_carrera, usuarios.facultad AS usuarios_facultad, usuarios.semestre AS usuarios_semestre, usuarios.foto_url AS usuarios_foto_url, usuarios.telefono AS usuarios_telefono, usuarios.contacto_emergencia AS usuarios_contacto_emergencia, usuarios.contacto_emergencia_nombre AS usuarios_contacto_emergencia_nombre, usuarios.contacto_emergencia_telefono AS usuarios_contacto_emergencia_telefono, usuarios.calles_secundarias AS usuarios_calles_secundarias, usuarios.direccion_lat AS usuarios_direccion_lat, usuarios.direccion_lng AS usuarios_direccion_lng, usuarios.cedula AS usuarios_cedula, usuarios.tipo_sangre AS usuarios_tipo_sangre, usuarios.zona_barrio AS usuarios_zona_barrio, usuarios.reputacion_promedio AS usuarios_reputacion_promedio, usuarios.total_viajes AS usuarios_total_viajes, usuarios.esta_activo AS usuarios_esta_activo, usuarios.es_admin AS usuarios_es_admin, usuarios.email_verificado AS usuarios_email_verificado, usuarios.fecha_registro AS usuarios_fecha_registro 
+FROM usuarios 
+WHERE usuarios.email = %(email_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'email_1': 'admin@uta.edu.ec', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-05-13 22:27:31,346 INFO werkzeug Thread-7 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:27:31] "[35m[1mPOST /auth/login HTTP/1.1[0m" 500 -
+2026-05-13 22:29:32,231 INFO werkzeug MainThread : [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.51:5000
+2026-05-13 22:29:32,231 INFO werkzeug MainThread : [33mPress CTRL+C to quit[0m
+2026-05-13 22:29:47,499 ERROR app Thread-1 (process_request_thread) : Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'usuarios.calles_secundarias' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\app\main\routes.py", line 11, in index
+    if not current_user.is_authenticated:
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\werkzeug\local.py", line 311, in __get__
+    obj = instance._get_current_object()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\werkzeug\local.py", line 515, in _get_current_object
+    return get_name(local())
+                    ~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask_login\utils.py", line 25, in <lambda>
+    current_user = LocalProxy(lambda: _get_user())
+                                      ~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask_login\utils.py", line 372, in _get_user
+    current_app.login_manager._load_user()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask_login\login_manager.py", line 364, in _load_user
+    user = self._user_callback(user_id)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\app\models.py", line 24, in load_user
+    return db.session.get(Usuario, int(user_id))
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\scoping.py", line 1044, in get
+    return self._proxied.get(
+           ~~~~~~~~~~~~~~~~~^
+        entity,
+        ^^^^^^^
+    ...<6 lines>...
+        bind_arguments=bind_arguments,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 3680, in get
+    return self._get_impl(
+           ~~~~~~~~~~~~~~^
+        entity,
+        ^^^^^^^
+    ...<7 lines>...
+        bind_arguments=bind_arguments,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 3859, in _get_impl
+    return db_load_fn(
+        self,
+    ...<5 lines>...
+        bind_arguments=bind_arguments,
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 695, in load_on_pk_identity
+    session.execute(
+    ~~~~~~~~~~~~~~~^
+        q,
+        ^^
+    ...<2 lines>...
+        bind_arguments=bind_arguments,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1054, "Unknown column 'usuarios.calles_secundarias' in 'field list'")
+[SQL: SELECT usuarios.id AS usuarios_id, usuarios.email AS usuarios_email, usuarios.password_hash AS usuarios_password_hash, usuarios.nombre AS usuarios_nombre, usuarios.apellido AS usuarios_apellido, usuarios.genero AS usuarios_genero, usuarios.fecha_nacimiento AS usuarios_fecha_nacimiento, usuarios.direccion AS usuarios_direccion, usuarios.carrera AS usuarios_carrera, usuarios.facultad AS usuarios_facultad, usuarios.semestre AS usuarios_semestre, usuarios.foto_url AS usuarios_foto_url, usuarios.telefono AS usuarios_telefono, usuarios.contacto_emergencia AS usuarios_contacto_emergencia, usuarios.contacto_emergencia_nombre AS usuarios_contacto_emergencia_nombre, usuarios.contacto_emergencia_telefono AS usuarios_contacto_emergencia_telefono, usuarios.calles_secundarias AS usuarios_calles_secundarias, usuarios.direccion_lat AS usuarios_direccion_lat, usuarios.direccion_lng AS usuarios_direccion_lng, usuarios.cedula AS usuarios_cedula, usuarios.tipo_sangre AS usuarios_tipo_sangre, usuarios.zona_barrio AS usuarios_zona_barrio, usuarios.reputacion_promedio AS usuarios_reputacion_promedio, usuarios.total_viajes AS usuarios_total_viajes, usuarios.esta_activo AS usuarios_esta_activo, usuarios.es_admin AS usuarios_es_admin, usuarios.email_verificado AS usuarios_email_verificado, usuarios.fecha_registro AS usuarios_fecha_registro 
+FROM usuarios 
+WHERE usuarios.id = %(pk_1)s]
+[parameters: {'pk_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-05-13 22:29:47,525 INFO werkzeug Thread-1 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:29:47] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2026-05-13 22:29:56,638 ERROR app Thread-2 (process_request_thread) : Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'usuarios.calles_secundarias' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\app\main\routes.py", line 11, in index
+    if not current_user.is_authenticated:
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\werkzeug\local.py", line 311, in __get__
+    obj = instance._get_current_object()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\werkzeug\local.py", line 515, in _get_current_object
+    return get_name(local())
+                    ~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask_login\utils.py", line 25, in <lambda>
+    current_user = LocalProxy(lambda: _get_user())
+                                      ~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask_login\utils.py", line 372, in _get_user
+    current_app.login_manager._load_user()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask_login\login_manager.py", line 364, in _load_user
+    user = self._user_callback(user_id)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\app\models.py", line 24, in load_user
+    return db.session.get(Usuario, int(user_id))
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\scoping.py", line 1044, in get
+    return self._proxied.get(
+           ~~~~~~~~~~~~~~~~~^
+        entity,
+        ^^^^^^^
+    ...<6 lines>...
+        bind_arguments=bind_arguments,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 3680, in get
+    return self._get_impl(
+           ~~~~~~~~~~~~~~^
+        entity,
+        ^^^^^^^
+    ...<7 lines>...
+        bind_arguments=bind_arguments,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 3859, in _get_impl
+    return db_load_fn(
+        self,
+    ...<5 lines>...
+        bind_arguments=bind_arguments,
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 695, in load_on_pk_identity
+    session.execute(
+    ~~~~~~~~~~~~~~~^
+        q,
+        ^^
+    ...<2 lines>...
+        bind_arguments=bind_arguments,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1054, "Unknown column 'usuarios.calles_secundarias' in 'field list'")
+[SQL: SELECT usuarios.id AS usuarios_id, usuarios.email AS usuarios_email, usuarios.password_hash AS usuarios_password_hash, usuarios.nombre AS usuarios_nombre, usuarios.apellido AS usuarios_apellido, usuarios.genero AS usuarios_genero, usuarios.fecha_nacimiento AS usuarios_fecha_nacimiento, usuarios.direccion AS usuarios_direccion, usuarios.carrera AS usuarios_carrera, usuarios.facultad AS usuarios_facultad, usuarios.semestre AS usuarios_semestre, usuarios.foto_url AS usuarios_foto_url, usuarios.telefono AS usuarios_telefono, usuarios.contacto_emergencia AS usuarios_contacto_emergencia, usuarios.contacto_emergencia_nombre AS usuarios_contacto_emergencia_nombre, usuarios.contacto_emergencia_telefono AS usuarios_contacto_emergencia_telefono, usuarios.calles_secundarias AS usuarios_calles_secundarias, usuarios.direccion_lat AS usuarios_direccion_lat, usuarios.direccion_lng AS usuarios_direccion_lng, usuarios.cedula AS usuarios_cedula, usuarios.tipo_sangre AS usuarios_tipo_sangre, usuarios.zona_barrio AS usuarios_zona_barrio, usuarios.reputacion_promedio AS usuarios_reputacion_promedio, usuarios.total_viajes AS usuarios_total_viajes, usuarios.esta_activo AS usuarios_esta_activo, usuarios.es_admin AS usuarios_es_admin, usuarios.email_verificado AS usuarios_email_verificado, usuarios.fecha_registro AS usuarios_fecha_registro 
+FROM usuarios 
+WHERE usuarios.id = %(pk_1)s]
+[parameters: {'pk_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-05-13 22:29:56,652 INFO werkzeug Thread-2 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:29:56] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2026-05-13 22:34:23,335 INFO werkzeug MainThread : [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.51:5000
+2026-05-13 22:34:23,336 INFO werkzeug MainThread : [33mPress CTRL+C to quit[0m
+2026-05-13 22:34:49,888 ERROR app Thread-1 (process_request_thread) : Exception on /auth/login [POST]
+Traceback (most recent call last):
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'usuarios.calles_secundarias' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\app\auth\routes.py", line 54, in login
+    usuario = Usuario.query.filter_by(email=email).first()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2766, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2864, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+        params,
+        ^^^^^^^
+        execution_options={"_sa_orm_load_options": self.load_options},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1054, "Unknown column 'usuarios.calles_secundarias' in 'field list'")
+[SQL: SELECT usuarios.id AS usuarios_id, usuarios.email AS usuarios_email, usuarios.password_hash AS usuarios_password_hash, usuarios.nombre AS usuarios_nombre, usuarios.apellido AS usuarios_apellido, usuarios.genero AS usuarios_genero, usuarios.fecha_nacimiento AS usuarios_fecha_nacimiento, usuarios.direccion AS usuarios_direccion, usuarios.carrera AS usuarios_carrera, usuarios.facultad AS usuarios_facultad, usuarios.semestre AS usuarios_semestre, usuarios.foto_url AS usuarios_foto_url, usuarios.telefono AS usuarios_telefono, usuarios.contacto_emergencia AS usuarios_contacto_emergencia, usuarios.contacto_emergencia_nombre AS usuarios_contacto_emergencia_nombre, usuarios.contacto_emergencia_telefono AS usuarios_contacto_emergencia_telefono, usuarios.calles_secundarias AS usuarios_calles_secundarias, usuarios.direccion_lat AS usuarios_direccion_lat, usuarios.direccion_lng AS usuarios_direccion_lng, usuarios.cedula AS usuarios_cedula, usuarios.tipo_sangre AS usuarios_tipo_sangre, usuarios.zona_barrio AS usuarios_zona_barrio, usuarios.reputacion_promedio AS usuarios_reputacion_promedio, usuarios.total_viajes AS usuarios_total_viajes, usuarios.esta_activo AS usuarios_esta_activo, usuarios.es_admin AS usuarios_es_admin, usuarios.email_verificado AS usuarios_email_verificado, usuarios.fecha_registro AS usuarios_fecha_registro 
+FROM usuarios 
+WHERE usuarios.email = %(email_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'email_1': 'admin@uta.edu.ec', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-05-13 22:34:49,908 INFO werkzeug Thread-1 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:34:49] "[35m[1mPOST /auth/login HTTP/1.1[0m" 500 -
+2026-05-13 22:34:58,125 INFO werkzeug Thread-2 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:34:58] "[32mGET / HTTP/1.1[0m" 302 -
+2026-05-13 22:34:58,477 INFO werkzeug Thread-3 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:34:58] "GET /auth/login HTTP/1.1" 200 -
+2026-05-13 22:34:58,809 INFO werkzeug Thread-4 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:34:58] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:34:58,814 INFO werkzeug Thread-5 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:34:58] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:34:58,815 INFO werkzeug Thread-6 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:34:58] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:35:05,726 ERROR app Thread-7 (process_request_thread) : Exception on /auth/login [POST]
+Traceback (most recent call last):
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'usuarios.calles_secundarias' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\app\auth\routes.py", line 54, in login
+    usuario = Usuario.query.filter_by(email=email).first()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2766, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2864, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+        params,
+        ^^^^^^^
+        execution_options={"_sa_orm_load_options": self.load_options},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+    ~~~~~~~~~~^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 558, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 822, in _read_query_result
+    result.read()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 1200, in read
+    first_packet = self.connection._read_packet()
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\connections.py", line 772, in _read_packet
+    packet.raise_for_error()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrador\Desktop\APP modelado de software Proyecto\venv\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1054, "Unknown column 'usuarios.calles_secundarias' in 'field list'")
+[SQL: SELECT usuarios.id AS usuarios_id, usuarios.email AS usuarios_email, usuarios.password_hash AS usuarios_password_hash, usuarios.nombre AS usuarios_nombre, usuarios.apellido AS usuarios_apellido, usuarios.genero AS usuarios_genero, usuarios.fecha_nacimiento AS usuarios_fecha_nacimiento, usuarios.direccion AS usuarios_direccion, usuarios.carrera AS usuarios_carrera, usuarios.facultad AS usuarios_facultad, usuarios.semestre AS usuarios_semestre, usuarios.foto_url AS usuarios_foto_url, usuarios.telefono AS usuarios_telefono, usuarios.contacto_emergencia AS usuarios_contacto_emergencia, usuarios.contacto_emergencia_nombre AS usuarios_contacto_emergencia_nombre, usuarios.contacto_emergencia_telefono AS usuarios_contacto_emergencia_telefono, usuarios.calles_secundarias AS usuarios_calles_secundarias, usuarios.direccion_lat AS usuarios_direccion_lat, usuarios.direccion_lng AS usuarios_direccion_lng, usuarios.cedula AS usuarios_cedula, usuarios.tipo_sangre AS usuarios_tipo_sangre, usuarios.zona_barrio AS usuarios_zona_barrio, usuarios.reputacion_promedio AS usuarios_reputacion_promedio, usuarios.total_viajes AS usuarios_total_viajes, usuarios.esta_activo AS usuarios_esta_activo, usuarios.es_admin AS usuarios_es_admin, usuarios.email_verificado AS usuarios_email_verificado, usuarios.fecha_registro AS usuarios_fecha_registro 
+FROM usuarios 
+WHERE usuarios.email = %(email_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'email_1': 'admin@uta.edu.ec', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-05-13 22:35:05,739 INFO werkzeug Thread-7 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:35:05] "[35m[1mPOST /auth/login HTTP/1.1[0m" 500 -
+2026-05-13 22:38:13,930 INFO werkzeug MainThread : [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.51:5000
+2026-05-13 22:38:13,930 INFO werkzeug MainThread : [33mPress CTRL+C to quit[0m
+2026-05-13 22:38:45,605 INFO werkzeug Thread-1 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:45] "GET /auth/login HTTP/1.1" 200 -
+2026-05-13 22:38:45,913 INFO werkzeug Thread-2 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:45] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:38:45,937 INFO werkzeug Thread-3 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:45] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:38:45,939 INFO werkzeug Thread-4 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:45] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:38:48,142 INFO werkzeug Thread-5 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:48] "[32mPOST /auth/login HTTP/1.1[0m" 302 -
+2026-05-13 22:38:48,482 INFO werkzeug Thread-6 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:48] "GET /index HTTP/1.1" 200 -
+2026-05-13 22:38:48,711 INFO werkzeug Thread-7 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:48] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:38:48,835 INFO werkzeug Thread-8 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:48] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:38:48,836 INFO werkzeug Thread-9 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:48] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:38:48,841 INFO werkzeug Thread-10 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:48] "[33mGET /api/v1/estadisticas HTTP/1.1[0m" 404 -
+2026-05-13 22:38:49,143 INFO werkzeug Thread-11 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:49] "[33mGET /api/v1/viajes HTTP/1.1[0m" 404 -
+2026-05-13 22:38:54,310 INFO werkzeug Thread-12 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:54] "GET /perfil HTTP/1.1" 200 -
+2026-05-13 22:38:54,547 INFO werkzeug Thread-13 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:54] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:38:54,641 INFO werkzeug Thread-14 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:54] "[33mGET /static/img/perfiles/1_1778727504_anime-girl-demon-horn-with-glasses-8k-wallpaper-uhdpaper.com-6120j.jpg HTTP/1.1[0m" 404 -
+2026-05-13 22:38:54,646 INFO werkzeug Thread-15 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:54] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:38:54,648 INFO werkzeug Thread-16 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:54] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:38:59,353 INFO werkzeug Thread-17 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:59] "GET /perfil/editar HTTP/1.1" 200 -
+2026-05-13 22:38:59,685 INFO werkzeug Thread-19 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:59] "[33mGET /static/img/perfiles/1_1778727504_anime-girl-demon-horn-with-glasses-8k-wallpaper-uhdpaper.com-6120j.jpg HTTP/1.1[0m" 404 -
+2026-05-13 22:38:59,686 INFO werkzeug Thread-18 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:59] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:38:59,688 INFO werkzeug Thread-20 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:59] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:38:59,692 INFO werkzeug Thread-21 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:38:59] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:40:03,846 INFO werkzeug Thread-23 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:40:03] "[32mPOST /perfil/editar HTTP/1.1[0m" 302 -
+2026-05-13 22:40:04,095 INFO werkzeug Thread-24 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:40:04] "GET /perfil HTTP/1.1" 200 -
+2026-05-13 22:40:04,168 INFO werkzeug Thread-25 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:40:04] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:40:04,448 INFO werkzeug Thread-26 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:40:04] "[33mGET /static/img/perfiles/1_1778727504_anime-girl-demon-horn-with-glasses-8k-wallpaper-uhdpaper.com-6120j.jpg HTTP/1.1[0m" 404 -
+2026-05-13 22:40:04,451 INFO werkzeug Thread-27 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:40:04] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:40:04,453 INFO werkzeug Thread-28 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:40:04] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:40:07,764 INFO werkzeug Thread-29 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:40:07] "GET /perfil/editar HTTP/1.1" 200 -
+2026-05-13 22:40:08,103 INFO werkzeug Thread-31 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:40:08] "[33mGET /static/img/perfiles/1_1778727504_anime-girl-demon-horn-with-glasses-8k-wallpaper-uhdpaper.com-6120j.jpg HTTP/1.1[0m" 404 -
+2026-05-13 22:40:08,104 INFO werkzeug Thread-30 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:40:08] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:40:08,110 INFO werkzeug Thread-32 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:40:08] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:40:08,111 INFO werkzeug Thread-33 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:40:08] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:42:36,623 INFO werkzeug Thread-35 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:36] "[32mPOST /perfil/editar HTTP/1.1[0m" 302 -
+2026-05-13 22:42:36,856 INFO werkzeug Thread-36 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:36] "GET /perfil HTTP/1.1" 200 -
+2026-05-13 22:42:36,931 INFO werkzeug Thread-37 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:36] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:42:37,212 INFO werkzeug Thread-38 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:37] "[33mGET /static/img/perfiles/1_1778730156_anime-girl-demon-horn-with-glasses-8k-wallpaper-uhdpaper.com-6120j.jpg HTTP/1.1[0m" 404 -
+2026-05-13 22:42:37,216 INFO werkzeug Thread-39 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:37] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:42:37,218 INFO werkzeug Thread-40 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:37] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:42:41,218 INFO werkzeug Thread-41 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:41] "GET /perfil/editar HTTP/1.1" 200 -
+2026-05-13 22:42:41,547 INFO werkzeug Thread-42 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:41] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:42:41,552 INFO werkzeug Thread-43 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:41] "[33mGET /static/img/perfiles/1_1778730156_anime-girl-demon-horn-with-glasses-8k-wallpaper-uhdpaper.com-6120j.jpg HTTP/1.1[0m" 404 -
+2026-05-13 22:42:41,555 INFO werkzeug Thread-45 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:41] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:42:41,556 INFO werkzeug Thread-44 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:41] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:42:52,050 INFO werkzeug Thread-46 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:52] "[32mPOST /perfil/editar HTTP/1.1[0m" 302 -
+2026-05-13 22:42:52,375 INFO werkzeug Thread-47 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:52] "GET /perfil HTTP/1.1" 200 -
+2026-05-13 22:42:52,617 INFO werkzeug Thread-48 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:52] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:42:52,726 INFO werkzeug Thread-49 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:52] "[33mGET /static/img/perfiles/1_1778730172_anime-girl-demon-horn-with-glasses-8k-wallpaper-uhdpaper.com-6120j.jpg HTTP/1.1[0m" 404 -
+2026-05-13 22:42:52,729 INFO werkzeug Thread-51 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:52] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:42:52,730 INFO werkzeug Thread-50 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:42:52] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:44:34,277 INFO werkzeug Thread-53 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:44:34] "GET / HTTP/1.1" 200 -
+2026-05-13 22:44:34,533 INFO werkzeug Thread-54 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:44:34] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:44:34,625 INFO werkzeug Thread-55 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:44:34] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:44:34,626 INFO werkzeug Thread-56 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:44:34] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:44:34,663 INFO werkzeug Thread-57 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:44:34] "[33mGET /api/v1/estadisticas HTTP/1.1[0m" 404 -
+2026-05-13 22:44:34,967 INFO werkzeug Thread-58 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:44:34] "[33mGET /api/v1/viajes HTTP/1.1[0m" 404 -
+2026-05-13 22:44:48,140 INFO werkzeug Thread-59 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:44:48] "GET /viajes/publicar HTTP/1.1" 200 -
+2026-05-13 22:44:48,360 INFO werkzeug Thread-60 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:44:48] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:44:48,491 INFO werkzeug Thread-61 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:44:48] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:44:48,491 INFO werkzeug Thread-62 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:44:48] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:47:05,816 INFO werkzeug MainThread : [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.51:5000
+2026-05-13 22:47:05,817 INFO werkzeug MainThread : [33mPress CTRL+C to quit[0m
+2026-05-13 22:47:08,887 INFO werkzeug Thread-1 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:08] "GET /perfil HTTP/1.1" 200 -
+2026-05-13 22:47:09,202 INFO werkzeug Thread-2 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:09] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:47:09,220 INFO werkzeug Thread-3 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:09] "[33mGET /static/img/perfiles/1_1778730172_anime-girl-demon-horn-with-glasses-8k-wallpaper-uhdpaper.com-6120j.jpg HTTP/1.1[0m" 404 -
+2026-05-13 22:47:09,225 INFO werkzeug Thread-4 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:09] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:47:09,226 INFO werkzeug Thread-5 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:09] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:47:11,914 INFO werkzeug Thread-6 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:11] "GET /perfil/editar HTTP/1.1" 200 -
+2026-05-13 22:47:12,251 INFO werkzeug Thread-8 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:12] "[33mGET /static/img/perfiles/1_1778730172_anime-girl-demon-horn-with-glasses-8k-wallpaper-uhdpaper.com-6120j.jpg HTTP/1.1[0m" 404 -
+2026-05-13 22:47:12,252 INFO werkzeug Thread-7 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:12] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:47:12,257 INFO werkzeug Thread-9 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:12] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:47:12,259 INFO werkzeug Thread-10 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:12] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:47:20,047 INFO werkzeug Thread-11 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:20] "[32mPOST /perfil/editar HTTP/1.1[0m" 302 -
+2026-05-13 22:47:20,366 INFO werkzeug Thread-12 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:20] "GET /perfil HTTP/1.1" 200 -
+2026-05-13 22:47:20,628 INFO werkzeug Thread-13 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:20] "[36mGET /static/css/style.css?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:47:20,707 INFO werkzeug Thread-15 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:20] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-05-13 22:47:20,709 INFO werkzeug Thread-16 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:20] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
+2026-05-13 22:47:20,719 INFO werkzeug Thread-14 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:20] "GET /static/img/perfiles/1_1778730440_anime-girl-demon-horn-with-glasses-8k-wallpaper-uhdpaper.com-6120j.jpg HTTP/1.1" 200 -

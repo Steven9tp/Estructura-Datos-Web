@@ -172,25 +172,22 @@ window.URideMapa = (function () {
                 el.innerHTML = ''; el.id = containerId; el.style.height = '380px';
 
                 if (useUserLoc && _userCoords) {
-                    // TRUCO AVANZADO DESPLIEGUE: Trasladar las coordenadas ficticias (Ecuador) a las calles
-                    // Reales de donde está físicamente parado el usuario ahora mismo.
                     const rLat = _userCoords[0];
                     const rLng = _userCoords[1];
 
-                    // Calcular offset global entre la coordenada vieja base (Ecuador) y el usuario actual
-                    // El origen arrancará unos ~800 metros noroeste de donde está el usuario 
-                    // para que el mapa dibuje calles reales de la ciudad del cliente.
-                    const dLat = rLat - data.origen.coords[0] - 0.007;
-                    const dLng = rLng - data.origen.coords[1] - 0.007;
+                    // Calcular offset global para mantener la misma distancia y forma de la ruta
+                    // pero centrando el PUNTO DE ORIGEN exactamente donde está el usuario físicamente.
+                    const dLat = rLat - data.origen.coords[0];
+                    const dLng = rLng - data.origen.coords[1];
 
-                    data.origen.coords[0] += dLat;
-                    data.origen.coords[1] += dLng;
+                    data.origen.coords[0] = rLat;
+                    data.origen.coords[1] = rLng;
                     
                     data.destino.coords[0] += dLat;
                     data.destino.coords[1] += dLng;
 
-                    data.centro[0] += dLat;
-                    data.centro[1] += dLng;
+                    data.centro[0] = rLat;
+                    data.centro[1] = rLng;
                 }
 
                 init(containerId, data);

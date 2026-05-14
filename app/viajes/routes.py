@@ -37,6 +37,13 @@ def publicar_viaje():
             cupos_disponibles=form.cupos_totales.data,
             notas_reglas=form.notas_reglas.data
         )
+        if form.origen_lat.data and form.origen_lng.data:
+            viaje.origen_lat = float(form.origen_lat.data)
+            viaje.origen_lng = float(form.origen_lng.data)
+        if form.destino_lat.data and form.destino_lng.data:
+            viaje.destino_lat = float(form.destino_lat.data)
+            viaje.destino_lng = float(form.destino_lng.data)
+            
         db.session.add(viaje)
         # RNF4: Trazabilidad de publicación
         EventoTrazabilidad.registrar(

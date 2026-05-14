@@ -15,6 +15,7 @@ from wtforms import (
     TextAreaField, IntegerField, DateTimeField, BooleanField,
     DateField, RadioField
 )
+from flask_wtf.file import FileField, FileAllowed
 from wtforms.validators import (
     DataRequired, Email, Length, EqualTo, ValidationError,
     NumberRange, Optional
@@ -68,10 +69,10 @@ class RegistroForm(FlaskForm):
         Optional(),
         Length(max=100)
     ])
-    zona_barrio = SelectField('Zona/Barrio',
-        choices=[('', 'Selecciona tu zona')] + [(z, z) for z in ZONAS_VALIDAS],
-        validators=[DataRequired(message='Selecciona tu zona')]
-    )
+    direccion = StringField('Dirección o Sector de residencia', validators=[
+        DataRequired(message='Ingresa tu dirección o sector principal'),
+        Length(max=200)
+    ])
     telefono = StringField('Teléfono (opcional)', validators=[
         Optional(),
         Length(max=20)
@@ -161,12 +162,19 @@ class ResetPasswordForm(FlaskForm):
 
 class ViajeForm(FlaskForm):
     """Formulario para publicar un viaje"""
-    origen_zona = SelectField('Origen (zona)',
-        choices=[('', 'Selecciona origen')] + [(z, z) for z in ZONAS_VALIDAS],
-        validators=[DataRequired(message='Selecciona una zona de origen')])
-    destino_zona = SelectField('Destino (zona)',
-        choices=[('', 'Selecciona destino')] + [(z, z) for z in ZONAS_VALIDAS],
-        validators=[DataRequired(message='Selecciona una zona de destino')])
+    origen_zona = StringField('Dirección exacta de origen',
+        validators=[DataRequired(message='Escribe una dirección de origen o selecciona en el mapa')])
+    
+    # Coordenadas interactivas de mapa
+    origen_lat = StringField('Latitud Origen', validators=[Optional()])
+    origen_lng = StringField('Longitud Origen', validators=[Optional()])
+    
+    destino_zona = StringField('Dirección exacta de destino',
+        validators=[DataRequired(message='Escribe una dirección de destino o selecciona en el mapa')])
+        
+    destino_lat = StringField('Latitud Destino', validators=[Optional()])
+    destino_lng = StringField('Longitud Destino', validators=[Optional()])
+    
     fecha_hora = DateTimeField('Fecha y hora', format='%Y-%m-%dT%H:%M',
         validators=[DataRequired(message='Selecciona fecha y hora')])
     cupos_totales = IntegerField('Cupos disponibles', validators=[
@@ -190,10 +198,8 @@ class ViajeForm(FlaskForm):
 
 class BuscarViajeForm(FlaskForm):
     """Formulario de búsqueda de viajes"""
-    origen_zona = SelectField('Origen',
-        choices=[('', 'Cualquiera')] + [(z, z) for z in ZONAS_VALIDAS])
-    destino_zona = SelectField('Destino',
-        choices=[('', 'Cualquiera')] + [(z, z) for z in ZONAS_VALIDAS])
+    origen_zona = StringField('Buscar por ciudad o dirección de origen', validators=[Optional()])
+    destino_zona = StringField('Buscar por ciudad o dirección de destino', validators=[Optional()])
     fecha = DateField('Fecha del viaje', format='%Y-%m-%d', validators=[Optional()])
     solo_disponibles = BooleanField('Solo con cupos disponibles', default=True)
     submit = SubmitField('Buscar')
@@ -265,9 +271,40 @@ class EditarPerfilForm(FlaskForm):
     telefono = StringField('Teléfono', validators=[Optional(), Length(max=20)])
     fecha_nacimiento = DateField('Fecha de Nacimiento', format='%Y-%m-%d',
         validators=[Optional()])
-    zona_barrio = SelectField('Zona/Barrio',
-        choices=[('', 'Selecciona')] + [(z, z) for z in ZONAS_VALIDAS])
-    direccion = StringField('Dirección', validators=[Optional(), Length(max=200)])
-    foto_url = StringField('URL de foto de perfil',
-        validators=[Optional(), Length(max=300)])
+    direccion = StringField('Dirección Principal (Ej: Ambato)', validators=[Optional(), Length(max=200)])
+    calles_secundarias = StringField('Calles Principal y Secundaria', validators=[Optional(), Length(max=200)])
+    direccion_lat = StringField('Latitud Casa', validators=[Optional()])
+    direccion_lng = StringField('Longitud Casa', validators=[Optional()])
+    
+    # Nuevos campos de Seguridad y Verificación
+    cedula = StringField('Número de Cédula/ID Estudiantil', validators=[Optional(), Length(max=20)])
+    contacto_emergencia_nombre = StringField('Nombre Contacto Emergencia', validators=[Optional(), Length(max=100)])
+    contacto_emergencia_telefono = StringField('Teléfono Contacto Emergencia', validators=[Optional(), Length(max=20)])
+    tipo_sangre = SelectField('Tipo de Sangre', choices=[
+        ('', 'No especificado'), ('O+', 'O+'), ('O-', 'O-'), ('A+', 'A+'), ('A-', 'A-'),
+        ('B+', 'B+'), ('B-', 'B-'), ('AB+', 'AB+'), ('AB-', 'AB-')
+    ], validators=[Optional()])
+    
+    # Información Académica
+    facultad = SelectField('Facultad o Campus', choices=[
+        ('', 'Selecciona tu Facultad'),
+        ('Ingeniería en Sistemas, Electrónica e Industrial', 'Fisei'),
+        ('Ingeniería Civil y Mecánica', 'Ficm'),
+        ('Ciencias de la Salud', 'Salud'),
+        ('Ciencias Administrativas', 'Administrativas'),
+        ('Jurisprudencia y Ciencias Sociales', 'Jurisprudencia'),
+        ('Diseño y Arquitectura', 'Diseño'),
+        ('Ciencias Humanas y de la Educación', 'Educación'),
+        ('Ciencias Agropecuarias', 'Agropecuarias')
+    ], validators=[Optional()])
+    semestre = SelectField('Semestre/Nivel', choices=[
+        ('', 'Selecciona'), ('1', 'Primer Semestre'), ('2', 'Segundo Semestre'),
+        ('3', 'Tercer Semestre'), ('4', 'Cuarto Semestre'), ('5', 'Quinto Semestre'),
+        ('6', 'Sexto Semestre'), ('7', 'Séptimo Semestre'), ('8', 'Octavo Semestre'),
+        ('9', 'Noveno Semestre'), ('10', 'Décimo Semestre'), ('Egresado', 'Egresado')
+    ], validators=[Optional()])
+
+    foto_perfil = FileField('Foto de Perfil', validators=[
+        FileAllowed(['jpg', 'png', 'jpeg'], 'Solo se permiten imágenes (JPG, PNG)')
+    ])
     submit = SubmitField('Guardar Cambios')

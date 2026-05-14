@@ -24,9 +24,47 @@ app = create_app(_config_map.get(_env, 'default'))
 # Asegurar que las tablas se creen incluso cuando se usa Gunicorn en Render
 with app.app_context():
     try:
-        db.create_all()
-        from app.init_db import create_admin_user
-        create_admin_user()
+        from app.init_db import init_database
+        try:
+            with db.engine.connect() as conn:
+                print("==================================================")
+                print("EJECUTANDO FIX MANUAL DE BASE DE DATOS DESDE RUN.PY")
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN contacto_emergencia_nombre VARCHAR(100) DEFAULT ''"))
+                    print("✅ contacto_emergencia_nombre agregado")
+                except Exception as e:
+                    pass
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN contacto_emergencia_telefono VARCHAR(20) DEFAULT ''"))
+                    print("✅ contacto_emergencia_telefono agregado")
+                except Exception as e:
+                    pass
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN calles_secundarias VARCHAR(200) DEFAULT ''"))
+                    print("✅ calles_secundarias agregado")
+                except Exception as e:
+                    pass
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN direccion_lat FLOAT DEFAULT NULL"))
+                except Exception: pass
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN direccion_lng FLOAT DEFAULT NULL"))
+                except Exception: pass
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN direccion VARCHAR(200) DEFAULT ''"))
+                except Exception: pass
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN cedula VARCHAR(20) DEFAULT ''"))
+                except Exception: pass
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN tipo_sangre VARCHAR(50) DEFAULT ''"))
+                except Exception: pass
+                conn.commit()
+                print("==================================================")
+        except Exception as ex:
+            print("Error en el fix manual:", ex)
+            
+        init_database()
     except Exception as e:
         print(f"Error inicializando DB: {e}")
 @app.shell_context_processor
@@ -71,10 +109,9 @@ if __name__ == '__main__':
                 conn.execute(db.text('SELECT 1'))
             print('✅ MySQL conectado correctamente')
 
-            db.create_all()
-            from app.init_db import create_admin_user
+            from app.init_db import init_database
             try:
-                create_admin_user()
+                init_database()
             except Exception:
                 db.session.rollback()
             print('✅ Tablas listas')

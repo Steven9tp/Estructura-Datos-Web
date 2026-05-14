@@ -14,30 +14,32 @@
             <div class="card-body-uride">
                 <form method="post">
                     {{ form.hidden_tag() }}
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-secondary">Zona de Origen</label>
-                        {{ form.origen_zona(class="form-select bg-light border-0 py-2") }}
+                    <div class="mb-3 position-relative">
+                        <label class="form-label small fw-bold text-secondary">Dirección de Origen</label>
+                        {{ form.origen_zona(class="form-control-uride", id="origen_search", placeholder="Ej: Ambato", autocomplete="off") }}
+                        <ul id="origen-suggestions" class="list-group position-absolute w-100" style="z-index:1000; display:none; max-height: 200px; overflow-y: auto;"></ul>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-secondary">Zona de Destino</label>
-                        {{ form.destino_zona(class="form-select bg-light border-0 py-2") }}
+                    <div class="mb-3 position-relative">
+                        <label class="form-label small fw-bold text-secondary">Dirección de Destino</label>
+                        {{ form.destino_zona(class="form-control-uride", id="destino_search", placeholder="Ej: Ficoa", autocomplete="off") }}
+                        <ul id="destino-suggestions" class="list-group position-absolute w-100" style="z-index:1000; display:none; max-height: 200px; overflow-y: auto;"></ul>
                     </div>
                     <!-- RF4: Filtro por fecha -->
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-secondary">Fecha del viaje</label>
-                        {{ form.fecha(class="form-control bg-light border-0 py-2") }}
+                        {{ form.fecha(class="form-control-uride", type="date") }}
                     </div>
                     <!-- RF4: Filtro por disponibilidad -->
                     <div class="mb-3 form-check" style="padding-left:1.5rem">
-                        {{ form.solo_disponibles(class="form-check-input") }}
+                        {{ form.solo_disponibles(class="form-check-input", style="accent-color:var(--accent)") }}
                         <label class="form-check-label small text-secondary" for="{{ form.solo_disponibles.id }}">
                             Solo con cupos disponibles
                         </label>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                    <button type="submit" class="btn-uride btn-primary-uride btn-full py-2 shadow-sm">
                         <i class="fas fa-search me-2"></i>Aplicar Filtros
                     </button>
-                    <a href="{{ url_for('viajes.buscar_viajes') }}" class="btn btn-link w-100 mt-2 text-decoration-none text-secondary small">
+                    <a href="{{ url_for('viajes.buscar_viajes') }}" class="btn-uride btn-ghost btn-full mt-2 text-decoration-none small" style="justify-content:center">
                         Limpiar filtros
                     </a>
                 </form>
@@ -144,6 +146,53 @@
                     URideMapa.cargarViaje(id, 'mapa-viaje', 'mapa-stats');
                 });
             });
+
+            // Autocomplete para búsqueda
+            function setupSearchAutocomplete(inputId, listId) {
+                const input = document.getElementById(inputId);
+                const list = document.getElementById(listId);
+                let timeout;
+
+                input.addEventListener('input', function() {
+                    clearTimeout(timeout);
+                    const query = this.value;
+                    if (query.length < 4) { list.style.display = 'none'; return; }
+
+                    timeout = setTimeout(() => {
+                        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`)
+                            .then(r => r.json())
+                            .then(data => {
+                                list.innerHTML = '';
+                                if (data.length > 0) {
+                                    data.forEach(item => {
+                                        const li = document.createElement('li');
+                                        li.className = 'list-group-item list-group-item-action';
+                                        li.style.cursor = 'pointer';
+                                        li.style.fontSize = '0.8rem';
+                                        li.innerText = item.display_name;
+                                        li.onclick = () => {
+                                            input.value = item.display_name;
+                                            list.style.display = 'none';
+                                        };
+                                        list.appendChild(li);
+                                    });
+                                    list.style.display = 'block';
+                                } else {
+                                    list.style.display = 'none';
+                                }
+                            });
+                    }, 500);
+                });
+
+                document.addEventListener('click', e => {
+                    if (!input.contains(e.target) && !list.contains(e.target)) {
+                        list.style.display = 'none';
+                    }
+                });
+            }
+
+            setupSearchAutocomplete('origen_search', 'origen-suggestions');
+            setupSearchAutocomplete('destino_search', 'destino-suggestions');
         });
     })();
 </script>

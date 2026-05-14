@@ -19,6 +19,7 @@ Nota DEV: sin SMTP configurado los enlaces se imprimen en la consola del servido
 """
 from flask import render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, current_user, login_required
+from markupsafe import Markup
 from urllib.parse import urlparse
 
 from app import db
@@ -119,7 +120,7 @@ def registro():
             apellido=form.apellido.data.strip(),
             email=form.email.data.strip().lower(),
             carrera=form.carrera.data.strip() if form.carrera.data else '',
-            zona_barrio=form.zona_barrio.data,
+            direccion=form.direccion.data.strip() if form.direccion.data else '',
             telefono=form.telefono.data.strip() if form.telefono.data else '',
             email_verificado=False,  # Debe verificar por correo
             esta_activo=True,
