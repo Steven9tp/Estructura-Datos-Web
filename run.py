@@ -59,6 +59,38 @@ with app.app_context():
                 try:
                     conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN tipo_sangre VARCHAR(50) DEFAULT ''"))
                 except Exception: pass
+                
+                # Campos adicionales de usuarios
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN foto_url VARCHAR(300) NULL"))
+                except Exception: pass
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN facultad VARCHAR(100) DEFAULT ''"))
+                except Exception: pass
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN semestre VARCHAR(50) DEFAULT ''"))
+                except Exception: pass
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN carrera VARCHAR(100) DEFAULT ''"))
+                except Exception: pass
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN telefono VARCHAR(20) DEFAULT ''"))
+                except Exception: pass
+                
+                # Migraciones para tabla viajes
+                try:
+                    conn.execute(db.text("ALTER TABLE viajes ADD COLUMN origen_lat FLOAT NULL"))
+                except Exception: pass
+                try:
+                    conn.execute(db.text("ALTER TABLE viajes ADD COLUMN origen_lng FLOAT NULL"))
+                except Exception: pass
+                try:
+                    conn.execute(db.text("ALTER TABLE viajes ADD COLUMN destino_lat FLOAT NULL"))
+                except Exception: pass
+                try:
+                    conn.execute(db.text("ALTER TABLE viajes ADD COLUMN destino_lng FLOAT NULL"))
+                except Exception: pass
+                
                 conn.commit()
                 print("==================================================")
         except Exception as ex:

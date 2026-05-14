@@ -12,10 +12,14 @@ from flask_login import LoginManager
 from config import config
 
 logger = logging.getLogger(__name__)
+import sys
 logging.basicConfig(
-    filename='error.log',
     level=logging.ERROR,
-    format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
+    format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s',
+    handlers=[
+        logging.FileHandler("error.log"),
+        logging.StreamHandler(sys.stdout)
+    ]
 )
 
 db = SQLAlchemy()
