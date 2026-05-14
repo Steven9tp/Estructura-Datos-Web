@@ -84,6 +84,10 @@ def create_app(config_name=None):
         app.config['MAIL_USE_TLS'] = (port == 587)
         app.config['MAIL_USE_SSL'] = (port == 465)
         mail.init_app(app)
+        
+        # Log para verificar que Render lee las variables
+        mail_user = os.getenv('MAIL_USERNAME', 'NO_CONFIGURADO')
+        print(f"INFO: Sistema de Email inicializado para: {mail_user}")
 
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Por favor inicia sesión para acceder.'
