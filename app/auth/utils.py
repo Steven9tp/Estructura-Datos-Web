@@ -1,56 +1,51 @@
 """
 Utilidades de autenticacion para U-Ride
 =========================================
-Usa smtplib directamente con send_message para soportar caracteres en español (ñ, tildes).
+Usa la API HTTP de Google Apps Script para evitar el bloqueo del puerto SMTP (25, 465, 587) de Render.
 """
-import os
-import smtplib
+import json
+import urllib.request
 import logging
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 logger = logging.getLogger(__name__)
 
-def _smtp_configurado() -> bool:
-    """Verifica si las credenciales existen."""
-    username = os.getenv('MAIL_USERNAME', '').strip()
-    password = os.getenv('MAIL_PASSWORD', '').strip()
-    return bool(username and password and len(password) >= 16)
+# URL secreta de la API generada por el usuario
+GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwnd4Oaqby2NCP6JRHMMMyzy0MWCXuTyMck4kHFECvQGC6-CC2URT5vePh9-pixUs9C/exec"
 
-def _enviar_smtp(destinatario: str, asunto: str, html: str, texto: str) -> bool:
-    """Lógica robusta y síncrona que usa send_message para caracteres Unicode."""
-    server_host = os.getenv('MAIL_SERVER', 'smtp.gmail.com').strip()
-    server_port = int(os.getenv('MAIL_PORT', 465)) # Usar 465 por defecto para SSL
-    username    = os.getenv('MAIL_USERNAME', '').strip()
-    password    = os.getenv('MAIL_PASSWORD', '').strip()
-
+def _enviar_http(destinatario: str, asunto: str, html: str) -> bool:
+    """Envía el correo usando la API HTTP para esquivar los bloqueos de Render."""
+    data = {
+        "to": destinatario,
+        "subject": asunto,
+        "html": html
+    }
+    
+    print(f"[EMAIL API] Contactando con Google Apps Script para enviar a {destinatario}...")
+    
     try:
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = asunto
-        msg['From']    = f"U-Ride <{username}>"
-        msg['To']      = destinatario
-
-        msg.attach(MIMEText(texto, 'plain', 'utf-8'))
-        msg.attach(MIMEText(html,  'html',  'utf-8'))
-
-        print(f"[EMAIL] Conectando a {server_host}:{server_port} para {destinatario}...")
+        payload = json.dumps(data).encode('utf-8')
+        req = urllib.request.Request(
+            GOOGLE_SCRIPT_URL, 
+            data=payload, 
+            headers={'Content-Type': 'application/json'}
+        )
         
-        if server_port == 465:
-            server = smtplib.SMTP_SSL(server_host, server_port, timeout=15)
-        else:
-            server = smtplib.SMTP(server_host, server_port, timeout=15)
-            server.starttls()
-            
-        server.login(username, password)
-        # CRÍTICO: send_message maneja automáticamente codificación UTF-8 (ñ, tildes)
-        server.send_message(msg)
-        server.quit()
-
-        print(f"[EMAIL] ✅ Éxito al enviar a {destinatario}")
-        return True
+        with urllib.request.urlopen(req, timeout=15) as response:
+            result_text = response.read().decode('utf-8')
+            try:
+                result = json.loads(result_text)
+                if result.get('status') == 'success':
+                    print(f"[EMAIL API] ✅ Éxito al enviar a {destinatario}")
+                    return True
+                else:
+                    print(f"[EMAIL API ERROR] ❌ Google Script devolvió error: {result}")
+                    return False
+            except json.JSONDecodeError:
+                print(f"[EMAIL API ERROR] ❌ Respuesta no es JSON válida: {result_text}")
+                return False
 
     except Exception as e:
-        print(f"[EMAIL ERROR] ❌ Falló el envío: {e}")
+        print(f"[EMAIL API ERROR] ❌ Falló la conexión HTTP: {e}")
         return False
 
 def enviar_correo_verificacion(usuario, token: str) -> bool:
@@ -62,14 +57,10 @@ def enviar_correo_verificacion(usuario, token: str) -> bool:
         enlace = enlace.replace('http://', 'https://')
 
     print(f"\n[EMAIL] Preparando verificación para {usuario.email}")
-    
-    if not _smtp_configurado():
-        print(f"DEBUG: Enlace -> {enlace}")
-        return True
 
     asunto = '✅ Confirma tu cuenta en U-Ride'
     
-    # HTML Simplificado idéntico a test_email.py
+    # HTML Simplificado y optimizado
     html = f"""
     <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;">
       <div style="background:#dc2626;padding:20px;text-align:center;border-radius:8px 8px 0 0;">
@@ -91,9 +82,7 @@ def enviar_correo_verificacion(usuario, token: str) -> bool:
     </div>
     """
     
-    texto = f"Hola {usuario.nombre}, verifica tu cuenta aquí: {enlace}"
-
-    return _enviar_smtp(usuario.email, asunto, html, texto)
+    return _enviar_http(usuario.email, asunto, html)
 
 def enviar_correo_recuperacion(usuario, token: str) -> bool:
     from flask import url_for, current_app
@@ -105,13 +94,9 @@ def enviar_correo_recuperacion(usuario, token: str) -> bool:
 
     print(f"\n[EMAIL] Preparando recuperación para {usuario.email}")
 
-    if not _smtp_configurado():
-        print(f"DEBUG: Enlace -> {enlace}")
-        return True
-
     asunto = '🔒 Restablece tu contraseña en U-Ride'
     
-    # HTML Simplificado idéntico a test_email.py
+    # HTML Simplificado
     html = f"""
     <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;">
       <div style="background:#dc2626;padding:20px;text-align:center;border-radius:8px 8px 0 0;">
@@ -132,7 +117,5 @@ def enviar_correo_recuperacion(usuario, token: str) -> bool:
       </div>
     </div>
     """
-    
-    texto = f"Hola {usuario.nombre}, cambia tu contraseña aquí: {enlace}"
 
-    return _enviar_smtp(usuario.email, asunto, html, texto)
+    return _enviar_http(usuario.email, asunto, html)
