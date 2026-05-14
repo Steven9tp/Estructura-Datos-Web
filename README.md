@@ -32,7 +32,7 @@
 | **ORM** | SQLAlchemy + Flask-Migrate | 3.1.1 |
 | **Autenticación** | Flask-Login + itsdangerous | 0.6.2 |
 | **Formularios** | Flask-WTF + WTForms | 1.1.1 |
-| **Email** | `smtplib` nativo Python — `sendmail()` + `as_string()` | — |
+| **Email** | API HTTP (Google Apps Script) para evadir bloqueo Render | — |
 | **Frontend** | Jinja2 + Bootstrap 5 + Font Awesome 6 | — |
 | **Mapas** | Leaflet.js + OpenStreetMap + OSRM | 1.9.4 |
 | **Seguridad** | Werkzeug hashing + CSRF + tokens firmados | — |
@@ -583,3 +583,11 @@ El proyecto está configurado y optimizado para ser desplegado de forma gratuita
    - `SECRET_KEY` = (Una clave larga de seguridad)
    - `FLASK_ENV` = production
 8. Hacer deploy. La aplicación estará viva en un enlace `.onrender.com`.
+
+### 🚨 IMPORTANTE: Sistema de Correos (Bypass de Render)
+**Render (Capa Gratuita) bloquea todo el tráfico saliente SMTP (puertos 25, 465, 587).**
+Por esta razón, la aplicación ya NO usa `smtplib` ni contraseñas de aplicación de Google. En su lugar, utiliza un **Webhook HTTP (Google Apps Script)** creado por el administrador. 
+
+- El código en `app/auth/utils.py` envía un JSON vía puerto 443 (HTTPS) a la API de Google Scripts.
+- Google Apps Script recibe el JSON y despacha el correo usando la cuenta asociada (Ej. `steven...`).
+- Esto garantiza el envío de correos tanto en entornos locales como en la nube gratuita de Render de forma instantánea.
