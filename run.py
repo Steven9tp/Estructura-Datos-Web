@@ -60,6 +60,14 @@ with app.app_context():
                     conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN tipo_sangre VARCHAR(50) DEFAULT ''"))
                 except Exception: pass
                 
+                # Campos adicionales y obsoletos de usuarios
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN contacto_emergencia VARCHAR(100) DEFAULT ''"))
+                except Exception: pass
+                try:
+                    conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN zona_barrio VARCHAR(100) DEFAULT ''"))
+                except Exception: pass
+                
                 # Campos adicionales de usuarios
                 try:
                     conn.execute(db.text("ALTER TABLE usuarios ADD COLUMN foto_url VARCHAR(300) NULL"))
