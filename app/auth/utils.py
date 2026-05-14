@@ -63,8 +63,29 @@ def enviar_correo_verificacion(usuario, token: str) -> bool:
         print(f"DEBUG: Enlace -> {enlace}")
         return True
 
-    asunto = 'Confirma tu cuenta en U-Ride'
-    html = f"<h2>Hola {usuario.nombre}</h2><p>Verifica tu cuenta aquí: <a href='{enlace}'>{enlace}</a></p>"
+    asunto = '🚗 Confirma tu cuenta en U-Ride'
+    
+    html = f"""
+    <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+      <div style="background:#dc2626;padding:20px;text-align:center;">
+        <h1 style="color:white;margin:0;">🚗 U-Ride</h1>
+      </div>
+      <div style="padding:24px;background:#ffffff;">
+        <h2 style="color:#111827;margin-top:0;">Hola, {usuario.nombre}!</h2>
+        <p style="color:#4b5563;font-size:16px;">
+          Gracias por registrarte en U-Ride. Para completar tu registro y poder iniciar sesión, necesitamos verificar tu correo institucional.
+        </p>
+        <div style="text-align:center;margin:30px 0;">
+          <a href="{enlace}" style="background:#dc2626;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Verificar mi cuenta</a>
+        </div>
+        <p style="color:#6b7280;font-size:14px;margin-bottom:0;">
+          Si el botón no funciona, copia y pega este enlace en tu navegador:<br>
+          <span style="color:#dc2626;word-break:break-all;">{enlace}</span>
+        </p>
+      </div>
+    </div>
+    """
+    
     texto = f"Hola {usuario.nombre}, verifica tu cuenta aquí: {enlace}"
 
     return _enviar_smtp(usuario.email, asunto, html, texto)
@@ -79,8 +100,29 @@ def enviar_correo_recuperacion(usuario, token: str) -> bool:
         print(f"DEBUG: Enlace -> {enlace}")
         return True
 
-    asunto = 'Restablece tu contraseña en U-Ride'
-    html = f"<h2>Hola {usuario.nombre}</h2><p>Cambia tu contraseña aquí: <a href='{enlace}'>{enlace}</a></p>"
+    asunto = '🚗 Restablece tu contraseña en U-Ride'
+    
+    html = f"""
+    <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+      <div style="background:#dc2626;padding:20px;text-align:center;">
+        <h1 style="color:white;margin:0;">🚗 U-Ride</h1>
+      </div>
+      <div style="padding:24px;background:#ffffff;">
+        <h2 style="color:#111827;margin-top:0;">Hola, {usuario.nombre}!</h2>
+        <p style="color:#4b5563;font-size:16px;">
+          Hemos recibido una solicitud para cambiar tu contraseña en U-Ride.
+        </p>
+        <div style="text-align:center;margin:30px 0;">
+          <a href="{enlace}" style="background:#dc2626;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Cambiar mi contraseña</a>
+        </div>
+        <p style="color:#6b7280;font-size:14px;margin-bottom:0;">
+          Si el botón no funciona, copia y pega este enlace en tu navegador:<br>
+          <span style="color:#dc2626;word-break:break-all;">{enlace}</span>
+        </p>
+      </div>
+    </div>
+    """
+    
     texto = f"Hola {usuario.nombre}, cambia tu contraseña aquí: {enlace}"
 
     return _enviar_smtp(usuario.email, asunto, html, texto)

@@ -64,6 +64,8 @@ class ProductionConfig(Config):
     )
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
+    # Forzar URLs seguras (https) en producción (vital para evitar filtros de spam)
+    PREFERRED_URL_SCHEME = 'https'
 
 
 config = {
