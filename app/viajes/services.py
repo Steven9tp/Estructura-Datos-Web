@@ -6,6 +6,27 @@ from datetime import datetime
 from app.models import Viaje, Solicitud
 
 
+def _extraer_termino_busqueda(texto: str, max_palabras: int = 2) -> str:
+    """
+    Extrae un término corto de búsqueda a partir de un texto libre.
+    
+    Nominatim devuelve strings como:
+      "Ficoa, Ambato, Tungurahua, Ecuador"
+    Tomamos las primeras N palabras significativas (sin comas) para el LIKE.
+    
+    Args:
+        texto: Dirección completa ingresada por el usuario
+        max_palabras: Máximo de palabras a usar como término
+    Returns:
+        Término limpio para usar en ilike('%termino%')
+    """
+    # Quitar comas y separar por espacios
+    partes = [p.strip() for p in texto.replace(',', ' ').split() if p.strip()]
+    # Tomar las primeras max_palabras palabras
+    termino = ' '.join(partes[:max_palabras])
+    return termino if termino else texto.strip()
+
+
 def filtrar_viajes(origen_zona=None, destino_zona=None, fecha=None, solo_disponibles=True):
     """
     Filtra los viajes disponibles según criterios de búsqueda
@@ -28,10 +49,13 @@ def filtrar_viajes(origen_zona=None, destino_zona=None, fecha=None, solo_disponi
         query = query.filter(Viaje.cupos_disponibles > 0)
 
     if origen_zona and origen_zona.strip():
-        query = query.filter(Viaje.origen_zona == origen_zona)
+        # RF4: Búsqueda parcial insensible a mayúsculas para admitir texto libre (Nominatim)
+        termino_origen = _extraer_termino_busqueda(origen_zona)
+        query = query.filter(Viaje.origen_zona.ilike(f'%{termino_origen}%'))
 
     if destino_zona and destino_zona.strip():
-        query = query.filter(Viaje.destino_zona == destino_zona)
+        termino_destino = _extraer_termino_busqueda(destino_zona)
+        query = query.filter(Viaje.destino_zona.ilike(f'%{termino_destino}%'))
 
     if fecha:
         inicio_dia = datetime(fecha.year, fecha.month, fecha.day, 0, 0, 0)

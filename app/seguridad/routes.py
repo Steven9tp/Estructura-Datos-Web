@@ -18,7 +18,12 @@ def reglas_seguridad():
 @bp.route('/calificar/<int:viaje_id>/<int:destinatario_id>', methods=['GET', 'POST'])
 @login_required
 def calificar(viaje_id, destinatario_id):
-    """Permite calificar a otro usuario después de un viaje"""
+    """Permite calificar a otro usuario después de un viaje.
+    
+    RF8: Solo puede calificar quien participó efectivamente:
+      - El conductor puede calificar a los pasajeros aceptados.
+      - Un pasajero aceptado puede calificar al conductor.
+    """
     viaje = db.get_or_404(Viaje, viaje_id)
     destinatario = db.get_or_404(Usuario, destinatario_id)
 
@@ -27,7 +32,38 @@ def calificar(viaje_id, destinatario_id):
         flash('Solo puedes calificar después de finalizar el viaje.', 'warning')
         return redirect(url_for('viajes.mis_viajes'))
 
-    # Verificar que ya calificó
+    # ── Validación de participación efectiva (corrección obs. 3) ──────────────
+    es_conductor = (viaje.conductor_id == current_user.id)
+    solicitud_autor = Solicitud.query.filter_by(
+        viaje_id=viaje_id,
+        pasajero_id=current_user.id,
+        estado='aceptada'
+    ).first()
+    es_pasajero_aceptado = solicitud_autor is not None
+
+    if not es_conductor and not es_pasajero_aceptado:
+        flash('Solo los participantes del viaje pueden calificar.', 'danger')
+        return redirect(url_for('viajes.mis_viajes'))
+
+    # El conductor solo puede calificar a pasajeros aceptados
+    if es_conductor:
+        es_destinatario_valido = Solicitud.query.filter_by(
+            viaje_id=viaje_id,
+            pasajero_id=destinatario_id,
+            estado='aceptada'
+        ).first() is not None
+        if not es_destinatario_valido:
+            flash('Solo puedes calificar a los pasajeros de este viaje.', 'danger')
+            return redirect(url_for('viajes.mis_viajes'))
+
+    # El pasajero solo puede calificar al conductor
+    if es_pasajero_aceptado and not es_conductor:
+        if destinatario_id != viaje.conductor_id:
+            flash('Como pasajero solo puedes calificar al conductor del viaje.', 'danger')
+            return redirect(url_for('viajes.mis_viajes'))
+    # ─────────────────────────────────────────────────────────────────────────
+
+    # Verificar que no haya calificado antes
     ya_califico = Calificacion.query.filter_by(
         viaje_id=viaje_id,
         autor_id=current_user.id,

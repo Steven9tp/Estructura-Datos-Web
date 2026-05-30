@@ -15,7 +15,7 @@
                         <th>Nombre</th>
                         <th>Email</th>
                         <th>Carrera</th>
-                        <th>Zona</th>
+                        <th>Dirección/Sector</th>
                         <th>Reputación</th>
                         <th>Estado</th>
                         <th>Registrado</th>
@@ -32,7 +32,7 @@
                         </td>
                         <td style="font-size:.85rem">{{ u.email }}</td>
                         <td>{{ u.carrera or '—' }}</td>
-                        <td>{{ u.zona_barrio or '—' }}</td>
+                        <td>{{ u.direccion or '—' }}</td>
                         <td>
                             {% if u.reputacion_promedio > 0 %}
                                 <span style="color:var(--accent)">⭐ {{ u.reputacion_promedio }}</span>

@@ -268,6 +268,10 @@ class Reporte(db.Model):
     accion_tomada = db.Column(db.String(200))
     fecha = db.Column(db.DateTime, default=_utcnow)
 
+    # Relaciones ORM para acceder a los usuarios desde el template (obs. 5)
+    reportante = db.relationship('Usuario', foreign_keys=[reportante_id])
+    reportado = db.relationship('Usuario', foreign_keys=[reportado_id])
+
     def tomar_accion(self, descripcion_accion, tipo='ninguna'):
         """Marca el reporte como resuelto y registra la accion tomada.
         NO hace commit — el caller debe hacerlo.
