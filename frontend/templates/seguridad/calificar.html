@@ -1,28 +1,257 @@
 {% extends "base.html" %}
-{% block title %}Calificar Usuario — U-Ride{% endblock %}
-{% block page_title %}<i class="fas fa-star me-2" style="color:var(--accent)"></i>Calificar{% endblock %}
+{% block title %}Calificar Viaje — U-Ride{% endblock %}
+{% block page_title %}<i class="fas fa-star me-2" style="color:var(--accent)"></i>Calificar Experiencia{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card-uride p-4">
-            <h5 class="fw-bold mb-1">Calificar a {{ destinatario.nombre }}</h5>
-            <p style="color:var(--text-secondary);font-size:.875rem;margin-bottom:24px">Viaje: {{ viaje.origen_zona }} → {{ viaje.destino_zona }}</p>
-            <form method="post">
-                {{ form.hidden_tag() }}
-                <div class="form-group">
-                    <label class="form-label-uride">Puntuación</label>
-                    {{ form.puntuacion(class="form-control-uride form-select-uride") }}
+    <div class="col-md-7 col-lg-6">
+
+        <!-- Tarjeta principal -->
+        <div class="card-uride overflow-hidden">
+
+            <!-- Header degradado -->
+            <div style="background:linear-gradient(135deg,#1f2937,#111827);padding:28px 28px 20px;position:relative;overflow:hidden">
+                <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(201,162,39,.12)"></div>
+                <div style="position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;border-radius:50%;background:rgba(201,162,39,.07)"></div>
+
+                <!-- Avatar + nombre destinatario -->
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                         style="width:52px;height:52px;background:rgba(201,162,39,.2);color:var(--accent);font-size:1.3rem;flex-shrink:0">
+                        {{ destinatario.nombre[0]|upper }}
+                    </div>
+                    <div>
+                        <div class="fw-bold text-white" style="font-size:1rem">{{ destinatario.nombre }}</div>
+                        <div style="font-size:.78rem;color:rgba(255,255,255,.55)">{{ destinatario.carrera or 'Estudiante UTA' }}</div>
+                        {% if destinatario.reputacion_promedio > 0 %}
+                        <div style="font-size:.78rem;color:var(--accent);margin-top:2px">
+                            <i class="fas fa-star me-1"></i>{{ '%.1f'|format(destinatario.reputacion_promedio) }} reputación actual
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label-uride">Comentario</label>
-                    {{ form.comentario(class="form-control-uride", rows=3, placeholder="Comparte tu experiencia...") }}
+
+                <!-- Ruta del viaje -->
+                <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:10px 14px;font-size:.82rem;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:10px">
+                    <i class="fas fa-map-marker-alt" style="color:var(--accent);flex-shrink:0"></i>
+                    <span class="text-truncate">{{ viaje.origen_zona }}</span>
+                    <i class="fas fa-arrow-right" style="opacity:.5;flex-shrink:0"></i>
+                    <span class="text-truncate">{{ viaje.destino_zona }}</span>
+                    <span style="opacity:.5;flex-shrink:0;margin-left:auto;font-size:.75rem">
+                        {{ viaje.fecha_hora.strftime('%d/%m %H:%M') }}
+                    </span>
                 </div>
-                <div class="d-flex gap-3">
-                    {{ form.submit(class="btn-uride btn-primary-uride btn-lg-uride") }}
-                    <a href="{{ url_for('viajes.mis_viajes') }}" class="btn-uride btn-ghost btn-lg-uride">Cancelar</a>
-                </div>
-            </form>
+            </div>
+
+            <!-- Formulario -->
+            <div class="card-body-uride" style="padding:28px">
+                <form method="post" id="form-calificar">
+                    {{ form.hidden_tag() }}
+
+                    <!-- ─── Selector de estrellas interactivo ─── -->
+                    <div class="text-center mb-4">
+                        <div style="font-size:.85rem;color:var(--text-secondary);margin-bottom:14px;font-weight:600">
+                            ¿Cómo fue tu experiencia en este viaje?
+                        </div>
+
+                        <!-- Estrellas grandes clickeables -->
+                        <div id="stars-container" style="display:flex;justify-content:center;gap:10px;margin-bottom:10px">
+                            {% for i in range(1,6) %}
+                            <button type="button"
+                                    class="star-btn"
+                                    data-value="{{ i }}"
+                                    id="star-{{ i }}"
+                                    onclick="seleccionarEstrella({{ i }})"
+                                    style="background:none;border:none;cursor:pointer;font-size:2.4rem;color:#d1d5db;transition:transform .15s,color .15s;padding:0 2px"
+                                    title="{{ i }} estrella{% if i > 1 %}s{% endif %}">
+                                &#9733;
+                            </button>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Texto descriptivo de la puntuación -->
+                        <div id="rating-label" style="font-size:.9rem;font-weight:700;color:var(--text-secondary);min-height:22px;transition:all .2s">
+                            Toca las estrellas para calificar
+                        </div>
+
+                        <!-- Emojis de experiencia -->
+                        <div id="rating-emojis" style="display:none;margin-top:8px">
+                            <div id="emoji-display" style="font-size:2rem;transition:all .3s">😐</div>
+                        </div>
+
+                        <!-- Input oculto del form original -->
+                        {{ form.puntuacion(id="puntuacion_hidden", class="d-none") }}
+                    </div>
+
+                    <!-- ─── Etiquetas de aspectos (opcional pero visual) ─── -->
+                    <div class="mb-4">
+                        <div style="font-size:.8rem;color:var(--text-secondary);font-weight:600;margin-bottom:10px">
+                            ¿Qué destacas? <span style="font-weight:400;opacity:.7">(opcional)</span>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:7px" id="tags-container">
+                            {% set tags = ['Puntual','Ruta segura','Buen conductor','Amigable','Música agradable','Silencioso','Cómodo','Rápido'] %}
+                            {% for tag in tags %}
+                            <button type="button" class="tag-btn"
+                                    onclick="toggleTag(this, '{{ tag }}')"
+                                    style="border:1.5px solid var(--border);border-radius:20px;padding:5px 14px;font-size:.78rem;background:var(--bg-main);color:var(--text-secondary);cursor:pointer;transition:all .18s">
+                                {{ tag }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" id="tags_selected" name="tags_selected">
+                    </div>
+
+                    <!-- ─── Comentario libre ─── -->
+                    <div class="form-group mb-4">
+                        <label class="form-label-uride">
+                            <i class="fas fa-comment-alt me-1" style="color:var(--accent)"></i>
+                            Tu reseña <span style="font-weight:400;color:var(--text-secondary);font-size:.8rem">(opcional)</span>
+                        </label>
+                        {{ form.comentario(
+                            class="form-control-uride",
+                            rows=3,
+                            id="comentario",
+                            placeholder="Comparte tu experiencia: ¿Cómo fue el viaje? ¿Lo recomendarías?",
+                            maxlength=300
+                        ) }}
+                        <div style="text-align:right;font-size:.72rem;color:var(--text-secondary);margin-top:4px">
+                            <span id="char-count">0</span>/300 caracteres
+                        </div>
+                    </div>
+
+                    <!-- ─── Botones de acción ─── -->
+                    <div class="d-flex gap-3">
+                        <button type="submit" id="btn-enviar" class="btn-uride btn-primary-uride btn-lg-uride flex-fill"
+                                disabled style="opacity:.5;cursor:not-allowed;transition:all .3s">
+                            <i class="fas fa-paper-plane me-2"></i>Enviar Calificación
+                        </button>
+                        <a href="{{ url_for('viajes.mis_viajes') }}" class="btn-uride btn-ghost btn-lg-uride">
+                            Omitir
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
+
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.star-btn:hover { transform: scale(1.25); }
+.star-btn.activa { color: var(--accent, #c9a227) !important; text-shadow: 0 0 8px rgba(201,162,39,.4); }
+.star-btn.hover-activa { color: #f59e0b !important; }
+.tag-btn.seleccionado {
+    background: rgba(201,162,39,.12) !important;
+    color: var(--accent, #c9a227) !important;
+    border-color: var(--accent, #c9a227) !important;
+    font-weight: 600;
+}
+</style>
+<script>
+(function() {
+    const ETIQUETAS = {
+        1: ['Muy tardío','Ruta peligrosa','Muy incómodo','No recomendaría'],
+        2: ['Tardío','Podría mejorar','Regular'],
+        3: ['Correcto','Cumplió lo prometido'],
+        4: ['Puntual','Buen viaje','Recomendable'],
+        5: ['Excelente','Muy puntual','Súper seguro','¡Lo recomiendo!']
+    };
+    const EMOJIS   = {1:'😠',2:'😞',3:'😐',4:'😊',5:'🤩'};
+    const LABELS   = {
+        1:'Muy malo — no lo recomendaría',
+        2:'Malo — mejorable',
+        3:'Regular — cumplió lo básico',
+        4:'Bueno — buen viaje',
+        5:'¡Excelente! — 100% recomendado'
+    };
+    const COLORES  = {1:'#ef4444',2:'#f97316',3:'#eab308',4:'#22c55e',5:'#c9a227'};
+
+    let puntuacionActual = 0;
+    let tagsActivos = [];
+
+    window.seleccionarEstrella = function(valor) {
+        puntuacionActual = valor;
+        // Actualizar select oculto
+        const sel = document.getElementById('puntuacion_hidden');
+        for (let i = 0; i < sel.options.length; i++) {
+            if (parseInt(sel.options[i].value) === valor) {
+                sel.selectedIndex = i;
+                break;
+            }
+        }
+        // Colorear estrellas
+        document.querySelectorAll('.star-btn').forEach(btn => {
+            const v = parseInt(btn.getAttribute('data-value'));
+            if (v <= valor) {
+                btn.classList.add('activa');
+                btn.style.color = COLORES[valor];
+            } else {
+                btn.classList.remove('activa');
+                btn.style.color = '#d1d5db';
+            }
+            btn.classList.remove('hover-activa');
+        });
+        // Label y emoji
+        document.getElementById('rating-label').textContent = LABELS[valor];
+        document.getElementById('rating-label').style.color  = COLORES[valor];
+        document.getElementById('rating-emojis').style.display = 'block';
+        document.getElementById('emoji-display').textContent  = EMOJIS[valor];
+        // Habilitar botón
+        const btn = document.getElementById('btn-enviar');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor  = 'pointer';
+    };
+
+    window.toggleTag = function(btn, tag) {
+        btn.classList.toggle('seleccionado');
+        if (btn.classList.contains('seleccionado')) {
+            tagsActivos.push(tag);
+        } else {
+            tagsActivos = tagsActivos.filter(t => t !== tag);
+        }
+        document.getElementById('tags_selected').value = tagsActivos.join(', ');
+        // Agregar tag al comentario si no está ya
+        const coment = document.getElementById('comentario');
+        if (btn.classList.contains('seleccionado') && !coment.value.includes(tag)) {
+            coment.value = (coment.value ? coment.value + ' · ' : '') + tag;
+            actualizarContador();
+        }
+    };
+
+    // Hover de estrellas
+    document.querySelectorAll('.star-btn').forEach(btn => {
+        const v = parseInt(btn.getAttribute('data-value'));
+        btn.addEventListener('mouseenter', () => {
+            document.querySelectorAll('.star-btn').forEach(b => {
+                const bv = parseInt(b.getAttribute('data-value'));
+                if (bv <= v) b.classList.add('hover-activa');
+                else         b.classList.remove('hover-activa');
+            });
+        });
+        btn.addEventListener('mouseleave', () => {
+            document.querySelectorAll('.star-btn').forEach(b => {
+                b.classList.remove('hover-activa');
+                const bv = parseInt(b.getAttribute('data-value'));
+                b.style.color = bv <= puntuacionActual ? (COLORES[puntuacionActual]||'#c9a227') : '#d1d5db';
+            });
+        });
+    });
+
+    // Contador de caracteres
+    function actualizarContador() {
+        const len = document.getElementById('comentario').value.length;
+        document.getElementById('char-count').textContent = len;
+    }
+    document.getElementById('comentario').addEventListener('input', actualizarContador);
+
+    // Rellenar con errores de validación si los hay (valor previo en select)
+    const selEl = document.getElementById('puntuacion_hidden');
+    if (selEl && selEl.value && parseInt(selEl.value) > 0) {
+        seleccionarEstrella(parseInt(selEl.value));
+    }
+})();
+</script>
 {% endblock %}

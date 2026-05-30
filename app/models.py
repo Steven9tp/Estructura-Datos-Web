@@ -162,6 +162,9 @@ class Viaje(db.Model):
                 name='estado_viaje'),
         default='abierto', index=True
     )
+    # Modo salida inmediata y tiempo de espera
+    inicio_inmediato = db.Column(db.Boolean, default=False, nullable=False)
+    limite_espera_minutos = db.Column(db.Integer, nullable=True)  # None = sin límite
     created_at = db.Column(db.DateTime, default=_utcnow)
 
     solicitudes = db.relationship(
@@ -194,6 +197,19 @@ class Viaje(db.Model):
         self.estado = 'cancelado'
         for s in self.solicitudes.filter_by(estado='pendiente').all():
             s.estado = 'cancelada'
+
+    def iniciar_viaje(self):
+        """Marca el viaje como en_curso (conductor decide partir).
+        Valido desde estado 'abierto' o 'completo'.
+        NO hace commit — el caller debe hacerlo.
+        """
+        if self.estado in ('abierto', 'completo'):
+            self.estado = 'en_curso'
+            # Rechazar solicitudes pendientes restantes al iniciar
+            for s in self.solicitudes.filter_by(estado='pendiente').all():
+                s.estado = 'cancelada'
+            return True
+        return False
 
     def finalizar_viaje(self):
         """Marca el viaje como finalizado si esta en un estado valido.

@@ -18,7 +18,10 @@ def upgrade():
                 "ALTER TABLE viajes ADD COLUMN IF NOT EXISTS origen_lat FLOAT NULL;",
                 "ALTER TABLE viajes ADD COLUMN IF NOT EXISTS origen_lng FLOAT NULL;",
                 "ALTER TABLE viajes ADD COLUMN IF NOT EXISTS destino_lat FLOAT NULL;",
-                "ALTER TABLE viajes ADD COLUMN IF NOT EXISTS destino_lng FLOAT NULL;"
+                "ALTER TABLE viajes ADD COLUMN IF NOT EXISTS destino_lng FLOAT NULL;",
+                # Nuevos campos: modo de salida inmediata y límite de espera
+                "ALTER TABLE viajes ADD COLUMN IF NOT EXISTS inicio_inmediato TINYINT(1) NOT NULL DEFAULT 0;",
+                "ALTER TABLE viajes ADD COLUMN IF NOT EXISTS limite_espera_minutos INT NULL;"
             ]
             
             for cmd in comandos:

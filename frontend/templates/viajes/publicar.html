@@ -33,12 +33,75 @@
                             </div>
                         </div>
                         <div class="col-12">
+                            <!-- MODO DE SALIDA: Nuevo bloque -->
+                            <div id="bloque-modo-salida" style="background:linear-gradient(135deg,rgba(201,162,39,.08),rgba(201,162,39,.03));border:1.5px solid rgba(201,162,39,.35);border-radius:14px;padding:18px 20px;margin-bottom:4px">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                                    <div>
+                                        <div class="fw-bold" style="font-size:.9rem;color:var(--text-primary)">
+                                            <i class="fas fa-bolt me-2" style="color:var(--accent)"></i>¿Cuándo sale el viaje?
+                                        </div>
+                                        <div style="font-size:.78rem;color:var(--text-secondary);margin-top:3px">
+                                            Puedes publicar para ahora mismo o programarlo para más tarde
+                                        </div>
+                                    </div>
+                                    <!-- Toggle salir ahora -->
+                                    <label class="d-flex align-items-center gap-2" style="cursor:pointer;user-select:none">
+                                        <div class="toggle-switch" id="toggle-wrap">
+                                            {{ form.inicio_inmediato(id="inicio_inmediato", class="toggle-input d-none") }}
+                                            <div class="toggle-track" id="toggle-track"
+                                                 style="width:52px;height:28px;border-radius:14px;background:#d1d5db;position:relative;transition:background .25s;cursor:pointer"
+                                                 onclick="toggleInmediato()">
+                                                <div id="toggle-thumb"
+                                                     style="width:22px;height:22px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.2)"></div>
+                                            </div>
+                                        </div>
+                                        <span id="toggle-label" class="fw-bold" style="font-size:.85rem;color:var(--text-secondary)">Programado</span>
+                                    </label>
+                                </div>
+
+                                <!-- Límite de espera (visible solo cuando es inmediato) -->
+                                <div id="bloque-espera" style="display:none;margin-top:16px;padding-top:14px;border-top:1px solid rgba(201,162,39,.2)">
+                                    <label class="form-label-uride" style="font-size:.82rem">
+                                        <i class="fas fa-hourglass-half me-1" style="color:var(--accent)"></i>
+                                        Límite de espera antes de partir
+                                    </label>
+                                    <div class="d-flex gap-2 flex-wrap" id="btns-espera">
+                                        {% for mins, label in [(0,'Sin límite'),(5,'5 min'),(10,'10 min'),(15,'15 min'),(20,'20 min'),(30,'30 min')] %}
+                                        <button type="button"
+                                                class="btn-espera btn btn-sm"
+                                                data-mins="{{ mins }}"
+                                                style="border:1.5px solid var(--border);border-radius:20px;font-size:.78rem;padding:4px 14px;background:var(--bg-main);color:var(--text-secondary);transition:all .2s"
+                                                onclick="seleccionarEspera({{ mins }}, this)">
+                                            {% if mins == 0 %}<i class="fas fa-infinity me-1"></i>{% endif %}{{ label }}
+                                        </button>
+                                        {% endfor %}
+                                    </div>
+                                    {{ form.limite_espera_minutos(id="limite_espera_minutos", type="hidden") }}
+                                    <p id="espera-aviso" style="font-size:.75rem;color:var(--text-secondary);margin-top:8px;margin-bottom:0">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        El viaje partirá cuando se llenen los cupos <strong>o</strong> al cumplirse el tiempo de espera.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campo fecha/hora: solo visible en modo programado -->
+                        <div class="col-12" id="bloque-fecha">
                             <div class="form-group">
                                 <label class="form-label-uride"><i class="fas fa-clock me-1" style="color:var(--accent)"></i>Fecha y Hora de Salida</label>
                                 {{ form.fecha_hora(class="form-control-uride", type="datetime-local", id="fecha_hora") }}
                                 {% for e in form.fecha_hora.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
                             </div>
                         </div>
+
+                        <!-- Banner "saliendo ahora" (visible solo en modo inmediato) -->
+                        <div class="col-12" id="bloque-ahora" style="display:none">
+                            <div style="background:rgba(34,197,94,.1);border:1.5px solid rgba(34,197,94,.3);border-radius:10px;padding:12px 16px;font-size:.85rem;color:#166534;display:flex;align-items:center;gap:10px">
+                                <i class="fas fa-circle" style="color:#22c55e;font-size:.6rem;animation:pulse-dot 1s infinite"></i>
+                                <strong>El viaje saldrá ahora mismo</strong> — la hora de salida se registra automáticamente al publicar.
+                            </div>
+                        </div>
+
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label class="form-label-uride"><i class="fas fa-users me-1" style="color:var(--accent)"></i>Cupos disponibles</label>
@@ -97,7 +160,78 @@
 </div>
 {% endblock %}
 {% block scripts %}
+<style>
+@keyframes pulse-dot {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:.5; transform:scale(1.4); }
+}
+</style>
 <script>
+// ── Toggle "Salir ahora" ──────────────────────────────────────────────────
+let _inmediato = false;
+let _esperaSeleccionada = null;
+
+function toggleInmediato() {
+    _inmediato = !_inmediato;
+    const chk   = document.getElementById('inicio_inmediato');
+    const track = document.getElementById('toggle-track');
+    const thumb = document.getElementById('toggle-thumb');
+    const label = document.getElementById('toggle-label');
+    const bloqFecha = document.getElementById('bloque-fecha');
+    const bloqAhora = document.getElementById('bloque-ahora');
+    const bloqEspera= document.getElementById('bloque-espera');
+
+    chk.checked = _inmediato;
+    if (_inmediato) {
+        track.style.background = 'var(--accent, #c9a227)';
+        thumb.style.transform  = 'translateX(24px)';
+        label.textContent      = '¡Salir ahora!';
+        label.style.color      = 'var(--accent, #c9a227)';
+        bloqFecha.style.display  = 'none';
+        bloqAhora.style.display  = 'block';
+        bloqEspera.style.display = 'block';
+        // Limpiar fecha y hacerla no requerida en cliente
+        document.getElementById('fecha_hora').removeAttribute('required');
+    } else {
+        track.style.background = '#d1d5db';
+        thumb.style.transform  = 'translateX(0)';
+        label.textContent      = 'Programado';
+        label.style.color      = 'var(--text-secondary)';
+        bloqFecha.style.display  = 'block';
+        bloqAhora.style.display  = 'none';
+        bloqEspera.style.display = 'none';
+    }
+}
+
+function seleccionarEspera(mins, btn) {
+    _esperaSeleccionada = mins === 0 ? null : mins;
+    document.getElementById('limite_espera_minutos').value = mins === 0 ? '' : mins;
+    // Resaltar botón activo
+    document.querySelectorAll('.btn-espera').forEach(b => {
+        b.style.background  = 'var(--bg-main)';
+        b.style.color       = 'var(--text-secondary)';
+        b.style.borderColor = 'var(--border)';
+        b.style.fontWeight  = 'normal';
+    });
+    btn.style.background  = 'var(--accent, #c9a227)';
+    btn.style.color       = '#111';
+    btn.style.borderColor = 'var(--accent, #c9a227)';
+    btn.style.fontWeight  = '700';
+
+    const aviso = document.getElementById('espera-aviso');
+    if (mins === 0) {
+        aviso.innerHTML = '<i class="fas fa-infinity me-1"></i>Sin límite de tiempo — el viaje parte cuando el conductor lo decida.';
+    } else {
+        aviso.innerHTML = `<i class="fas fa-clock me-1"></i>El viaje partirá en <strong>${mins} minutos</strong> o antes si se llenan todos los cupos.`;
+    }
+}
+
+// Activar botón "Sin límite" por defecto al cargar
+window.addEventListener('load', function() {
+    const btnSinLimite = document.querySelector('.btn-espera[data-mins="0"]');
+    if (btnSinLimite) seleccionarEspera(0, btnSinLimite);
+});
+
 let map = null;
 let markerOrigen = null;
 let markerDestino = null;

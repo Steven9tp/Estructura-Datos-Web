@@ -28,14 +28,23 @@ def buscar_viajes():
 def publicar_viaje():
     form = ViajeForm()
     if form.validate_on_submit():
+        from datetime import datetime as dt
+        # Si es inmediato, usar hora actual; si no, usar la fecha del form
+        if form.inicio_inmediato.data:
+            fecha_salida = dt.now()
+        else:
+            fecha_salida = form.fecha_hora.data
+
         viaje = Viaje(
             conductor_id=current_user.id,
             origen_zona=form.origen_zona.data,
             destino_zona=form.destino_zona.data,
-            fecha_hora=form.fecha_hora.data,
+            fecha_hora=fecha_salida,
             cupos_totales=form.cupos_totales.data,
             cupos_disponibles=form.cupos_totales.data,
-            notas_reglas=form.notas_reglas.data
+            notas_reglas=form.notas_reglas.data,
+            inicio_inmediato=form.inicio_inmediato.data,
+            limite_espera_minutos=form.limite_espera_minutos.data or None,
         )
         if form.origen_lat.data and form.origen_lng.data:
             viaje.origen_lat = float(form.origen_lat.data)
@@ -49,12 +58,17 @@ def publicar_viaje():
         EventoTrazabilidad.registrar(
             accion='viaje_publicado',
             usuario_id=current_user.id,
-            detalles={'origen': form.origen_zona.data, 'destino': form.destino_zona.data,
-                      'fecha': str(form.fecha_hora.data)}
+            detalles={
+                'origen': form.origen_zona.data,
+                'destino': form.destino_zona.data,
+                'fecha': str(fecha_salida),
+                'inmediato': form.inicio_inmediato.data,
+                'limite_espera': form.limite_espera_minutos.data,
+            }
         )
         db.session.commit()
         flash('¡Viaje publicado con éxito!', 'success')
-        return redirect(url_for('viajes.mis_viajes'))
+        return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje.id))
     return render_template('viajes/publicar.html', title='Publicar Viaje', form=form)
 
 
@@ -82,24 +96,53 @@ def detalle_viaje(viaje_id):
     # Obtener mensajes del viaje
     mensajes = Mensaje.query.filter_by(viaje_id=viaje_id).order_by(Mensaje.timestamp.asc()).all()
     
+    # Verificar qué calificaciones ya dio el usuario en este viaje
+    from app.models import Calificacion
+    califs_viaje = Calificacion.query.filter_by(
+        viaje_id=viaje_id, autor_id=current_user.id
+    ).all()
+    calificaciones_dadas = {viaje_id: {c.destinatario_id for c in califs_viaje}}
+
+    # Reglas de seguridad para el modal
+    reglas_seguridad = [
+        'Verifica la identidad del conductor antes de subir',
+        'Comparte tu ubicación con alguien de confianza',
+        'Solo viaja con conductores verificados (@uta.edu.ec)',
+        'Usa el cinturón de seguridad siempre',
+        'Reporta cualquier conducta inapropiada',
+    ]
+
     return render_template('viajes/detalle.html', title='Detalle del Viaje',
                            viaje=viaje, ya_solicito=ya_solicito,
                            solicitudes_aceptadas=solicitudes_aceptadas,
                            solicitudes_pendientes=solicitudes_pendientes,
-                           mensajes=mensajes)
+                           mensajes=mensajes,
+                           calificaciones_dadas=calificaciones_dadas,
+                           reglas_seguridad=reglas_seguridad)
+
 
 
 @bp.route('/mis-viajes')
 @login_required
 def mis_viajes():
+    from app.models import Calificacion
     viajes = Viaje.query.filter_by(
         conductor_id=current_user.id
     ).order_by(Viaje.fecha_hora.desc()).all()
     solicitudes = Solicitud.query.filter_by(
         pasajero_id=current_user.id
     ).order_by(Solicitud.fecha_solicitud.desc()).all()
+
+    # Precalcular qué pares (viaje_id, destinatario_id) ya calificó el usuario
+    # → {viaje_id: set(destinatario_ids calificados)}
+    califs = Calificacion.query.filter_by(autor_id=current_user.id).all()
+    calificaciones_dadas = {}
+    for c in califs:
+        calificaciones_dadas.setdefault(c.viaje_id, set()).add(c.destinatario_id)
+
     return render_template('viajes/mis_viajes.html', title='Mis Viajes',
-                           viajes=viajes, solicitudes=solicitudes)
+                           viajes=viajes, solicitudes=solicitudes,
+                           calificaciones_dadas=calificaciones_dadas)
 
 
 @bp.route('/solicitar/<int:viaje_id>', methods=['POST'])
@@ -216,3 +259,27 @@ def finalizar_viaje(viaje_id):
     else:
         flash('No se pudo finalizar el viaje.', 'danger')
     return redirect(url_for('viajes.mis_viajes'))
+
+
+@bp.route('/iniciar/<int:viaje_id>', methods=['POST'])
+@login_required
+def iniciar_viaje(viaje_id):
+    """Conductor inicia el viaje: estado pasa a 'en_curso'.
+    Se pueden tener los asientos llenos o decidir partir con los que hay.
+    """
+    viaje = db.get_or_404(Viaje, viaje_id)
+    if viaje.conductor_id != current_user.id:
+        flash('Solo el conductor puede iniciar el viaje.', 'danger')
+        return redirect(url_for('viajes.mis_viajes'))
+    if viaje.iniciar_viaje():
+        EventoTrazabilidad.registrar(
+            accion='viaje_iniciado',
+            usuario_id=current_user.id,
+            viaje_id=viaje_id,
+            detalles={'pasajeros_al_iniciar': viaje.cupos_totales - viaje.cupos_disponibles}
+        )
+        db.session.commit()
+        flash('¡El viaje ha comenzado! Buen viaje.', 'success')
+    else:
+        flash('No se puede iniciar el viaje en su estado actual.', 'danger')
+    return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje_id))

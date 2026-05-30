@@ -174,9 +174,16 @@ class ViajeForm(FlaskForm):
         
     destino_lat = StringField('Latitud Destino', validators=[Optional()])
     destino_lng = StringField('Longitud Destino', validators=[Optional()])
+
+    # Modo de salida
+    inicio_inmediato = BooleanField('Publicar para salir ahora mismo', default=False)
+    limite_espera_minutos = IntegerField(
+        'Límite de espera (minutos)',
+        validators=[Optional(), NumberRange(min=1, max=120, message='Entre 1 y 120 minutos')]
+    )
     
-    fecha_hora = DateTimeField('Fecha y hora', format='%Y-%m-%dT%H:%M',
-        validators=[DataRequired(message='Selecciona fecha y hora')])
+    fecha_hora = DateTimeField('Fecha y hora de salida programada', format='%Y-%m-%dT%H:%M',
+        validators=[Optional()])  # Opcional cuando inicio_inmediato=True
     cupos_totales = IntegerField('Cupos disponibles', validators=[
         DataRequired(),
         NumberRange(min=1, max=8, message='Entre 1 y 8 cupos')
@@ -186,9 +193,13 @@ class ViajeForm(FlaskForm):
     submit = SubmitField('Publicar Viaje')
 
     def validate_fecha_hora(self, field):
-        """Valida que la fecha del viaje sea futura."""
-        if field.data and field.data < datetime.now():
-            raise ValidationError('La fecha del viaje debe ser futura')
+        """Valida fecha solo si el viaje NO es inmediato."""
+        es_inmediato = self.inicio_inmediato.data
+        if not es_inmediato:
+            if not field.data:
+                raise ValidationError('Selecciona fecha y hora de salida, o marca \'Salir ahora\'')
+            if field.data < datetime.now():
+                raise ValidationError('La fecha del viaje debe ser futura (o marca \'Salir ahora\')')
 
     def validate_destino_zona(self, field):
         """Valida que origen y destino sean distintos."""

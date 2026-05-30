@@ -7,7 +7,17 @@
 
 {% block content %}
 <!-- Elemento oculto para pasar datos al JS de forma limpia -->
-<div id="viaje-data" data-viaje-id="{{ viaje.id }}"></div>
+<div id="viaje-data"
+     data-viaje-id="{{ viaje.id }}"
+     data-fecha-hora="{{ viaje.fecha_hora.strftime('%Y-%m-%dT%H:%M:%S') }}"
+     data-limite-espera="{{ viaje.limite_espera_minutos or 0 }}"
+     data-estado="{{ viaje.estado }}"
+     data-origen-lat="{{ viaje.origen_lat or '' }}"
+     data-origen-lng="{{ viaje.origen_lng or '' }}"
+     data-destino-lat="{{ viaje.destino_lat or '' }}"
+     data-destino-lng="{{ viaje.destino_lng or '' }}">
+</div>
+
 
 <div class="row g-4">
     <div class="col-lg-4">
@@ -61,6 +71,11 @@
                             <i class="fas {% if ya_solicito.estado == 'aceptada' %}fa-check-circle{% elif ya_solicito.estado == 'pendiente' %}fa-clock{% else %}fa-times-circle{% endif %} me-2"></i>
                             Solicitud: <strong>{{ ya_solicito.estado|upper }}</strong>
                         </div>
+                        {% if viaje.estado == 'en_curso' and ya_solicito.estado == 'aceptada' %}
+                        <div style="background:rgba(34,197,94,.1);border:1.5px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 14px;font-size:.82rem;color:#166534;text-align:center">
+                            <i class="fas fa-car me-2"></i><strong>¡El viaje está en curso!</strong> Buen viaje.
+                        </div>
+                        {% endif %}
                     {% elif viaje.estado == 'abierto' and viaje.cupos_disponibles > 0 %}
                         <!-- RF9: Boton que abre modal de reglas antes de confirmar -->
                         <button type="button" class="btn-uride btn-primary-uride btn-full py-3 fw-bold"
@@ -68,6 +83,10 @@
                             <i class="fas fa-shield-alt me-2"></i> Ver Reglas y Unirme
                         </button>
                         <!-- El formulario real esta dentro del modal -->
+                    {% elif viaje.estado == 'en_curso' %}
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-car me-2"></i>Este viaje ya está <strong>en curso</strong>
+                        </div>
                     {% else %}
                         <div class="alert alert-secondary text-center">No disponible</div>
                     {% endif %}
@@ -76,17 +95,57 @@
                     <div class="alert alert-info text-center small mb-3">
                         <i class="fas fa-user-tie me-2"></i>Eres el conductor
                     </div>
-                    {% if viaje.estado in ('abierto', 'completo', 'en_curso') %}
-                    <form action="{{ url_for('viajes.finalizar_viaje', viaje_id=viaje.id) }}" method="POST">
+
+                    {% if viaje.inicio_inmediato and viaje.estado in ('abierto', 'completo') %}
+                    <!-- Banner de espera con countdown -->
+                    <div id="banner-espera"
+                         style="background:rgba(201,162,39,.1);border:1.5px solid rgba(201,162,39,.4);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:.82rem;color:#92400e">
+                        {% if viaje.limite_espera_minutos %}
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span><i class="fas fa-hourglass-half me-1"></i>Tiempo restante de espera:</span>
+                            <strong id="countdown-espera" style="font-size:1rem;font-variant-numeric:tabular-nums">—</strong>
+                        </div>
+                        <div style="font-size:.74rem;margin-top:4px;opacity:.8">
+                            El viaje parte automáticamente al llegar a 0 o cuando inicies manualmente
+                        </div>
+                        {% else %}
+                        <div><i class="fas fa-infinity me-1"></i><strong>Sin límite de espera</strong> — parte cuando tú lo decidas</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if viaje.estado in ('abierto', 'completo') %}
+                    <!-- Botón INICIAR VIAJE -->
+                    <form action="{{ url_for('viajes.iniciar_viaje', viaje_id=viaje.id) }}" method="POST"
+                          onsubmit="return confirm('¿Confirmas el inicio del viaje con {{ viaje.cupos_totales - viaje.cupos_disponibles }} pasajero(s) a bordo?')">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="btn-uride btn-full bg-success text-white py-2 mb-2">
-                             Finalizar Viaje
+                        <button type="submit" class="btn-uride btn-full fw-bold py-2 mb-2"
+                                style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none">
+                            <i class="fas fa-play-circle me-2"></i>
+                            Iniciar Viaje
+                            {% if viaje.cupos_disponibles > 0 %}
+                            <small style="opacity:.85;font-weight:400"> ({{ viaje.cupos_totales - viaje.cupos_disponibles }}/{{ viaje.cupos_totales }} pasajeros)</small>
+                            {% else %}
+                            <small style="opacity:.85;font-weight:400"> ¡Cupos llenos!</small>
+                            {% endif %}
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    {% if viaje.estado in ('abierto', 'completo', 'en_curso') %}
+                    <form action="{{ url_for('viajes.finalizar_viaje', viaje_id=viaje.id) }}" method="POST"
+                          onsubmit="return confirm('¿Marcar el viaje como finalizado?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-uride btn-full py-2 mb-2"
+                                style="background:rgba(99,102,241,.1);color:#4338ca;border:1.5px solid rgba(99,102,241,.3)">
+                            <i class="fas fa-flag-checkered me-2"></i>Finalizar Viaje
                         </button>
                     </form>
                     {% endif %}
                 {% endif %}
             </div>
         </div>
+
 
         <!-- ═══ SOLICITUDES PENDIENTES ═══ -->
         {% if viaje.conductor_id == current_user.id and solicitudes_pendientes %}
@@ -279,27 +338,306 @@
 {% endif %}
 {% endblock %}
 
+{# ── Modal de calificación — aparece al inicio del viaje y se repite según distancia ── #}
+{% if viaje.estado in ('en_curso', 'finalizado')
+      and ya_solicito and ya_solicito.estado == 'aceptada'
+      and viaje.conductor_id != current_user.id %}
+{% set ya_califique_conductor = viaje.conductor_id in (calificaciones_dadas or {}).get(viaje.id, set()) %}
+{% if not ya_califique_conductor %}
+<div class="modal fade" id="modalCalificar" tabindex="-1"
+     data-bs-backdrop="static" data-bs-keyboard="false"
+     data-viaje-id="{{ viaje.id }}"
+     data-estado="{{ viaje.estado }}"
+     data-calificar-url="{{ url_for('seguridad.calificar', viaje_id=viaje.id, destinatario_id=viaje.conductor_id) }}">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:18px;border:none;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+
+            <!-- Header dinámico según estado -->
+            <div id="modal-header-bg"
+                 style="background:linear-gradient(135deg,#1f2937,#111827);padding:26px;text-align:center;position:relative;overflow:hidden">
+                <!-- Círculo decorativo -->
+                <div style="position:absolute;top:-24px;right:-24px;width:90px;height:90px;border-radius:50%;background:rgba(201,162,39,.15)"></div>
+                <div style="position:absolute;bottom:-16px;left:-16px;width:60px;height:60px;border-radius:50%;background:rgba(201,162,39,.08)"></div>
+
+                <div id="modal-emoji" style="font-size:2.6rem;margin-bottom:8px">🚗</div>
+                <h5 id="modal-titulo" class="fw-bold text-white mb-1">
+                    {% if viaje.estado == 'en_curso' %}¡Ya estás en camino!{% else %}¡Viaje completado!{% endif %}
+                </h5>
+                <p id="modal-subtitulo" style="color:rgba(255,255,255,.6);font-size:.82rem;margin:0">
+                    ¿Cómo va tu viaje con
+                    <strong style="color:var(--accent)">{{ viaje.conductor.nombre.split()[0] }}</strong>?
+                </p>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body" style="padding:24px">
+
+                <!-- Barra de tiempo estimado (solo si en_curso) -->
+                {% if viaje.estado == 'en_curso' %}
+                <div id="bloque-tiempo-estimado"
+                     style="background:var(--bg-main);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:.8rem;color:var(--text-secondary);display:flex;align-items:center;justify-content:space-between;gap:10px">
+                    <div><i class="fas fa-road me-1" style="color:var(--accent)"></i>Tiempo estimado de llegada:</div>
+                    <strong id="tiempo-estimado-label" style="color:var(--text-primary)">Calculando…</strong>
+                </div>
+                {% endif %}
+
+                <p style="font-size:.82rem;color:var(--text-secondary);text-align:center;margin-bottom:16px">
+                    Tu opinión ayuda a la comunidad a elegir conductores seguros
+                </p>
+
+                <!-- Estrellas grandes interactivas -->
+                <div style="display:flex;justify-content:center;gap:10px;margin-bottom:8px" id="modal-stars">
+                    {% for i in range(1,6) %}
+                    <a href="{{ url_for('seguridad.calificar', viaje_id=viaje.id, destinatario_id=viaje.conductor_id) }}"
+                       id="mstar-{{ i }}"
+                       style="font-size:2.4rem;color:#d1d5db;text-decoration:none;transition:transform .18s,color .18s;line-height:1"
+                       onmouseover="resaltarModal({{ i }})"
+                       onmouseout="resetModal()"
+                       title="{{ i }} estrella{% if i > 1 %}s{% endif %}">
+                        ★
+                    </a>
+                    {% endfor %}
+                </div>
+                <p style="text-align:center;font-size:.75rem;color:var(--text-secondary)">
+                    Toca una estrella para ir a la calificación completa
+                </p>
+
+                <!-- Cuenta regresiva para "re-aparecer" si cierra -->
+                <div id="bloque-recordatorio" style="display:none;text-align:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+                    <span style="font-size:.75rem;color:var(--text-secondary)">
+                        <i class="fas fa-clock me-1"></i>Si cierras, te recordaremos en
+                        <strong id="label-recordatorio" style="color:var(--accent)">…</strong>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer" style="border:none;padding:14px 24px;background:var(--bg-main);gap:10px">
+                <a href="{{ url_for('seguridad.calificar', viaje_id=viaje.id, destinatario_id=viaje.conductor_id) }}"
+                   class="btn-uride btn-primary-uride flex-fill text-center fw-bold">
+                    <i class="fas fa-star me-2"></i>Calificar ahora
+                </a>
+                <button type="button" id="btn-mas-tarde" class="btn-uride btn-ghost"
+                        data-bs-dismiss="modal" style="font-size:.82rem">
+                    Más tarde
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+
 {% block scripts %}
 <script>
-    (function() {
-        document.addEventListener('DOMContentLoaded', function () {
-            // Cargar Mapa
-            const dataEl = document.getElementById('viaje-data');
-            if (dataEl) {
-                const viajeId = dataEl.getAttribute('data-viaje-id');
-                URideMapa.cargarViaje(viajeId, 'mapa-viaje', null);
+// ══════════════════════════════════════════════════════════════════════════
+// U-Ride — Sistema de calificación con reaparición por tiempo estimado
+// ══════════════════════════════════════════════════════════════════════════
+(function () {
+    // ── Utilidades ───────────────────────────────────────────────────────────
+    /** Distancia en km entre dos coordenadas (Haversine) */
+    function haversineKm(lat1, lng1, lat2, lng2) {
+        const R  = 6371;
+        const dL = (lat2 - lat1) * Math.PI / 180;
+        const dG = (lng2 - lng1) * Math.PI / 180;
+        const a  = Math.sin(dL/2)**2 +
+                   Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) *
+                   Math.sin(dG/2)**2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    /** Minutos estimados de viaje urbano (30 km/h) con mínimo de 5 min */
+    function estimarMinutos(km) {
+        return Math.max(5, Math.round(km / 30 * 60));
+    }
+
+    /** Clave de sessionStorage para este viaje */
+    function storageKey(viajeId) {
+        return 'uride_cal_dismiss_' + viajeId;
+    }
+
+    // ── Leer datos del DOM ───────────────────────────────────────────────────
+    const viajeDataEl = document.getElementById('viaje-data');
+    const modalEl     = document.getElementById('modalCalificar');
+
+    // ── Lógica del modal de calificación ────────────────────────────────────
+    if (modalEl && viajeDataEl && typeof bootstrap !== 'undefined') {
+        const viajeId  = viajeDataEl.getAttribute('data-viaje-id');
+        const estado   = modalEl.getAttribute('data-estado');
+        const orLat    = parseFloat(viajeDataEl.getAttribute('data-origen-lat')  || '0');
+        const orLng    = parseFloat(viajeDataEl.getAttribute('data-origen-lng')  || '0');
+        const dsLat    = parseFloat(viajeDataEl.getAttribute('data-destino-lat') || '0');
+        const dsLng    = parseFloat(viajeDataEl.getAttribute('data-destino-lng') || '0');
+
+        // Calcular distancia y tiempo estimado
+        let estimadoMin = 15; // fallback si no hay coords
+        if (orLat && orLng && dsLat && dsLng) {
+            const km = haversineKm(orLat, orLng, dsLat, dsLng);
+            estimadoMin = estimarMinutos(km);
+        }
+
+        // Mostrar tiempo en el bloque informativo dentro del modal
+        const tiempoLabel = document.getElementById('tiempo-estimado-label');
+        if (tiempoLabel) {
+            tiempoLabel.textContent = estimadoMin < 60
+                ? `~${estimadoMin} minutos`
+                : `~${Math.round(estimadoMin/60*10)/10} horas`;
+        }
+
+        // Mostrar cuándo reaparecerá si cierran
+        const labelRecord = document.getElementById('label-recordatorio');
+        const bloqRecord  = document.getElementById('bloque-recordatorio');
+        if (labelRecord && bloqRecord && estado === 'en_curso') {
+            bloqRecord.style.display  = 'block';
+            labelRecord.textContent   = estimadoMin < 60
+                ? `${estimadoMin} minutos`
+                : `${Math.round(estimadoMin/60*10)/10} horas`;
+        }
+
+        // ── Función principal: mostrar el modal ──────────────────────────────
+        function mostrarModal() {
+            // Actualizar textos según estado actual
+            const emoji  = document.getElementById('modal-emoji');
+            const titulo = document.getElementById('modal-titulo');
+            const sub    = document.getElementById('modal-subtitulo');
+
+            if (estado === 'finalizado') {
+                if (emoji)  emoji.textContent  = '🎉';
+                if (titulo) titulo.textContent  = '¡Viaje completado!';
+                if (sub)    sub.innerHTML       = sub.innerHTML.replace('¿Cómo va tu viaje', '¿Cómo fue tu viaje');
             }
 
-            // Aplicar anchos de progreso dinámicos para evitar errores de CSS
-            document.querySelectorAll('.js-dynamic-width').forEach(el => {
-                const width = el.getAttribute('data-width');
-                if (width) el.style.width = width;
-            });
+            const instancia = bootstrap.Modal.getOrCreateInstance(modalEl);
+            instancia.show();
+        }
 
-            // Scroll Chat
-            const chat = document.getElementById('chat-container');
-            if (chat) chat.scrollTop = chat.scrollHeight;
+        // ── Revisar sessionStorage: ¿ya lo cerró antes? ─────────────────────
+        function debeReaparecer() {
+            const raw = sessionStorage.getItem(storageKey(viajeId));
+            if (!raw) return true; // nunca lo cerró → mostrar
+
+            try {
+                const { cerradoEn, reaparecerEn } = JSON.parse(raw);
+                const ahora = Date.now();
+                // Si ya pasó el tiempo estimado → volver a mostrar
+                return ahora >= reaparecerEn;
+            } catch { return true; }
+        }
+
+        // ── Al cerrar "Más tarde": registrar en sessionStorage ───────────────
+        const btnMasTarde = document.getElementById('btn-mas-tarde');
+        if (btnMasTarde) {
+            btnMasTarde.addEventListener('click', function() {
+                const ahora = Date.now();
+                sessionStorage.setItem(storageKey(viajeId), JSON.stringify({
+                    cerradoEn:   ahora,
+                    reaparecerEn: ahora + estimadoMin * 60 * 1000
+                }));
+
+                // Programar reaparición automática en esta misma pestaña
+                setTimeout(function() {
+                    // Volver a verificar que no haya calificado mientras tanto
+                    mostrarModal();
+                }, estimadoMin * 60 * 1000);
+            });
+        }
+
+        // ── Mostrar el modal al cargar (si corresponde) ───────────────────────
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                if (debeReaparecer()) {
+                    mostrarModal();
+
+                    // Si quedaba un timer activo, programar reaparición futura
+                    const raw = sessionStorage.getItem(storageKey(viajeId));
+                    if (raw) {
+                        try {
+                            const { reaparecerEn } = JSON.parse(raw);
+                            const restante = reaparecerEn - Date.now();
+                            if (restante > 0) {
+                                setTimeout(mostrarModal, restante);
+                            }
+                        } catch {}
+                    }
+                } else {
+                    // No toca todavía, pero programar para cuando llegue el momento
+                    const raw = sessionStorage.getItem(storageKey(viajeId));
+                    try {
+                        const { reaparecerEn } = JSON.parse(raw);
+                        const restante = reaparecerEn - Date.now();
+                        if (restante > 0) {
+                            setTimeout(mostrarModal, restante);
+                        }
+                    } catch {}
+                }
+            }, 900); // pequeño delay para que la página cargue visualmente
         });
-    })();
+    }
+
+    // ── Resto del DOM init ───────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function () {
+        // Cargar Mapa
+        if (viajeDataEl) {
+            const viajeId = viajeDataEl.getAttribute('data-viaje-id');
+            URideMapa.cargarViaje(viajeId, 'mapa-viaje', null);
+        }
+
+        // Anchos dinámicos de barra de progreso
+        document.querySelectorAll('.js-dynamic-width').forEach(el => {
+            const w = el.getAttribute('data-width');
+            if (w) el.style.width = w;
+        });
+
+        // Scroll automático al final del chat
+        const chat = document.getElementById('chat-container');
+        if (chat) chat.scrollTop = chat.scrollHeight;
+
+        // ── Countdown de espera de cupos (para conductor) ────────────────────
+        const countdownEl = document.getElementById('countdown-espera');
+        if (countdownEl && viajeDataEl) {
+            const fechaHoraStr = viajeDataEl.getAttribute('data-fecha-hora');
+            const limiteMin    = parseInt(viajeDataEl.getAttribute('data-limite-espera') || '0', 10);
+
+            if (fechaHoraStr && limiteMin > 0) {
+                const fechaSalida = new Date(fechaHoraStr);
+                const deadline    = new Date(fechaSalida.getTime() + limiteMin * 60 * 1000);
+
+                function actualizarCountdown() {
+                    const ahora   = new Date();
+                    const diff_ms = deadline - ahora;
+                    if (diff_ms <= 0) {
+                        countdownEl.textContent = '⏰ ¡Tiempo agotado!';
+                        countdownEl.style.color = '#ef4444';
+                        return;
+                    }
+                    const min = Math.floor(diff_ms / 60000);
+                    const seg = Math.floor((diff_ms % 60000) / 1000);
+                    countdownEl.textContent = `${String(min).padStart(2,'0')}:${String(seg).padStart(2,'0')}`;
+                    setTimeout(actualizarCountdown, 1000);
+                }
+                actualizarCountdown();
+            }
+        }
+    });
+})();
+
+// ── Funciones globales para hover de estrellas del modal ─────────────────
+function resaltarModal(nivel) {
+    for (let i = 1; i <= 5; i++) {
+        const s = document.getElementById('mstar-' + i);
+        if (!s) continue;
+        s.style.color     = i <= nivel ? 'var(--accent, #c9a227)' : '#d1d5db';
+        s.style.transform = i <= nivel ? 'scale(1.25)' : 'scale(1)';
+    }
+}
+function resetModal() {
+    for (let i = 1; i <= 5; i++) {
+        const s = document.getElementById('mstar-' + i);
+        if (!s) continue;
+        s.style.color     = '#d1d5db';
+        s.style.transform = 'scale(1)';
+    }
+}
 </script>
 {% endblock %}
