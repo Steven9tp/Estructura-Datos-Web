@@ -7,20 +7,26 @@
     <div class="col-lg-4">
         <div class="card-uride text-center" style="padding:32px">
             <!-- Avatar con inicial o Foto -->
-            <div style="position:relative;display:inline-block;margin-bottom:16px;width:100px;height:100px;border-radius:50%;overflow:hidden;box-shadow:0 4px 20px rgba(220,38,38,.3)">
+            <div
+                style="position:relative;display:inline-block;margin-bottom:16px;width:100px;height:100px;border-radius:50%;overflow:hidden;box-shadow:0 4px 20px rgba(220,38,38,.3)">
                 {% if current_user.foto_url %}
-                    <img src="{{ url_for('static', filename=current_user.foto_url) }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'; document.getElementById('fallback-avatar-view').style.display='flex';" alt="Avatar">
-                    <div id="fallback-avatar-view" style="width:100%;height:100%;background:var(--accent);color:#fff;display:none;align-items:center;justify-content:center;font-size:2.5rem;font-weight:800;margin:0 auto;">
-                        {{ current_user.nombre[0]|upper }}
-                    </div>
+                <img src="{{ url_for('static', filename=current_user.foto_url) }}"
+                    style="width:100%;height:100%;object-fit:cover;"
+                    onerror="this.style.display='none'; document.getElementById('fallback-avatar-view').style.display='flex';"
+                    alt="Avatar">
+                <div id="fallback-avatar-view"
+                    style="width:100%;height:100%;background:var(--accent);color:#fff;display:none;align-items:center;justify-content:center;font-size:2.5rem;font-weight:800;margin:0 auto;">
+                    {{ current_user.nombre[0]|upper }}
+                </div>
                 {% else %}
-                <div style="width:100%;height:100%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:800;margin:0 auto;">
+                <div
+                    style="width:100%;height:100%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:800;margin:0 auto;">
                     {{ current_user.nombre[0]|upper }}
                 </div>
                 {% endif %}
                 <a href="{{ url_for('main.editar_perfil') }}"
-                   style="position:absolute;bottom:0;right:calc(50% - 64px);width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;border:3px solid #fff;text-decoration:none"
-                   title="Editar perfil">
+                    style="position:absolute;bottom:0;right:calc(50% - 64px);width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;border:3px solid #fff;text-decoration:none"
+                    title="Editar perfil">
                     <i class="fas fa-pen"></i>
                 </a>
             </div>
@@ -34,11 +40,13 @@
             <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 0">
                 <span style="color:var(--text-secondary);font-size:.82rem">{{ current_user.email }}</span>
                 {% if current_user.email_verificado %}
-                <span style="background:#d1fae5;color:#065f46;font-size:.68rem;padding:2px 8px;border-radius:50px;font-weight:600">
+                <span
+                    style="background:#d1fae5;color:#065f46;font-size:.68rem;padding:2px 8px;border-radius:50px;font-weight:600">
                     <i class="fas fa-check-circle me-1"></i>Verificado
                 </span>
                 {% else %}
-                <span style="background:#fee2e2;color:#991b1b;font-size:.68rem;padding:2px 8px;border-radius:50px;font-weight:600">
+                <span
+                    style="background:#fee2e2;color:#991b1b;font-size:.68rem;padding:2px 8px;border-radius:50px;font-weight:600">
                     <i class="fas fa-times-circle me-1"></i>No verificado
                 </span>
                 {% endif %}
@@ -49,8 +57,10 @@
                 <div style="font-size:2rem;font-weight:800;color:var(--accent)">
                     {{ current_user.reputacion_promedio if current_user.total_viajes >= 1 else '—' }}
                 </div>
-                <div style="font-size:.7rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px">Reputación promedio</div>
-                <div style="font-size:.8rem;color:var(--text-secondary);margin-top:4px">{{ current_user.total_viajes }} calificaciones</div>
+                <div style="font-size:.7rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px">
+                    Reputación promedio</div>
+                <div style="font-size:.8rem;color:var(--text-secondary);margin-top:4px">{{ current_user.total_viajes }}
+                    calificaciones</div>
             </div>
 
             <!-- Acciones -->
@@ -66,11 +76,13 @@
 
         <!-- Menú lateral tipo imagen de referencia -->
         <div class="card-uride mt-3" style="padding:0;overflow:hidden">
-            <a href="{{ url_for('main.editar_perfil') }}" style="display:flex;align-items:center;gap:12px;padding:14px 20px;text-decoration:none;color:var(--text-primary);border-bottom:1px solid var(--border);background:rgba(220,38,38,.04)">
+            <a href="{{ url_for('main.editar_perfil') }}"
+                style="display:flex;align-items:center;gap:12px;padding:14px 20px;text-decoration:none;color:var(--text-primary);border-bottom:1px solid var(--border);background:rgba(220,38,38,.04)">
                 <i class="fas fa-user" style="color:var(--accent);width:20px;text-align:center"></i>
                 <span style="font-weight:600;font-size:.875rem">Información Personal</span>
             </a>
-            <a href="{{ url_for('auth.logout') }}" style="display:flex;align-items:center;gap:12px;padding:14px 20px;text-decoration:none;color:#ef4444">
+            <a href="{{ url_for('auth.logout') }}"
+                style="display:flex;align-items:center;gap:12px;padding:14px 20px;text-decoration:none;color:#ef4444">
                 <i class="fas fa-sign-out-alt" style="width:20px;text-align:center"></i>
                 <span style="font-weight:600;font-size:.875rem">Cerrar Sesión</span>
             </a>
@@ -81,31 +93,40 @@
     <div class="col-lg-8">
         <div class="card-uride mb-3">
             <div class="card-header-uride">
-                <h6 class="fw-bold mb-0"><i class="fas fa-id-card me-2" style="color:var(--accent)"></i>Información Personal</h6>
+                <h6 class="fw-bold mb-0"><i class="fas fa-id-card me-2" style="color:var(--accent)"></i>Información
+                    Personal</h6>
             </div>
             <div class="card-body-uride">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div style="background:var(--bg-main);border-radius:10px;padding:14px">
-                            <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">Nombre</div>
+                            <div
+                                style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">
+                                Nombre</div>
                             <div style="font-weight:600">{{ current_user.nombre }}</div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div style="background:var(--bg-main);border-radius:10px;padding:14px">
-                            <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">Apellido</div>
+                            <div
+                                style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">
+                                Apellido</div>
                             <div style="font-weight:600">{{ current_user.apellido or 'Sin especificar' }}</div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div style="background:var(--bg-main);border-radius:10px;padding:14px">
-                            <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">Carrera</div>
+                            <div
+                                style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">
+                                Carrera</div>
                             <div style="font-weight:600">{{ current_user.carrera or 'Sin especificar' }}</div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div style="background:var(--bg-main);border-radius:10px;padding:14px">
-                            <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">Género</div>
+                            <div
+                                style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">
+                                Género</div>
                             <div style="font-weight:600">
                                 {% if current_user.genero == 'M' %}Masculino
                                 {% elif current_user.genero == 'F' %}Femenino
@@ -116,63 +137,91 @@
                     </div>
                     <div class="col-md-6">
                         <div style="background:var(--bg-main);border-radius:10px;padding:14px">
-                            <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">Teléfono</div>
+                            <div
+                                style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">
+                                Teléfono</div>
                             <div style="font-weight:600">{{ current_user.telefono or 'Sin especificar' }}</div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div style="background:var(--bg-main);border-radius:10px;padding:14px">
-                            <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">Fecha de Nacimiento</div>
+                            <div
+                                style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">
+                                Fecha de Nacimiento</div>
                             <div style="font-weight:600">
                                 {% if current_user.fecha_nacimiento %}
-                                    {{ current_user.fecha_nacimiento.strftime('%d/%m/%Y') }}
+                                {{ current_user.fecha_nacimiento.strftime('%d/%m/%Y') }}
                                 {% else %}
-                                    Sin especificar
+                                Sin especificar
                                 {% endif %}
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div style="background:var(--bg-main);border-radius:10px;padding:14px">
-                            <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">Dirección Principal</div>
-                            <div style="font-weight:600"><i class="fas fa-map-marker-alt me-2" style="color:var(--accent)"></i>{{ current_user.direccion or 'Sin especificar' }}</div>
+                            <div
+                                style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">
+                                Dirección Principal</div>
+                            <div style="font-weight:600"><i class="fas fa-map-marker-alt me-2"
+                                    style="color:var(--accent)"></i>{{ current_user.direccion or 'Sin especificar' }}
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div style="background:var(--bg-main);border-radius:10px;padding:14px">
-                            <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">Calles Principal y Secundaria</div>
-                            <div style="font-weight:600">{{ current_user.calles_secundarias or 'Sin especificar' }}</div>
+                            <div
+                                style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">
+                                Calles Principal y Secundaria</div>
+                            <div style="font-weight:600">{{ current_user.calles_secundarias or 'Sin especificar' }}
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div style="background:var(--bg-main);border-radius:10px;padding:14px">
-                            <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">Facultad / Campus</div>
+                            <div
+                                style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">
+                                Facultad / Campus</div>
                             <div style="font-weight:600">{{ current_user.facultad or 'Sin especificar' }}</div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div style="background:var(--bg-main);border-radius:10px;padding:14px">
-                            <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">Semestre / Nivel</div>
+                            <div
+                                style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">
+                                Semestre / Nivel</div>
                             <div style="font-weight:600">{{ current_user.semestre or 'Sin especificar' }}</div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div style="background:var(--bg-main);border-radius:10px;padding:14px;border-left:3px solid #10b981;">
-                            <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">Contacto de Emergencia</div>
-                            <div style="font-weight:600"><i class="fas fa-user-shield me-2 text-success"></i>{{ current_user.contacto_emergencia_nombre or 'Sin nombre' }}</div>
-                            <div style="font-weight:600; font-size: 0.85rem; margin-top: 5px;"><i class="fas fa-phone-alt me-2 text-success"></i>{{ current_user.contacto_emergencia_telefono or 'Sin teléfono' }}</div>
+                        <div
+                            style="background:var(--bg-main);border-radius:10px;padding:14px;border-left:3px solid #10b981;">
+                            <div
+                                style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">
+                                Contacto de Emergencia</div>
+                            <div style="font-weight:600"><i class="fas fa-user-shield me-2 text-success"></i>{{
+                                current_user.contacto_emergencia_nombre or 'Sin nombre' }}</div>
+                            <div style="font-weight:600; font-size: 0.85rem; margin-top: 5px;"><i
+                                    class="fas fa-phone-alt me-2 text-success"></i>{{
+                                current_user.contacto_emergencia_telefono or 'Sin teléfono' }}</div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div style="background:var(--bg-main);border-radius:10px;padding:14px;border-left:3px solid #ef4444;">
-                            <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">Tipo de Sangre / Alergias</div>
-                            <div style="font-weight:600"><i class="fas fa-tint me-2 text-danger"></i>{{ current_user.tipo_sangre or 'No especificado' }}</div>
+                        <div
+                            style="background:var(--bg-main);border-radius:10px;padding:14px;border-left:3px solid #ef4444;">
+                            <div
+                                style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">
+                                Tipo de Sangre / Alergias</div>
+                            <div style="font-weight:600"><i class="fas fa-tint me-2 text-danger"></i>{{
+                                current_user.tipo_sangre or 'No especificado' }}</div>
                         </div>
                     </div>
                     <div class="col-12">
                         <div style="background:var(--bg-main);border-radius:10px;padding:14px">
-                            <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">Miembro desde</div>
-                            <div style="font-weight:600">{{ current_user.fecha_registro.strftime('%d de %B, %Y') }}</div>
+                            <div
+                                style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">
+                                Miembro desde</div>
+                            <div style="font-weight:600">{{ current_user.fecha_registro.strftime('%d de %B, %Y') }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -182,14 +231,18 @@
         <!-- Panel de Seguridad Oculto para Otros (Cédula) -->
         <div class="card-uride mb-3">
             <div class="card-header-uride" style="background:rgba(16,185,129,.05);border-bottom:none;">
-                <h6 class="fw-bold mb-0 text-success"><i class="fas fa-user-shield me-2"></i>Seguridad y Verificación</h6>
+                <h6 class="fw-bold mb-0 text-success"><i class="fas fa-user-shield me-2"></i>Seguridad y Verificación
+                </h6>
             </div>
             <div class="card-body-uride" style="padding-top:0;">
-                <p style="font-size:0.8rem;color:var(--text-secondary);">Esta información es privada y vital para garantizar un entorno seguro en U-Ride.</p>
+                <p style="font-size:0.8rem;color:var(--text-secondary);">Esta información es privada y vital para
+                    garantizar un entorno seguro en U-Ride.</p>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div style="background:var(--bg-main);border-radius:10px;padding:14px">
-                            <div style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">Cédula / ID Estudiantil</div>
+                            <div
+                                style="font-size:.7rem;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px">
+                                Cédula / ID Estudiantil</div>
                             <div style="font-weight:600">{{ current_user.cedula or 'Falta registrar' }}</div>
                         </div>
                     </div>
@@ -200,8 +253,10 @@
         <!-- Nivel de confianza -->
         <div class="card-uride mb-3" style="background:rgba(220,38,38,.04);border-color:rgba(220,38,38,.2)">
             <div class="card-body-uride">
-                <div style="color:var(--accent);font-weight:700;margin-bottom:4px"><i class="fas fa-shield-alt me-2"></i>Nivel de confianza</div>
-                <div style="font-size:.875rem;color:var(--text-secondary)">{{ current_user.obtener_nivel_confianza() }}</div>
+                <div style="color:var(--accent);font-weight:700;margin-bottom:4px"><i
+                        class="fas fa-shield-alt me-2"></i>Nivel de confianza</div>
+                <div style="font-size:.875rem;color:var(--text-secondary)">{{ current_user.obtener_nivel_confianza() }}
+                </div>
             </div>
         </div>
 
@@ -209,7 +264,8 @@
         {% if current_user.direccion_lat and current_user.direccion_lng %}
         <div class="card-uride">
             <div class="card-header-uride">
-                <h6 class="fw-bold mb-0"><i class="fas fa-map-marked-alt me-2" style="color:var(--accent)"></i>Mi Ubicación (Privado)</h6>
+                <h6 class="fw-bold mb-0"><i class="fas fa-map-marked-alt me-2" style="color:var(--accent)"></i>Mi
+                    Ubicación (Privado)</h6>
             </div>
             <div id="mapa-perfil" style="height: 200px; border-radius: 0 0 14px 14px; z-index: 1;"></div>
         </div>
@@ -221,22 +277,22 @@
 {% block scripts %}
 {% if current_user.direccion_lat and current_user.direccion_lng %}
 <script>
-window.addEventListener('load', function() {
-    const map = L.map('mapa-perfil', {
-        zoomControl: false,
-        attributionControl: false
-    }).setView([{{ current_user.direccion_lat }}, {{ current_user.direccion_lng }}], 15);
-    
+    window.addEventListener('load', function () {
+        const map = L.map('mapa-perfil', {
+            zoomControl: false,
+            attributionControl: false
+        }).setView([{{ current_user.direccion_lat }}, {{ current_user.direccion_lng }}], 15);
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    
+
     const iconUser = L.divIcon({
         className: '',
         html: `<div style="width:30px;height:30px;border-radius:50% 50% 50% 0;background:#dc2626;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>`,
         iconSize: [30, 30], iconAnchor: [15, 30]
     });
-    
+
     L.marker([{{ current_user.direccion_lat }}, {{ current_user.direccion_lng }}], { icon: iconUser }).addTo(map);
-});
+};
 </script>
 {% endif %}
 {% endblock %}

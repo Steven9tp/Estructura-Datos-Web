@@ -1150,3 +1150,8 @@ WHERE usuarios.email = %(email_1)s
 2026-05-13 22:47:20,707 INFO werkzeug Thread-15 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:20] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
 2026-05-13 22:47:20,709 INFO werkzeug Thread-16 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:20] "[36mGET /static/js/mapa.js?v=2.1 HTTP/1.1[0m" 304 -
 2026-05-13 22:47:20,719 INFO werkzeug Thread-14 (process_request_thread) : 127.0.0.1 - - [13/May/2026 22:47:20] "GET /static/img/perfiles/1_1778730440_anime-girl-demon-horn-with-glasses-8k-wallpaper-uhdpaper.com-6120j.jpg HTTP/1.1" 200 -
+2026-05-25 15:31:03,349 INFO werkzeug MainThread : [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.49:5000
+2026-05-25 15:31:03,350 INFO werkzeug MainThread : [33mPress CTRL+C to quit[0m

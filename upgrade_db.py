@@ -1,4 +1,5 @@
 from app import create_app, db
+# pyrefly: ignore [missing-import]
 from sqlalchemy import text
 
 app = create_app()
