@@ -126,23 +126,51 @@ def detalle_viaje(viaje_id):
 @login_required
 def mis_viajes():
     from app.models import Calificacion
-    viajes = Viaje.query.filter_by(
-        conductor_id=current_user.id
-    ).order_by(Viaje.fecha_hora.desc()).all()
-    solicitudes = Solicitud.query.filter_by(
-        pasajero_id=current_user.id
-    ).order_by(Solicitud.fecha_solicitud.desc()).all()
+    from sqlalchemy.exc import OperationalError
 
-    # Precalcular qué pares (viaje_id, destinatario_id) ya calificó el usuario
-    # → {viaje_id: set(destinatario_ids calificados)}
-    califs = Calificacion.query.filter_by(autor_id=current_user.id).all()
-    calificaciones_dadas = {}
-    for c in califs:
-        calificaciones_dadas.setdefault(c.viaje_id, set()).add(c.destinatario_id)
+    # ── Safety net: si la tabla viajes tiene columnas faltantes, migrarlas ahora ──
+    _columnas_viajes = [
+        "ALTER TABLE viajes ADD COLUMN inicio_inmediato TINYINT(1) NOT NULL DEFAULT 0",
+        "ALTER TABLE viajes ADD COLUMN limite_espera_minutos INT NULL",
+        "ALTER TABLE viajes ADD COLUMN created_at DATETIME NULL",
+        "ALTER TABLE viajes ADD COLUMN origen_lat FLOAT NULL",
+        "ALTER TABLE viajes ADD COLUMN origen_lng FLOAT NULL",
+        "ALTER TABLE viajes ADD COLUMN destino_lat FLOAT NULL",
+        "ALTER TABLE viajes ADD COLUMN destino_lng FLOAT NULL",
+    ]
+    for _sql in _columnas_viajes:
+        try:
+            with db.engine.begin() as _conn:
+                _conn.execute(db.text(_sql))
+        except Exception:
+            pass  # ya existe → ignorar
 
-    return render_template('viajes/mis_viajes.html', title='Mis Viajes',
-                           viajes=viajes, solicitudes=solicitudes,
-                           calificaciones_dadas=calificaciones_dadas)
+    try:
+        viajes = Viaje.query.filter_by(
+            conductor_id=current_user.id
+        ).order_by(Viaje.fecha_hora.desc()).all()
+        solicitudes = Solicitud.query.filter_by(
+            pasajero_id=current_user.id
+        ).order_by(Solicitud.fecha_solicitud.desc()).all()
+
+        # Precalcular qué pares (viaje_id, destinatario_id) ya calificó el usuario
+        # → {viaje_id: set(destinatario_ids calificados)}
+        califs = Calificacion.query.filter_by(autor_id=current_user.id).all()
+        calificaciones_dadas = {}
+        for c in califs:
+            calificaciones_dadas.setdefault(c.viaje_id, set()).add(c.destinatario_id)
+
+        return render_template('viajes/mis_viajes.html', title='Mis Viajes',
+                               viajes=viajes, solicitudes=solicitudes,
+                               calificaciones_dadas=calificaciones_dadas)
+
+    except OperationalError as e:
+        # BD aún no migrada completamente — reintentar con columnas vacías
+        db.session.rollback()
+        return render_template('viajes/mis_viajes.html', title='Mis Viajes',
+                               viajes=[], solicitudes=[],
+                               calificaciones_dadas={})
+
 
 
 @bp.route('/solicitar/<int:viaje_id>', methods=['POST'])
