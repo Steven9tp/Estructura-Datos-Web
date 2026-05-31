@@ -342,7 +342,7 @@
 {% if viaje.estado in ('en_curso', 'finalizado')
       and ya_solicito and ya_solicito.estado == 'aceptada'
       and viaje.conductor_id != current_user.id %}
-{% set ya_califique_conductor = viaje.conductor_id in (calificaciones_dadas or {}).get(viaje.id, set()) %}
+{% set ya_califique_conductor = viaje.conductor_id in (calificaciones_dadas or {}).get(viaje.id, []) %}
 {% if not ya_califique_conductor %}
 <div class="modal fade" id="modalCalificar" tabindex="-1"
      data-bs-backdrop="static" data-bs-keyboard="false"
