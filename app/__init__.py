@@ -119,7 +119,7 @@ def create_app(config_name=None):
     app.register_blueprint(seguridad_bp, url_prefix='/seguridad')
 
     from app.api import bp as api_bp
-    app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(api_bp, url_prefix='/api/v1')
 
     return app
 
