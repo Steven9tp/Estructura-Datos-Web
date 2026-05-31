@@ -139,8 +139,9 @@ fetch('/api/v1/viajes')
             return;
         }
         cont.innerHTML = d.viajes.map(v => `
-        <div class="viaje-card" onclick="seleccionarViaje(${v.id}, '${v.origen}', '${v.destino}')"
-             style="border-radius:10px;margin-bottom:8px">
+        <a href="/viajes/detalle/${v.id}" class="viaje-card"
+             style="border-radius:10px;margin-bottom:8px;text-decoration:none;display:flex"
+             onclick="seleccionarViaje(event, ${v.id})">
             <div class="viaje-route" style="flex:1">
                 <div class="viaje-origin-dest">
                     <span>${v.origen}</span>
@@ -161,7 +162,7 @@ fetch('/api/v1/viajes')
                 <span class="cupos-num">${v.cupos}</span>
                 <span class="cupos-label">cupos</span>
             </div>
-        </div>`).join('');
+        </a>`).join('');
 
         // Cargar el primer viaje en el mapa
         if (d.viajes[0]) {
@@ -179,13 +180,23 @@ fetch('/api/v1/viajes')
         }
     });
 
-function seleccionarViaje(id, origen, destino) {
+function seleccionarViaje(event, id) {
+    // Clic simple → cargar mapa; doble clic o clic en badge → navegar al detalle
+    // Si el usuario quiere ir al detalle, el link del <a> lo llevará automáticamente.
+    // Solo prevenimos la navegación para actualizar el mapa primero.
+    event.preventDefault();
+
     // Resaltar card seleccionada
     document.querySelectorAll('.viaje-card').forEach(c => c.style.borderColor = '');
     event.currentTarget.style.borderColor = '#c9a227';
 
     // Cargar mapa
     URideMapa.cargarViaje(id, 'mapa-viaje', 'mapa-stats');
+
+    // Navegar al detalle después de un pequeño delay para ver el mapa
+    setTimeout(() => {
+        window.location.href = `/viajes/detalle/${id}`;
+    }, 600);
 }
 </script>
 {% endblock %}
