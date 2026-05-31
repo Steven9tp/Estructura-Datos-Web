@@ -139,30 +139,38 @@ fetch('/api/v1/viajes')
             return;
         }
         cont.innerHTML = d.viajes.map(v => `
-        <a href="/viajes/detalle/${v.id}" class="viaje-card"
-             style="border-radius:10px;margin-bottom:8px;text-decoration:none;display:flex"
-             onclick="seleccionarViaje(event, ${v.id})">
-            <div class="viaje-route" style="flex:1">
-                <div class="viaje-origin-dest">
-                    <span>${v.origen}</span>
-                    <i class="fas fa-long-arrow-alt-right route-arrow"></i>
-                    <span>${v.destino}</span>
+        <div class="viaje-card" style="border-radius:10px;margin-bottom:10px;padding:14px 16px;display:block;cursor:default">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+                <div style="flex:1">
+                    <div class="viaje-origin-dest" style="font-weight:700;font-size:.9rem">
+                        <span>${v.origen}</span>
+                        <i class="fas fa-long-arrow-alt-right route-arrow"></i>
+                        <span>${v.destino}</span>
+                    </div>
+                    <div class="viaje-meta" style="margin-top:5px">
+                        <span class="meta-item"><i class="fas fa-clock"></i>${v.fecha}</span>
+                        <span class="meta-item"><i class="fas fa-user"></i>${v.conductor}</span>
+                        ${v.reputacion > 0 ? `<span class="meta-item" style="color:#c9a227"><i class="fas fa-star"></i>${v.reputacion}</span>` : ''}
+                    </div>
                 </div>
-                <div class="viaje-meta">
-                    <span class="meta-item">
-                        <i class="fas fa-clock"></i>${v.fecha}
-                    </span>
-                    <span class="meta-item">
-                        <i class="fas fa-user"></i>${v.conductor}
-                    </span>
-                    ${v.reputacion > 0 ? `<span class="meta-item" style="color:#c9a227"><i class="fas fa-star"></i>${v.reputacion}</span>` : ''}
+                <div class="cupos-badge" onclick="URideMapa.cargarViaje(${v.id},'mapa-viaje','mapa-stats')" style="cursor:pointer" title="Ver en mapa">
+                    <span class="cupos-num">${v.cupos}</span>
+                    <span class="cupos-label">cupos</span>
                 </div>
             </div>
-            <div class="cupos-badge">
-                <span class="cupos-num">${v.cupos}</span>
-                <span class="cupos-label">cupos</span>
+            <div style="display:flex;gap:8px">
+                <a href="/viajes/detalle/${v.id}"
+                   style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:linear-gradient(135deg,#c9a227,#a07d1a);color:#fff;border:none;border-radius:9px;padding:9px 14px;font-size:.82rem;font-weight:700;text-decoration:none;transition:opacity .2s"
+                   onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+                    <i class="fas fa-eye"></i> Ver Detalle y Unirme
+                </a>
+                <button onclick="URideMapa.cargarViaje(${v.id},'mapa-viaje','mapa-stats')"
+                        style="background:rgba(201,162,39,.12);border:1.5px solid rgba(201,162,39,.3);border-radius:9px;padding:9px 12px;cursor:pointer;font-size:.82rem;color:var(--accent)"
+                        title="Ver ruta en mapa">
+                    <i class="fas fa-map-marked-alt"></i>
+                </button>
             </div>
-        </a>`).join('');
+        </div>`).join('');
 
         // Cargar el primer viaje en el mapa
         if (d.viajes[0]) {
@@ -180,23 +188,5 @@ fetch('/api/v1/viajes')
         }
     });
 
-function seleccionarViaje(event, id) {
-    // Clic simple → cargar mapa; doble clic o clic en badge → navegar al detalle
-    // Si el usuario quiere ir al detalle, el link del <a> lo llevará automáticamente.
-    // Solo prevenimos la navegación para actualizar el mapa primero.
-    event.preventDefault();
-
-    // Resaltar card seleccionada
-    document.querySelectorAll('.viaje-card').forEach(c => c.style.borderColor = '');
-    event.currentTarget.style.borderColor = '#c9a227';
-
-    // Cargar mapa
-    URideMapa.cargarViaje(id, 'mapa-viaje', 'mapa-stats');
-
-    // Navegar al detalle después de un pequeño delay para ver el mapa
-    setTimeout(() => {
-        window.location.href = `/viajes/detalle/${id}`;
-    }, 600);
-}
 </script>
 {% endblock %}
