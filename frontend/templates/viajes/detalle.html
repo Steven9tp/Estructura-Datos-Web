@@ -67,22 +67,84 @@
                 {% if viaje.conductor_id != current_user.id %}
                     <!-- VISTA PASAJERO -->
                     {% if ya_solicito %}
-                        <div class="alert {% if ya_solicito.estado == 'aceptada' %}alert-success{% elif ya_solicito.estado == 'pendiente' %}alert-warning{% else %}alert-danger{% endif %} text-center py-2">
-                            <i class="fas {% if ya_solicito.estado == 'aceptada' %}fa-check-circle{% elif ya_solicito.estado == 'pendiente' %}fa-clock{% else %}fa-times-circle{% endif %} me-2"></i>
-                            Solicitud: <strong>{{ ya_solicito.estado|upper }}</strong>
+                        {% if ya_solicito.estado == 'aceptada' %}
+                        <div style="background:rgba(34,197,94,.12);border:2px solid rgba(34,197,94,.4);border-radius:12px;padding:14px;text-align:center">
+                            <i class="fas fa-check-circle" style="color:#22c55e;font-size:1.4rem"></i>
+                            <div style="font-weight:700;color:#166534;margin-top:6px">¡Estás en este viaje!</div>
+                            <div style="font-size:.78rem;color:#166534;opacity:.8">Eres pasajero confirmado</div>
                         </div>
+
+                        {% if viaje.estado == 'en_curso' %}
+                        <div style="background:rgba(34,197,94,.1);border:1.5px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 14px;font-size:.82rem;color:#166534;text-align:center;margin-top:8px">
+                            <i class="fas fa-car me-2"></i><strong>¡El viaje está en curso!</strong> Buen viaje.
+                        </div>
+                        {% endif %}
+
+                        {# ── Widget de calificación inline ──── #}
+                        {% if viaje.estado in ('en_curso', 'finalizado') %}
+                        {% set ya_califique_conductor = viaje.conductor_id in (calificaciones_dadas or {}).get(viaje.id, []) %}
+                        <div style="margin-top:12px;background:linear-gradient(135deg,rgba(201,162,39,.1),rgba(201,162,39,.04));border:1.5px solid rgba(201,162,39,.35);border-radius:14px;padding:16px">
+                            {% if ya_califique_conductor %}
+                            <div style="text-align:center;color:#166534;font-size:.88rem;font-weight:600">
+                                <i class="fas fa-star" style="color:#c9a227"></i>
+                                ¡Ya calificaste a {{ viaje.conductor.nombre.split()[0] }}!
+                            </div>
+                            {% else %}
+                            <div style="font-weight:700;font-size:.88rem;color:var(--text-primary);margin-bottom:10px;display:flex;align-items:center;gap:7px">
+                                <i class="fas fa-star" style="color:#c9a227"></i>
+                                Califica al conductor
+                            </div>
+                            <a href="{{ url_for('seguridad.calificar', viaje_id=viaje.id, destinatario_id=viaje.conductor_id) }}"
+                               style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;background:linear-gradient(135deg,#c9a227,#a07d1a);color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:.9rem;transition:opacity .2s"
+                               onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+                                <span style="font-size:1.3rem">⭐</span>
+                                Calificar a {{ viaje.conductor.nombre.split()[0] }}
+                            </a>
+                            <div style="display:flex;justify-content:center;gap:8px;margin-top:10px" id="star-preview">
+                                {% for i in range(1,6) %}
+                                <a href="{{ url_for('seguridad.calificar', viaje_id=viaje.id, destinatario_id=viaje.conductor_id) }}"
+                                   class="star-link"
+                                   data-val="{{ i }}"
+                                   style="font-size:2rem;color:#d1d5db;text-decoration:none;transition:color .15s,transform .15s">★</a>
+                                {% endfor %}
+                            </div>
+                            <div style="font-size:.72rem;text-align:center;color:var(--text-secondary);margin-top:6px">
+                                Toca una estrella para calificar
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        {# ── fin widget calificación ─── #}
+
+                        {% elif ya_solicito.estado == 'pendiente' %}
+                        <div style="background:rgba(234,179,8,.1);border:1.5px solid rgba(234,179,8,.4);border-radius:10px;padding:12px;text-align:center;font-size:.85rem;color:#92400e">
+                            <i class="fas fa-clock me-2"></i>Solicitud pendiente
+                        </div>
+                        {% else %}
+                        <div class="alert alert-danger text-center py-2" style="font-size:.85rem">
+                            <i class="fas fa-times-circle me-2"></i>Tu solicitud fue cancelada
+                        </div>
+                        {% endif %}
                         {% if viaje.estado == 'en_curso' and ya_solicito.estado == 'aceptada' %}
-                        <div style="background:rgba(34,197,94,.1);border:1.5px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 14px;font-size:.82rem;color:#166534;text-align:center">
+                        <div style="background:rgba(34,197,94,.1);border:1.5px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 14px;font-size:.82rem;color:#166534;text-align:center;margin-top:8px">
                             <i class="fas fa-car me-2"></i><strong>¡El viaje está en curso!</strong> Buen viaje.
                         </div>
                         {% endif %}
                     {% elif viaje.estado == 'abierto' and viaje.cupos_disponibles > 0 %}
-                        <!-- RF9: Boton que abre modal de reglas antes de confirmar -->
-                        <button type="button" class="btn-uride btn-primary-uride btn-full py-3 fw-bold"
-                                data-bs-toggle="modal" data-bs-target="#modalReglas">
-                            <i class="fas fa-shield-alt me-2"></i> Ver Reglas y Unirme
-                        </button>
-                        <!-- El formulario real esta dentro del modal -->
+                        <!-- Botón directo de unirse (auto-aceptado) -->
+                        <form action="{{ url_for('viajes.solicitar_unirse', viaje_id=viaje.id) }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit"
+                                    style="width:100%;padding:14px;background:linear-gradient(135deg,#c9a227,#a07d1a);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .2s"
+                                    onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+                                <i class="fas fa-user-plus"></i>
+                                Unirme al Viaje
+                                <span style="font-size:.78rem;opacity:.85;font-weight:400">({{ viaje.cupos_disponibles }} cupo{{ 's' if viaje.cupos_disponibles != 1 }} libre{{ 's' if viaje.cupos_disponibles != 1 }})</span>
+                            </button>
+                        </form>
+                        <div style="font-size:.72rem;color:var(--text-secondary);text-align:center;margin-top:6px">
+                            <i class="fas fa-shield-alt me-1"></i>Al unirte aceptas las <a href="{{ url_for('seguridad.reglas_seguridad') }}" style="color:var(--accent)">reglas de seguridad</a>
+                        </div>
                     {% elif viaje.estado == 'en_curso' %}
                         <div class="alert alert-info text-center">
                             <i class="fas fa-car me-2"></i>Este viaje ya está <strong>en curso</strong>
@@ -147,11 +209,49 @@
         </div>
 
 
-        <!-- ═══ SOLICITUDES PENDIENTES ═══ -->
+        <!-- ═══ PASAJEROS ACEPTADOS (con botón Expulsar para conductor) ═══ -->
+        {% if solicitudes_aceptadas %}
+        <div class="card-uride mb-3">
+            <div class="card-header-uride">
+                <h6 class="mb-0 fw-bold"><i class="fas fa-users me-2" style="color:var(--accent)"></i>Pasajeros ({{ solicitudes_aceptadas|length }})</h6>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for sol in solicitudes_aceptadas %}
+                <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                    <div style="display:flex;align-items:center;gap:10px">
+                        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a07d1a);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem">
+                            {{ sol.pasajero.nombre[0]|upper }}
+                        </div>
+                        <div>
+                            <div class="fw-bold" style="font-size:.9rem">{{ sol.pasajero.nombre }}</div>
+                            {% if sol.pasajero.reputacion_promedio > 0 %}
+                            <small class="text-muted">⭐ {{ sol.pasajero.reputacion_promedio }}</small>
+                            {% else %}
+                            <small class="text-muted">Nuevo usuario</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if viaje.conductor_id == current_user.id and viaje.estado in ('abierto', 'completo', 'en_curso') %}
+                    <form action="{{ url_for('viajes.expulsar_pasajero', solicitud_id=sol.id) }}" method="POST"
+                          onsubmit="return confirm('¿Expulsar a {{ sol.pasajero.nombre }} del viaje?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit"
+                                style="background:rgba(239,68,68,.1);border:1.5px solid rgba(239,68,68,.3);color:#dc2626;border-radius:8px;padding:5px 12px;font-size:.78rem;cursor:pointer;font-weight:600">
+                            <i class="fas fa-user-times me-1"></i>Expulsar
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ═══ SOLICITUDES PENDIENTES (ya no deberían existir con auto-aceptación) ═══ -->
         {% if viaje.conductor_id == current_user.id and solicitudes_pendientes %}
         <div class="card-uride mb-3 border-accent">
             <div class="card-header-uride" style="background: #fff3cd">
-                <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-bell me-2"></i>Solicitudes ({{ solicitudes_pendientes|length }})</h6>
+                <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-bell me-2"></i>Solicitudes pendientes ({{ solicitudes_pendientes|length }})</h6>
             </div>
             <div class="list-group list-group-flush">
                 {% for sol in solicitudes_pendientes %}
@@ -161,12 +261,10 @@
                         <small class="text-muted">Reputación: {{ sol.pasajero.reputacion_promedio }}</small>
                     </div>
                     <div class="d-flex gap-2">
-                        <!-- Aceptar: POST -->
                         <form action="{{ url_for('viajes.gestionar_solicitud', solicitud_id=sol.id, accion='aceptar') }}" method="POST" style="display:inline">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-success btn-sm">Aceptar</button>
                         </form>
-                        <!-- Rechazar: POST -->
                         <form action="{{ url_for('viajes.gestionar_solicitud', solicitud_id=sol.id, accion='rechazar') }}" method="POST" style="display:inline">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-outline-danger btn-sm">✕</button>

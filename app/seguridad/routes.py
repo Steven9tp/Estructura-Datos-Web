@@ -18,60 +18,53 @@ def reglas_seguridad():
 @bp.route('/calificar/<int:viaje_id>/<int:destinatario_id>', methods=['GET', 'POST'])
 @login_required
 def calificar(viaje_id, destinatario_id):
-    """Permite calificar a otro usuario después de un viaje.
-    
+    """Permite calificar a otro usuario durante o después de un viaje.
+
     RF8: Solo puede calificar quien participó efectivamente:
       - El conductor puede calificar a los pasajeros aceptados.
       - Un pasajero aceptado puede calificar al conductor.
+    Permitido en estado: en_curso o finalizado.
     """
     viaje = db.get_or_404(Viaje, viaje_id)
     destinatario = db.get_or_404(Usuario, destinatario_id)
 
-    # Solo si el viaje está finalizado
-    if viaje.estado != 'finalizado':
-        flash('Solo puedes calificar después de finalizar el viaje.', 'warning')
-        return redirect(url_for('viajes.mis_viajes'))
+    # Solo si el viaje está en curso o finalizado
+    if viaje.estado not in ('en_curso', 'finalizado'):
+        flash('Solo puedes calificar durante o después del viaje.', 'warning')
+        return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje_id))
 
-    # ── Validación de participación efectiva (corrección obs. 3) ──────────────
+    # ── Validación de participación efectiva ──────────────────────────────
     es_conductor = (viaje.conductor_id == current_user.id)
     solicitud_autor = Solicitud.query.filter_by(
-        viaje_id=viaje_id,
-        pasajero_id=current_user.id,
-        estado='aceptada'
+        viaje_id=viaje_id, pasajero_id=current_user.id, estado='aceptada'
     ).first()
     es_pasajero_aceptado = solicitud_autor is not None
 
     if not es_conductor and not es_pasajero_aceptado:
         flash('Solo los participantes del viaje pueden calificar.', 'danger')
-        return redirect(url_for('viajes.mis_viajes'))
+        return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje_id))
 
-    # El conductor solo puede calificar a pasajeros aceptados
     if es_conductor:
         es_destinatario_valido = Solicitud.query.filter_by(
-            viaje_id=viaje_id,
-            pasajero_id=destinatario_id,
-            estado='aceptada'
+            viaje_id=viaje_id, pasajero_id=destinatario_id, estado='aceptada'
         ).first() is not None
         if not es_destinatario_valido:
             flash('Solo puedes calificar a los pasajeros de este viaje.', 'danger')
-            return redirect(url_for('viajes.mis_viajes'))
+            return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje_id))
 
-    # El pasajero solo puede calificar al conductor
     if es_pasajero_aceptado and not es_conductor:
         if destinatario_id != viaje.conductor_id:
-            flash('Como pasajero solo puedes calificar al conductor del viaje.', 'danger')
-            return redirect(url_for('viajes.mis_viajes'))
-    # ─────────────────────────────────────────────────────────────────────────
+            flash('Como pasajero solo puedes calificar al conductor.', 'danger')
+            return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje_id))
+    # ─────────────────────────────────────────────────────────────────────
 
     # Verificar que no haya calificado antes
     ya_califico = Calificacion.query.filter_by(
-        viaje_id=viaje_id,
-        autor_id=current_user.id,
-        destinatario_id=destinatario_id
+        viaje_id=viaje_id, autor_id=current_user.id, destinatario_id=destinatario_id
     ).first()
     if ya_califico:
         flash('Ya has calificado a este usuario para este viaje.', 'info')
-        return redirect(url_for('viajes.mis_viajes'))
+        return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje_id))
 
     form = CalificacionForm()
     if form.validate_on_submit():
@@ -85,11 +78,12 @@ def calificar(viaje_id, destinatario_id):
         db.session.add(calificacion)
         db.session.commit()
         destinatario.actualizar_reputacion()
-        flash('¡Calificación enviada!', 'success')
-        return redirect(url_for('viajes.mis_viajes'))
+        flash('¡Calificación enviada! Gracias por tu opinión.', 'success')
+        return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje_id))
 
     return render_template('seguridad/calificar.html', title='Calificar Usuario',
                            form=form, destinatario=destinatario, viaje=viaje)
+
 
 
 @bp.route('/reportar/<int:usuario_id>', methods=['GET', 'POST'])

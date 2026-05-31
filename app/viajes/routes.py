@@ -193,22 +193,75 @@ def mis_viajes():
 @login_required
 def solicitar_unirse(viaje_id):
     viaje = db.get_or_404(Viaje, viaje_id)
+
     if viaje.conductor_id == current_user.id:
         flash('No puedes unirte a tu propio viaje.', 'warning')
         return redirect(url_for('viajes.buscar_viajes'))
-    if viaje.esta_lleno():
-        flash('El viaje está lleno.', 'danger')
+
+    if viaje.cupos_disponibles <= 0 or viaje.estado not in ('abierto', 'completo'):
+        flash('El viaje no tiene cupos disponibles.', 'danger')
         return redirect(url_for('viajes.buscar_viajes'))
-    ya = Solicitud.query.filter_by(viaje_id=viaje_id,
-                                   pasajero_id=current_user.id).first()
+
+    ya = Solicitud.query.filter_by(viaje_id=viaje_id, pasajero_id=current_user.id).first()
     if ya:
-        flash('Ya enviaste una solicitud para este viaje.', 'info')
-        return redirect(url_for('viajes.buscar_viajes'))
-    solicitud = Solicitud(viaje_id=viaje.id, pasajero_id=current_user.id)
+        if ya.estado == 'aceptada':
+            flash('Ya estás en este viaje.', 'info')
+        else:
+            flash('Ya enviaste una solicitud para este viaje.', 'info')
+        return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje_id))
+
+    # ── Auto-aceptar: el pasajero se une directamente ──────────────────────
+    solicitud = Solicitud(
+        viaje_id=viaje.id,
+        pasajero_id=current_user.id,
+        estado='aceptada'           # se acepta automáticamente
+    )
+    viaje.cupos_disponibles -= 1
+    if viaje.cupos_disponibles <= 0:
+        viaje.estado = 'completo'
+
     db.session.add(solicitud)
+    EventoTrazabilidad.registrar(
+        accion='pasajero_unido',
+        usuario_id=current_user.id,
+        viaje_id=viaje.id,
+        detalles={'auto_aceptado': True}
+    )
     db.session.commit()
-    flash('Solicitud enviada. Espera la confirmación del conductor.', 'info')
+    flash('¡Te has unido al viaje exitosamente!', 'success')
     return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje_id))
+
+
+@bp.route('/expulsar/<int:solicitud_id>', methods=['POST'])
+@login_required
+def expulsar_pasajero(solicitud_id):
+    """Conductor expulsa a un pasajero del viaje."""
+    solicitud = db.get_or_404(Solicitud, solicitud_id)
+    viaje = solicitud.viaje
+
+    if viaje.conductor_id != current_user.id:
+        flash('Solo el conductor puede expulsar pasajeros.', 'danger')
+        return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje.id))
+
+    if solicitud.estado == 'aceptada':
+        solicitud.estado = 'cancelada'
+        viaje.cupos_disponibles += 1
+        if viaje.estado == 'completo':
+            viaje.estado = 'abierto'
+        EventoTrazabilidad.registrar(
+            accion='pasajero_expulsado',
+            usuario_id=current_user.id,
+            viaje_id=viaje.id,
+            detalles={'pasajero_id': solicitud.pasajero_id}
+        )
+        db.session.commit()
+        flash(f'{solicitud.pasajero.nombre} ha sido removido del viaje.', 'info')
+    else:
+        flash('Este pasajero ya no está activo en el viaje.', 'warning')
+
+    return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje.id))
+
+
 
 
 @bp.route('/gestionar/<int:solicitud_id>/<string:accion>', methods=['POST'])
