@@ -98,7 +98,19 @@ with app.app_context():
                 try:
                     conn.execute(db.text("ALTER TABLE viajes ADD COLUMN destino_lng FLOAT NULL"))
                 except Exception: pass
-                
+                try:
+                    conn.execute(db.text("ALTER TABLE viajes ADD COLUMN inicio_inmediato TINYINT(1) NOT NULL DEFAULT 0"))
+                    print("✅ viajes.inicio_inmediato agregado")
+                except Exception: pass
+                try:
+                    conn.execute(db.text("ALTER TABLE viajes ADD COLUMN limite_espera_minutos INT NULL"))
+                    print("✅ viajes.limite_espera_minutos agregado")
+                except Exception: pass
+                try:
+                    conn.execute(db.text("ALTER TABLE viajes ADD COLUMN created_at DATETIME NULL"))
+                    print("✅ viajes.created_at agregado")
+                except Exception: pass
+
                 conn.commit()
                 print("==================================================")
         except Exception as ex:
