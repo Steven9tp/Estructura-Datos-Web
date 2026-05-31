@@ -128,7 +128,7 @@ def mis_viajes():
     from app.models import Calificacion
     from sqlalchemy.exc import OperationalError
 
-    # ── Safety net: si la tabla viajes tiene columnas faltantes, migrarlas ahora ──
+    # ── Safety net: migrar columnas faltantes en viajes al primer acceso ──────
     _columnas_viajes = [
         "ALTER TABLE viajes ADD COLUMN inicio_inmediato TINYINT(1) NOT NULL DEFAULT 0",
         "ALTER TABLE viajes ADD COLUMN limite_espera_minutos INT NULL",
@@ -149,27 +149,43 @@ def mis_viajes():
         viajes = Viaje.query.filter_by(
             conductor_id=current_user.id
         ).order_by(Viaje.fecha_hora.desc()).all()
+
         solicitudes = Solicitud.query.filter_by(
             pasajero_id=current_user.id
         ).order_by(Solicitud.fecha_solicitud.desc()).all()
 
-        # Precalcular qué pares (viaje_id, destinatario_id) ya calificó el usuario
-        # → {viaje_id: set(destinatario_ids calificados)}
+        # Precalcular pasajeros aceptados por viaje (evitar lazy queries en el template)
+        # → {viaje_id: [Solicitud, ...]}
+        ids_viajes_conductor = [v.id for v in viajes]
+        solicitudes_aceptadas_conductor = []
+        if ids_viajes_conductor:
+            solicitudes_aceptadas_conductor = Solicitud.query.filter(
+                Solicitud.viaje_id.in_(ids_viajes_conductor),
+                Solicitud.estado == 'aceptada'
+            ).all()
+
+        pasajeros_por_viaje = {}
+        for sol in solicitudes_aceptadas_conductor:
+            pasajeros_por_viaje.setdefault(sol.viaje_id, []).append(sol)
+
+        # Precalcular calificaciones dadas
         califs = Calificacion.query.filter_by(autor_id=current_user.id).all()
         calificaciones_dadas = {}
         for c in califs:
             calificaciones_dadas.setdefault(c.viaje_id, set()).add(c.destinatario_id)
 
         return render_template('viajes/mis_viajes.html', title='Mis Viajes',
-                               viajes=viajes, solicitudes=solicitudes,
-                               calificaciones_dadas=calificaciones_dadas)
+                               viajes=viajes,
+                               solicitudes=solicitudes,
+                               calificaciones_dadas=calificaciones_dadas,
+                               pasajeros_por_viaje=pasajeros_por_viaje)
 
-    except OperationalError as e:
-        # BD aún no migrada completamente — reintentar con columnas vacías
+    except OperationalError:
         db.session.rollback()
         return render_template('viajes/mis_viajes.html', title='Mis Viajes',
                                viajes=[], solicitudes=[],
-                               calificaciones_dadas={})
+                               calificaciones_dadas={},
+                               pasajeros_por_viaje={})
 
 
 
