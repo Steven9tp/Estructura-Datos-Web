@@ -45,12 +45,11 @@
                                         </div>
                                     </div>
                                     <!-- Toggle salir ahora -->
-                                    <label class="d-flex align-items-center gap-2" style="cursor:pointer;user-select:none">
+                                    <label class="d-flex align-items-center gap-2" style="cursor:pointer;user-select:none" for="inicio_inmediato">
                                         <div class="toggle-switch" id="toggle-wrap">
                                             {{ form.inicio_inmediato(id="inicio_inmediato", class="toggle-input d-none") }}
                                             <div class="toggle-track" id="toggle-track"
-                                                 style="width:52px;height:28px;border-radius:14px;background:#d1d5db;position:relative;transition:background .25s;cursor:pointer"
-                                                 onclick="toggleInmediato()">
+                                                 style="width:52px;height:28px;border-radius:14px;background:#d1d5db;position:relative;transition:background .25s;">
                                                 <div id="toggle-thumb"
                                                      style="width:22px;height:22px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.2)"></div>
                                             </div>
@@ -168,11 +167,9 @@
 </style>
 <script>
 // ── Toggle "Salir ahora" ──────────────────────────────────────────────────
-let _inmediato = false;
 let _esperaSeleccionada = null;
 
-function toggleInmediato() {
-    _inmediato = !_inmediato;
+function actualizarToggleUI() {
     const chk   = document.getElementById('inicio_inmediato');
     const track = document.getElementById('toggle-track');
     const thumb = document.getElementById('toggle-thumb');
@@ -181,8 +178,7 @@ function toggleInmediato() {
     const bloqAhora = document.getElementById('bloque-ahora');
     const bloqEspera= document.getElementById('bloque-espera');
 
-    chk.checked = _inmediato;
-    if (_inmediato) {
+    if (chk.checked) {
         track.style.background = 'var(--accent, #c9a227)';
         thumb.style.transform  = 'translateX(24px)';
         label.textContent      = '¡Salir ahora!';
@@ -204,6 +200,15 @@ function toggleInmediato() {
         document.getElementById('fecha_hora').setAttribute('required', 'required');
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const chk = document.getElementById('inicio_inmediato');
+    if (chk) {
+        chk.addEventListener('change', actualizarToggleUI);
+        // Sincronizar UI en caso de recarga o valor anterior
+        actualizarToggleUI();
+    }
+});
 
 function seleccionarEspera(mins, btn) {
     _esperaSeleccionada = mins === 0 ? null : mins;
