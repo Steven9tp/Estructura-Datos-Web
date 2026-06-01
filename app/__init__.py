@@ -121,7 +121,45 @@ def create_app(config_name=None):
     from app.api import bp as api_bp
     app.register_blueprint(api_bp, url_prefix='/api/v1')
 
+    # ── Safety-net de migración automática ────────────────────────────────────
+    # Agrega columnas nuevas a la BD de producción (Aiven/MySQL) si no existen.
+    # Cada ALTER TABLE se ejecuta de forma independiente; si la columna ya
+    # existe MySQL lanza un error que se captura y se ignora silenciosamente.
+    _migraciones = [
+        # Tabla usuarios — columnas añadidas en iteraciones posteriores al deploy
+        "ALTER TABLE usuarios ADD COLUMN contacto_emergencia_nombre VARCHAR(100) DEFAULT ''",
+        "ALTER TABLE usuarios ADD COLUMN contacto_emergencia_telefono VARCHAR(20) DEFAULT ''",
+        "ALTER TABLE usuarios ADD COLUMN calles_secundarias VARCHAR(200) DEFAULT ''",
+        "ALTER TABLE usuarios ADD COLUMN direccion_lat FLOAT NULL",
+        "ALTER TABLE usuarios ADD COLUMN direccion_lng FLOAT NULL",
+        "ALTER TABLE usuarios ADD COLUMN cedula VARCHAR(20) DEFAULT ''",
+        "ALTER TABLE usuarios ADD COLUMN tipo_sangre VARCHAR(50) DEFAULT ''",
+        "ALTER TABLE usuarios ADD COLUMN facultad VARCHAR(100) DEFAULT ''",
+        "ALTER TABLE usuarios ADD COLUMN semestre VARCHAR(50) DEFAULT ''",
+        "ALTER TABLE usuarios ADD COLUMN apellido VARCHAR(100) DEFAULT ''",
+        "ALTER TABLE usuarios ADD COLUMN genero VARCHAR(10) DEFAULT ''",
+        "ALTER TABLE usuarios ADD COLUMN zona_barrio VARCHAR(100) NULL",
+        "ALTER TABLE usuarios ADD COLUMN contacto_emergencia VARCHAR(100) DEFAULT ''",
+        # Tabla viajes — columnas de geolocalización e inicio inmediato
+        "ALTER TABLE viajes ADD COLUMN inicio_inmediato TINYINT(1) NOT NULL DEFAULT 0",
+        "ALTER TABLE viajes ADD COLUMN limite_espera_minutos INT NULL",
+        "ALTER TABLE viajes ADD COLUMN created_at DATETIME NULL",
+        "ALTER TABLE viajes ADD COLUMN origen_lat FLOAT NULL",
+        "ALTER TABLE viajes ADD COLUMN origen_lng FLOAT NULL",
+        "ALTER TABLE viajes ADD COLUMN destino_lat FLOAT NULL",
+        "ALTER TABLE viajes ADD COLUMN destino_lng FLOAT NULL",
+    ]
+
+    with app.app_context():
+        for _sql in _migraciones:
+            try:
+                with db.engine.begin() as _conn:
+                    _conn.execute(db.text(_sql))
+            except Exception:
+                pass  # Columna ya existe → ignorar
+
     return app
+
 
 @login_manager.user_loader
 def load_user(user_id):
