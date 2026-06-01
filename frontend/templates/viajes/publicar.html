@@ -200,6 +200,8 @@ function toggleInmediato() {
         bloqFecha.style.display  = 'block';
         bloqAhora.style.display  = 'none';
         bloqEspera.style.display = 'none';
+        // Volver a requerir la fecha
+        document.getElementById('fecha_hora').setAttribute('required', 'required');
     }
 }
 

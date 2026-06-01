@@ -33,6 +33,16 @@ def publicar_viaje():
         if form.inicio_inmediato.data:
             fecha_salida = dt.now()
         else:
+            if not form.fecha_hora.data:
+                flash('Por favor selecciona una fecha y hora para el viaje programado.', 'danger')
+                return render_template('viajes/publicar.html', title='Publicar Viaje',
+                                       form=form, reglas_seguridad=[
+                                           'Verifica la identidad del conductor antes de subir',
+                                           'Comparte tu ubicación con alguien de confianza',
+                                           'Solo viaja con conductores verificados (@uta.edu.ec)',
+                                           'Usa el cinturón de seguridad siempre',
+                                           'Reporta cualquier conducta inapropiada',
+                                       ])
             fecha_salida = form.fecha_hora.data
 
         viaje = Viaje(
