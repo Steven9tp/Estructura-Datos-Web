@@ -80,6 +80,17 @@
                         </div>
                         {% endif %}
 
+                        {# ── Botón salir del viaje (solo si aún no inició) ── #}
+                        {% if viaje.estado in ('abierto', 'completo') %}
+                        <button type="button"
+                                onclick="document.getElementById('modal-abandonar').classList.add('show-modal')"
+                                style="width:100%;margin-top:10px;padding:10px;background:rgba(239,68,68,.08);border:1.5px solid rgba(239,68,68,.3);color:#dc2626;border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s"
+                                onmouseover="this.style.background='rgba(239,68,68,.15)'"
+                                onmouseout="this.style.background='rgba(239,68,68,.08)'">
+                            <i class="fas fa-sign-out-alt"></i> Salir del viaje
+                        </button>
+                        {% endif %}
+
                         {# ── Widget de calificación inline ──── #}
                         {% if viaje.estado in ('en_curso', 'finalizado') %}
                         {% set ya_califique_conductor = viaje.conductor_id in (calificaciones_dadas or {}).get(viaje.id, []) %}
@@ -434,9 +445,61 @@
     </div>
 </div>
 {% endif %}
+
+{# ── Modal confirmación: Salir del viaje (pasajero) ── #}
+{% if ya_solicito and ya_solicito.estado == 'aceptada'
+      and viaje.estado in ('abierto', 'completo')
+      and viaje.conductor_id != current_user.id %}
+<style>
+#modal-abandonar { display:none; position:fixed; inset:0; z-index:9999;
+    background:rgba(0,0,0,.55); align-items:center; justify-content:center; }
+#modal-abandonar.show-modal { display:flex; }
+#modal-abandonar .modal-box {
+    background:var(--bg-card, #fff); border-radius:18px; padding:32px 28px;
+    max-width:420px; width:90%; box-shadow:0 24px 60px rgba(0,0,0,.25);
+    animation: slideUp .25s ease;
+}
+@keyframes slideUp {
+    from { transform:translateY(30px); opacity:0; }
+    to   { transform:translateY(0);    opacity:1; }
+}
+</style>
+<div id="modal-abandonar" onclick="if(event.target===this)this.classList.remove('show-modal')">
+    <div class="modal-box">
+        <div style="text-align:center;margin-bottom:20px">
+            <div style="font-size:2.8rem;margin-bottom:8px">🚶</div>
+            <h5 style="font-weight:800;color:var(--text-primary);margin-bottom:6px">¿Salir del viaje?</h5>
+            <p style="font-size:.85rem;color:var(--text-secondary);margin:0">
+                Dejarás tu cupo libre en
+                <strong>{{ viaje.origen_zona[:25] }}… → {{ viaje.destino_zona[:25] }}…</strong>.
+                El conductor no será notificado automáticamente.
+            </p>
+        </div>
+        <div style="background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.2);border-radius:10px;padding:10px 14px;font-size:.8rem;color:#92400e;margin-bottom:20px">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Esta acción <strong>no se puede deshacer</strong>. Si cambias de idea, tendrás que volver a unirte si hay cupos.
+        </div>
+        <div style="display:flex;gap:10px">
+            <button type="button"
+                    onclick="document.getElementById('modal-abandonar').classList.remove('show-modal')"
+                    style="flex:1;padding:12px;border:1.5px solid var(--border);background:transparent;border-radius:10px;font-size:.9rem;font-weight:600;cursor:pointer;color:var(--text-secondary);transition:all .2s"
+                    onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'">
+                Cancelar
+            </button>
+            <form action="{{ url_for('viajes.abandonar_viaje', viaje_id=viaje.id) }}" method="POST" style="flex:1">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        style="width:100%;padding:12px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s"
+                        onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+                    <i class="fas fa-sign-out-alt"></i> Sí, salir
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
-{# ── Modal de calificación — aparece al inicio del viaje y se repite según distancia ── #}
 {% if viaje.estado in ('en_curso', 'finalizado')
       and ya_solicito and ya_solicito.estado == 'aceptada'
       and viaje.conductor_id != current_user.id %}

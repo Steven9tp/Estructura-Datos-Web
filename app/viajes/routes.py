@@ -69,7 +69,16 @@ def publicar_viaje():
         db.session.commit()
         flash('¡Viaje publicado con éxito!', 'success')
         return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje.id))
-    return render_template('viajes/publicar.html', title='Publicar Viaje', form=form)
+
+    reglas_seguridad = [
+        'Verifica la identidad del conductor antes de subir',
+        'Comparte tu ubicación con alguien de confianza',
+        'Solo viaja con conductores verificados (@uta.edu.ec)',
+        'Usa el cinturón de seguridad siempre',
+        'Reporta cualquier conducta inapropiada',
+    ]
+    return render_template('viajes/publicar.html', title='Publicar Viaje',
+                           form=form, reglas_seguridad=reglas_seguridad)
 
 
 @bp.route('/detalle/<int:viaje_id>')
@@ -230,6 +239,44 @@ def solicitar_unirse(viaje_id):
     db.session.commit()
     flash('¡Te has unido al viaje exitosamente!', 'success')
     return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje_id))
+
+
+@bp.route('/abandonar/<int:viaje_id>', methods=['POST'])
+@login_required
+def abandonar_viaje(viaje_id):
+    """Pasajero abandona / cancela su lugar en un viaje."""
+    viaje = db.get_or_404(Viaje, viaje_id)
+
+    # Solo puede abandonar si el viaje aún no ha iniciado
+    if viaje.estado not in ('abierto', 'completo'):
+        flash('No puedes abandonar un viaje que ya está en curso o finalizado.', 'warning')
+        return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje_id))
+
+    solicitud = Solicitud.query.filter_by(
+        viaje_id=viaje_id,
+        pasajero_id=current_user.id,
+        estado='aceptada'
+    ).first()
+
+    if not solicitud:
+        flash('No tienes una reserva activa en este viaje.', 'info')
+        return redirect(url_for('viajes.detalle_viaje', viaje_id=viaje_id))
+
+    # Liberar el cupo y marcar la solicitud como cancelada
+    solicitud.estado = 'cancelada'
+    viaje.cupos_disponibles += 1
+    if viaje.estado == 'completo':
+        viaje.estado = 'abierto'
+
+    EventoTrazabilidad.registrar(
+        accion='pasajero_abandono',
+        usuario_id=current_user.id,
+        viaje_id=viaje.id,
+        detalles={'viaje_origen': viaje.origen_zona, 'viaje_destino': viaje.destino_zona}
+    )
+    db.session.commit()
+    flash('Has salido del viaje correctamente. Tu cupo quedó disponible.', 'info')
+    return redirect(url_for('viajes.mis_viajes'))
 
 
 @bp.route('/expulsar/<int:solicitud_id>', methods=['POST'])

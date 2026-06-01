@@ -226,29 +226,10 @@ function seleccionarEspera(mins, btn) {
     }
 }
 
-// Activar botón "Sin límite" por defecto al cargar
-window.addEventListener('load', function() {
-    const btnSinLimite = document.querySelector('.btn-espera[data-mins="0"]');
-    if (btnSinLimite) seleccionarEspera(0, btnSinLimite);
-});
-
 let map = null;
 let markerOrigen = null;
 let markerDestino = null;
 let routeLayer = null;
-
-// Iconos estilo U-Ride
-const iconOrigen = L.divIcon({
-    className: '',
-    html: `<div style="width:34px;height:34px;border-radius:50% 50% 50% 0;background:#dc2626;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>`,
-    iconSize: [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -38]
-});
-
-const iconDestino = L.divIcon({
-    className: '',
-    html: `<div style="width:34px;height:34px;border-radius:50% 50% 50% 0;background:#1f2937;transform:rotate(-45deg);border:3px solid #dc2626;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>`,
-    iconSize: [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -38]
-});
 
 // Autocomplete con Nominatim
 let timeoutOrigen, timeoutDestino;
@@ -263,7 +244,7 @@ function setupAutocomplete(inputId, listId, isOrigen) {
         if (query.length < 4) { list.style.display = 'none'; return; }
 
         const timeoutId = setTimeout(() => {
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`)
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=ec&limit=6`)
                 .then(r => r.json())
                 .then(data => {
                     list.innerHTML = '';
@@ -279,15 +260,25 @@ function setupAutocomplete(inputId, listId, isOrigen) {
                                 list.style.display = 'none';
                                 const lat = parseFloat(item.lat);
                                 const lon = parseFloat(item.lon);
-                                
-                                if (isOrigen) {
-                                    markerOrigen.setLatLng([lat, lon]);
-                                    map.setView([lat, lon], 14);
+                                if (map && markerOrigen && markerDestino) {
+                                    if (isOrigen) {
+                                        markerOrigen.setLatLng([lat, lon]);
+                                        map.setView([lat, lon], 14);
+                                    } else {
+                                        markerDestino.setLatLng([lat, lon]);
+                                    }
+                                    updateHiddenFields();
+                                    drawRoute();
                                 } else {
-                                    markerDestino.setLatLng([lat, lon]);
+                                    // Mapa aun no inicializado: guardar coords en hidden
+                                    if (isOrigen) {
+                                        document.getElementById('origen_lat').value = lat.toFixed(6);
+                                        document.getElementById('origen_lng').value = lon.toFixed(6);
+                                    } else {
+                                        document.getElementById('destino_lat').value = lat.toFixed(6);
+                                        document.getElementById('destino_lng').value = lon.toFixed(6);
+                                    }
                                 }
-                                updateHiddenFields();
-                                drawRoute();
                             });
                             list.appendChild(li);
                         });
@@ -295,8 +286,9 @@ function setupAutocomplete(inputId, listId, isOrigen) {
                     } else {
                         list.style.display = 'none';
                     }
-                });
-        }, 500);
+                })
+                .catch(() => { list.style.display = 'none'; });
+        }, 400);
 
         if (isOrigen) timeoutOrigen = timeoutId; else timeoutDestino = timeoutId;
     });
@@ -313,7 +305,6 @@ function reverseGeocode(lat, lng, isOrigen) {
         .then(r => r.json())
         .then(data => {
             if (data && data.display_name) {
-                // Simplificamos la dirección para que no sea excesivamente larga
                 let address = data.address.road || data.address.neighbourhood || data.address.suburb || data.display_name;
                 if (data.address.city || data.address.town) {
                     address += `, ${data.address.city || data.address.town}`;
@@ -324,12 +315,25 @@ function reverseGeocode(lat, lng, isOrigen) {
                     document.getElementById('destino_zona').value = address;
                 }
             }
-        });
+        })
+        .catch(() => {});
 }
 
 function initInteractiveMap(lat, lng) {
-    if (map) { map.remove(); }
-    
+    // Iconos definidos aqui dentro para garantizar que L ya esta cargado
+    const iconOrigen = L.divIcon({
+        className: '',
+        html: `<div style="width:34px;height:34px;border-radius:50% 50% 50% 0;background:#dc2626;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>`,
+        iconSize: [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -38]
+    });
+    const iconDestino = L.divIcon({
+        className: '',
+        html: `<div style="width:34px;height:34px;border-radius:50% 50% 50% 0;background:#1f2937;transform:rotate(-45deg);border:3px solid #dc2626;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>`,
+        iconSize: [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -38]
+    });
+
+    if (map) { map.remove(); map = null; }
+
     map = L.map('mapa-preview').setView([lat, lng], 14);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap', maxZoom: 19
@@ -340,77 +344,99 @@ function initInteractiveMap(lat, lng) {
 
     markerOrigen = L.marker([lat, lng], { icon: iconOrigen, draggable: true }).addTo(map)
         .bindPopup("<b>Arrastra</b> para ubicar el <b>Origen</b> exacto").openPopup();
-        
+
     markerDestino = L.marker([latDestino, lngDestino], { icon: iconDestino, draggable: true }).addTo(map)
         .bindPopup("<b>Arrastra</b> para ubicar el <b>Destino</b> exacto");
 
     updateHiddenFields();
-    
-    // Obtener las direcciones iniciales por Reverse Geocoding
+
     if (!document.getElementById('origen_zona').value) reverseGeocode(lat, lng, true);
     if (!document.getElementById('destino_zona').value) reverseGeocode(latDestino, lngDestino, false);
 
     drawRoute();
 
-    markerOrigen.on('dragend', function() { 
+    markerOrigen.on('dragend', function() {
         const p = markerOrigen.getLatLng();
-        updateHiddenFields(); 
+        updateHiddenFields();
         reverseGeocode(p.lat, p.lng, true);
-        drawRoute(); 
+        drawRoute();
     });
-    markerDestino.on('dragend', function() { 
+    markerDestino.on('dragend', function() {
         const p = markerDestino.getLatLng();
-        updateHiddenFields(); 
+        updateHiddenFields();
         reverseGeocode(p.lat, p.lng, false);
-        drawRoute(); 
+        drawRoute();
     });
 }
 
 function updateHiddenFields() {
+    if (!markerOrigen || !markerDestino) return;
     const pO = markerOrigen.getLatLng();
     const pD = markerDestino.getLatLng();
-    
     document.getElementById('origen_lat').value = pO.lat.toFixed(6);
     document.getElementById('origen_lng').value = pO.lng.toFixed(6);
-    
     document.getElementById('destino_lat').value = pD.lat.toFixed(6);
     document.getElementById('destino_lng').value = pD.lng.toFixed(6);
 }
 
 function drawRoute() {
-    if (routeLayer) { map.removeLayer(routeLayer); }
+    if (!map || !markerOrigen || !markerDestino) return;
+    if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
     const pO = markerOrigen.getLatLng();
     const pD = markerDestino.getLatLng();
-
     const url = `https://router.project-osrm.org/route/v1/driving/${pO.lng},${pO.lat};${pD.lng},${pD.lat}?overview=full&geometries=geojson`;
-
-    fetch(url).then(r => r.json()).then(osrm => {
-        if (osrm.code === 'Ok' && osrm.routes[0]) {
-            const routeCoords = osrm.routes[0].geometry.coordinates;
-            const latLngs = routeCoords.map(coord => [coord[1], coord[0]]);
-            routeLayer = L.polyline(latLngs, { color: '#dc2626', weight: 5, opacity: 0.85 }).addTo(map);
-            map.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
-        }
-    }).catch(err => console.error('OSRM route error', err));
+    fetch(url)
+        .then(r => r.json())
+        .then(osrm => {
+            if (osrm.code === 'Ok' && osrm.routes[0]) {
+                const latLngs = osrm.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                routeLayer = L.polyline(latLngs, { color: '#dc2626', weight: 5, opacity: 0.85 }).addTo(map);
+                map.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
+            }
+        })
+        .catch(err => console.warn('OSRM route error', err));
 }
 
-window.addEventListener('load', function() {
-    setupAutocomplete('origen_zona', 'origen-suggestions', true);
-    setupAutocomplete('destino_zona', 'destino-suggestions', false);
-    
-    document.getElementById('preview-info').innerHTML = `<i class="fas fa-spinner fa-spin text-primary me-2"></i> Obteniendo ubicación exacta...`;
-    
+// Esperar a que Leaflet este disponible (puede tardar por el defer)
+function waitForLeaflet(callback) {
+    if (typeof L !== 'undefined' && L.map) {
+        callback();
+    } else {
+        setTimeout(() => waitForLeaflet(callback), 80);
+    }
+}
+
+function inicializarMapaConGPS() {
+    document.getElementById('preview-info').innerHTML =
+        `<i class="fas fa-spinner fa-spin text-primary me-2"></i> Obteniendo ubicación exacta...`;
     if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(pos => {
-            document.getElementById('preview-info').innerHTML = `<i class="fas fa-hand-pointer me-1 text-primary"></i> ¡Arrastra los marcadores o busca una dirección!`;
-            initInteractiveMap(pos.coords.latitude, pos.coords.longitude);
-        }, err => {
-            document.getElementById('preview-info').innerHTML = `<i class="fas fa-exclamation-triangle text-warning me-1"></i> Sin GPS. Arrastra los marcadores libremente o busca.`;
-            initInteractiveMap(-1.24908, -78.62518); // Coordenadas centrales UTA o similar
-        }, { timeout: 7000 });
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                document.getElementById('preview-info').innerHTML =
+                    `<i class="fas fa-hand-pointer me-1 text-primary"></i> ¡Arrastra los marcadores o busca una dirección!`;
+                initInteractiveMap(pos.coords.latitude, pos.coords.longitude);
+            },
+            () => {
+                document.getElementById('preview-info').innerHTML =
+                    `<i class="fas fa-exclamation-triangle text-warning me-1"></i> Sin GPS. Arrastra los marcadores libremente o busca.`;
+                initInteractiveMap(-1.24908, -78.62518);
+            },
+            { timeout: 7000 }
+        );
     } else {
         initInteractiveMap(-1.24908, -78.62518);
     }
+}
+
+// Iniciar todo al cargar la pagina
+document.addEventListener('DOMContentLoaded', function() {
+    setupAutocomplete('origen_zona', 'origen-suggestions', true);
+    setupAutocomplete('destino_zona', 'destino-suggestions', false);
+    // Activar boton sin limite por defecto
+    const btnSinLimite = document.querySelector('.btn-espera[data-mins="0"]');
+    if (btnSinLimite) seleccionarEspera(0, btnSinLimite);
+    // Iniciar mapa solo cuando Leaflet este cargado
+    waitForLeaflet(inicializarMapaConGPS);
 });
 </script>
 {% endblock %}
