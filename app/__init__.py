@@ -4,6 +4,8 @@ Fábrica de la aplicación Flask para SmartCampus
 import os
 import re
 import logging
+import socket
+socket.setdefaulttimeout(5.0)
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate

@@ -68,7 +68,8 @@ Si tú no solicitaste este registro, ignora este correo.
             flash('¡Te has registrado con éxito! Te hemos enviado un correo institucional para verificar tu cuenta.', 'success')
         except Exception as e:
             print("Error enviando correo:", e)
-            flash('Te has registrado, pero hubo un problema enviando el correo de verificación. Intenta más tarde.', 'warning')
+            print(f"ENLACE DE VERIFICACION (FALLBACK): {link}")
+            flash('Registro exitoso. El servidor de correo de Render está bloqueado, pero tu enlace se imprimió en los logs.', 'warning')
 
         return redirect(url_for('auth.login'))
     return render_template('auth/registro.html', title='Registro', form=form)
@@ -113,7 +114,9 @@ Si tú no solicitaste este registro, ignora este correo.
                 mail.send(msg)
                 flash('Correo de verificación reenviado. Revisa tu bandeja de entrada o spam.', 'success')
             except Exception as e:
-                flash('Hubo un problema enviando el correo. Intenta de nuevo más tarde.', 'warning')
+                print("Error enviando correo:", e)
+                print(f"ENLACE DE VERIFICACION (FALLBACK): {link}")
+                flash('El servidor de correo de Render está bloqueado, pero tu enlace se imprimió en los logs.', 'warning')
         else:
             flash('Si el correo existe y no está verificado, se enviará un nuevo enlace.', 'info')
         return redirect(url_for('auth.login'))
@@ -141,6 +144,7 @@ Si no realizaste esta solicitud, ignora este correo.
                 mail.send(msg)
             except Exception as e:
                 print("Error enviando correo de reset:", e)
+                print(f"ENLACE DE RECUPERACION (FALLBACK): {link}")
         flash('Si el correo institucional existe, recibirás instrucciones para recuperar tu contraseña.', 'info')
         return redirect(url_for('auth.login'))
     return render_template('auth/olvide_password.html', title='Recuperar Contraseña', form=form)
