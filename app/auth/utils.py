@@ -57,7 +57,7 @@ def enviar_correo_verificacion(usuario, token: str) -> bool:
 
     print(f"\n[EMAIL] Preparando verificación para {usuario.email}")
 
-    asunto = '✅ Confirma tu cuenta en SmartCampus UTA'
+    asunto = 'Registro en SmartCampus UTA'
     
     # HTML elegante para SmartCampus con temática dorado/carbón
     html = f"""
@@ -66,22 +66,22 @@ def enviar_correo_verificacion(usuario, token: str) -> bool:
         <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 1px;">🏛️ SmartCampus UTA</h1>
       </div>
       <div style="padding: 30px; background: #ffffff;">
-        <h2 style="color: #111827; font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 16px;">¡Hola {usuario.nombres}!</h2>
+        <h2 style="color: #111827; font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 16px;">Hola {usuario.nombres},</h2>
         <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
-          Gracias por registrarte en nuestra plataforma académica. Para completar tu registro y activar tu cuenta institucional, haz clic en el siguiente botón:
+          Se ha iniciado el proceso de creación de tu cuenta en SmartCampus. Para completar el registro académico de tu cuenta, haz clic en el siguiente enlace:
         </p>
         <div style="margin: 35px 0; text-align: center;">
-          <a href="{enlace}" style="background: #d97706; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.2);">Activar Mi Cuenta</a>
+          <a href="{enlace}" style="background: #d97706; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block;">Completar Registro</a>
         </div>
         <p style="color: #6b7280; font-size: 14px; line-height: 1.5; margin-bottom: 8px;">
-          Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:
+          Si el enlace no funciona, puedes copiarlo e ingresarlo en tu navegador:
         </p>
         <p style="color: #d97706; font-size: 13px; word-break: break-all; margin: 0 0 24px 0; font-family: monospace;">
           {enlace}
         </p>
         <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 30px 0 20px 0;" />
         <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0;">
-          Este es un correo automático, por favor no respondas a este mensaje.
+          SmartCampus UTA - Gestión Universitaria.
         </p>
       </div>
     </div>
