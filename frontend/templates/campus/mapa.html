@@ -5,25 +5,27 @@
 {% block styles %}
 <style>
 .grafo-canvas {
-    background: var(--sidebar-bg);
+    background: #0f172a;
     border-radius: var(--radius-md);
     border: 1px solid rgba(201,162,39,.15);
-    width: 100%; height: 500px;
+    width: 100%; height: 750px;
     position: relative; overflow: hidden;
-    /* IMAGEN DE FONDO DEL CAMPUS */
-    background-image: url("{{ url_for('static', filename='img/mapa_fondo.png') }}");
-    background-size: cover;
+    background-image: 
+        radial-gradient(circle, rgba(201,162,39,0.08) 0%, transparent 80%),
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
     background-position: center;
 }
 .grafo-svg { width:100%; height:100%; position: absolute; top:0; left:0; z-index: 10;}
 /* Estilo similar a los pines azules de la imagen de referencia */
-.nodo-circulo { fill: #4c70b8; stroke: #ffffff; stroke-width: 2; cursor: pointer; transition: all .3s; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5)); }
-.nodo-circulo:hover, .nodo-circulo.active { stroke: #c9a227; stroke-width: 4; fill: #3b5998; }
-.nodo-label { fill: #ffffff; font-size: 13px; font-family: 'Inter',sans-serif; font-weight: 800; text-anchor: middle; pointer-events: none; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
-.arista-linea { stroke: rgba(255,255,255,0.7); stroke-width: 4; stroke-dasharray: 6 6; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.4)); }
+.nodo-circulo { fill: #1e3a8a; stroke: #ffffff; stroke-width: 2.5; cursor: pointer; transition: all .3s; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.6)); }
+.nodo-circulo:hover, .nodo-circulo.active { stroke: #c9a227; stroke-width: 4; fill: #d97706; }
+.nodo-label { fill: #ffffff; font-size: 12px; font-family: 'Inter',sans-serif; font-weight: 800; text-anchor: middle; pointer-events: none; text-shadow: 1px 1px 3px rgba(0,0,0,0.9); }
+.arista-linea { stroke: rgba(255,255,255,0.25); stroke-width: 4; stroke-dasharray: 6 6; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.4)); }
 .arista-activa { stroke: #10b981; stroke-width: 6; stroke-dasharray: none; animation: dash 1s linear infinite; filter: drop-shadow(0 0 8px rgba(16,185,129,0.8)); }
 @keyframes dash { to { stroke-dashoffset: -12; } }
-.peso-label { fill: #111; background: #fff; font-size: 13px; font-family:'Inter',sans-serif; font-weight: 800; text-shadow: 1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff; }
+.peso-label { fill: #ffffff; font-size: 11px; font-family:'Inter',sans-serif; font-weight: 800; text-anchor: middle; text-shadow: 1px 1px 3px rgba(0,0,0,0.9); }
 .result-step {
     display: flex; align-items: center; gap: 8px;
     padding: 10px 14px;
@@ -109,7 +111,7 @@
                 <span style="font-size:.75rem;color:rgba(255,255,255,.4);">Vista de Facultades - {{ puntos|length }} ubicaciones</span>
             </div>
             <div class="grafo-canvas">
-                <svg class="grafo-svg" id="grafoSVG" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet">
+                <svg class="grafo-svg" id="grafoSVG" viewBox="150 100 600 780" preserveAspectRatio="xMidYMid meet">
                     <!-- Aristas -->
                     {% for c in conexiones %}
                     {% set po = puntos_dict[c.punto_origen_id] %}
