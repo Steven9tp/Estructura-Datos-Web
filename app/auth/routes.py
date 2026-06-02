@@ -69,7 +69,9 @@ Si tú no solicitaste este registro, ignora este correo.
         except Exception as e:
             print("Error enviando correo:", e)
             print(f"ENLACE DE VERIFICACION (FALLBACK): {link}")
-            flash('Registro exitoso. El servidor de correo de Render está bloqueado, pero tu enlace se imprimió en los logs.', 'warning')
+            user.email_verificado = True
+            db.session.commit()
+            flash('¡Registro exitoso! Como el servidor gratuito de Render bloquea el correo, tu cuenta ha sido ACTIVADA AUTOMÁTICAMENTE para que puedas probarla.', 'warning')
 
         return redirect(url_for('auth.login'))
     return render_template('auth/registro.html', title='Registro', form=form)
