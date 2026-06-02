@@ -33,17 +33,41 @@ graph TD
 
 ## 3. RELACIÓN Y MAPEO DE LAS ESTRUCTURAS DE DATOS
 
-A continuación se detalla cómo se asocia cada estructura de datos propia con una función real del sistema:
+A continuación se detalla por qué se usó, cómo funciona y en qué archivo exacto se encuentra la implementación de cada una de las estructuras de datos propias del proyecto:
 
-| Estructura implementada | Caso de Uso en SmartCampus | Justificación y Funcionamiento |
-| :--- | :--- | :--- |
-| **Lista Simplemente Enlazada (`ListaSimple`)** | Catálogo de tipos de trámites académicos. | Crecimiento dinámico y flexible a medida que la secretaría de la UTA agrega o remueve tipos de solicitudes académicas. |
-| **Lista Doblemente Enlazada (`ListaDoble`)** | Navegación del historial de expedientes y auditoría. | Permite recorrer el historial de acciones del estudiante de forma bidireccional (hacia adelante y hacia atrás). |
-| **Lista Circular (`ListaCircular`)** | Asignación Round-Robin de Ventanillas de Atención. | Distribuye de forma secuencial y cíclica los turnos creados entre las ventanillas activas del campus. Al llegar a la última, el puntero regresa al inicio automáticamente. |
-| **Pila (LIFO - `Pila`)** | Historial de acciones en la bitácora y opción de deshacer. | Permite acceder rápidamente a la última acción registrada en el sistema. |
-| **Cola (FIFO - `Cola`)** | Fila virtual para atención estudiantil. | Modela el principio clásico de "primero en llegar, primero en ser atendido" (FIFO). Garantiza equidad y orden en los turnos. |
-| **Árbol N-Ario (`ArbolNArio`)** | Organigrama jerárquico de dependencias (Rectorado $\rightarrow$ Facultades $\rightarrow$ Carreras). | Organiza la información en una estructura de nodos padre-hijo sin restricciones de grado (un rectorado tiene N facultades, y una facultad tiene N carreras). |
-| **Grafo No Dirigido con Pesos (`Grafo`)** | Mapa del campus y cálculo de rutas óptimas. | Los edificios y patios representan los nodos (vértices), y las caminerías representan las aristas. El peso es la distancia en metros entre ellos. |
+### 1. Las Listas (`ListaSimple`, `ListaDoble`, `ListaCircular`)
+*   **¿Por qué se usó?**: Se usan para el almacenamiento secuencial dinámico. Como los datos académicos (como tipos de trámites o historial de auditoría) cambian constantemente, usar arreglos estáticos desperdiciaría memoria o limitaría el espacio.
+*   **¿Cómo funciona?**: Enlazan nodos mediante punteros en memoria RAM. La `ListaSimple` apunta al siguiente nodo, la `ListaDoble` tiene doble puntero (siguiente y anterior) para navegar en ambas direcciones, y la `ListaCircular` conecta el último nodo con el primero para dar vueltas cíclicas infinitas.
+*   **¿Dónde está en el código?**: 
+    *   **Implementación:** Definidas a mano en [app/estructuras/basicas.py](file:///c:/Users/Administrador/Desktop/APP%20estrctura%20de%20datos%20Proyecto%20-%20copia/app/estructuras/basicas.py#L9-L135).
+
+### 2. La Cola (`Cola` - FIFO)
+*   **¿Por qué se usó?**: Para el módulo de **atención estudiantil y turnos de ventanilla**. Mapea el flujo físico de personas de manera 100% equitativa.
+*   **¿Cómo funciona?**: Sigue la regla FIFO (*First-In, First-Out*): el primer estudiante en encolarse es el primero en ser llamado y atendido. Su tiempo de ejecución para insertar (`encolar`) y retirar (`desencolar`) es de $O(1)$ constante.
+*   **¿Dónde está en el código?**:
+    *   **Implementación:** En [app/estructuras/basicas.py](file:///c:/Users/Administrador/Desktop/APP%20estrctura%20de%20datos%20Proyecto%20-%20copia/app/estructuras/basicas.py#L162-L177).
+    *   **Uso en la lógica:** En [app/atencion/routes.py](file:///c:/Users/Administrador/Desktop/APP%20estrctura%20de%20datos%20Proyecto%20-%20copia/app/atencion/routes.py#L15-L22) (donde se definen las colas por dependencia y se gestionan las ventanillas).
+
+### 3. La Pila (`Pila` - LIFO)
+*   **¿Por qué se usó?**: Para registrar el **historial de acciones y bitácora de trámites** del usuario, permitiendo rastrear sus movimientos y revertirlos.
+*   **¿Cómo funciona?**: Sigue la regla LIFO (*Last-In, First-Out*): la última acción registrada es la primera que se puede visualizar o "deshacer" (como una pila de platos).
+*   **¿Dónde está en el código?**:
+    *   **Implementación:** En [app/estructuras/basicas.py](file:///c:/Users/Administrador/Desktop/APP%20estrctura%20de%20datos%20Proyecto%20-%20copia/app/estructuras/basicas.py#L140-L157).
+    *   **Uso en la lógica:** En [app/tramites/routes.py](file:///c:/Users/Administrador/Desktop/APP%20estrctura%20de%20datos%20Proyecto%20-%20copia/app/tramites/routes.py#L40-L60) (donde se alimenta la bitácora de acciones del usuario).
+
+### 4. El Árbol N-Ario (`ArbolNArio`)
+*   **¿Por qué se usó?**: Para modelar el **organigrama institucional** de dependencias de la universidad (Rectorado $\rightarrow$ Facultades $\rightarrow$ Carreras).
+*   **¿Cómo funciona?**: Es un árbol jerárquico no lineal donde cada nodo representa una oficina o departamento y puede tener múltiples nodos hijos vinculados. Se recorre de forma recursiva.
+*   **¿Dónde está en el código?**:
+    *   **Implementación:** En [app/estructuras/basicas.py](file:///c:/Users/Administrador/Desktop/APP%20estrctura%20de%20datos%20Proyecto%20-%20copia/app/estructuras/basicas.py#L182-L245).
+    *   **Uso en la lógica:** En [app/organizacion/routes.py](file:///c:/Users/Administrador/Desktop/APP%20estrctura%20de%20datos%20Proyecto%20-%20copia/app/organizacion/routes.py#L18-L45) (donde se carga el árbol organizacional y se calcula su profundidad/altura).
+
+### 5. El Grafo (`Grafo`)
+*   **¿Por qué se usó?**: Para el **mapa físico de caminerías y edificios** de la universidad, permitiendo calcular la ruta óptima de navegación.
+*   **¿Cómo funciona?**: Los edificios son nodos (vértices) y las veredas son conexiones (aristas) con un valor en metros (peso). Se utiliza el algoritmo de **Dijkstra** para explorar las conexiones y encontrar el camino más rápido entre cualquier origen y destino.
+*   **¿Dónde está en el código?**:
+    *   **Implementación:** En [app/estructuras/basicas.py](file:///c:/Users/Administrador/Desktop/APP%20estrctura%20de%20datos%20Proyecto%20-%20copia/app/estructuras/basicas.py#L250-L300).
+    *   **Uso en la lógica:** En [app/campus/routes.py](file:///c:/Users/Administrador/Desktop/APP%20estrctura%20de%20datos%20Proyecto%20-%20copia/app/campus/routes.py#L30-L55) (donde se reciben las coordenadas y se ejecuta Dijkstra para pintar la ruta en el mapa).
 
 ---
 

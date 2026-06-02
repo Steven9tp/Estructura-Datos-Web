@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block title %}Panel de Control de Administración{% endblock %}
+{% block page_title %}<i class="fas fa-user-shield me-2" style="color:var(--accent)"></i>Panel de Control de Administración{% endblock %}
+
+{% block styles %}
+<style>
+.stat-card-admin {
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all var(--transition);
+}
+.stat-card-admin:hover {
+    transform: translateY(-2px);
+    border-color: rgba(201, 162, 39, 0.3);
+}
+.stat-icon-admin {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(201, 162, 39, 0.1);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+.stat-info-admin {
+    display: flex;
+    flex-direction: column;
+}
+.stat-value-admin {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+.stat-label-admin {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.admin-table th, .admin-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+.admin-table th {
+    background: rgba(0, 0, 0, 0.15);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+.admin-table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+.badge-role {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+.badge-role.estudiante {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+.badge-role.empleado {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+.badge-role.admin {
+    background: rgba(201, 162, 39, 0.1);
+    color: var(--accent);
+}
+.search-bar-wrap {
+    position: relative;
+    max-width: 350px;
+    width: 100%;
+}
+.search-bar-wrap i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+.search-bar-wrap input {
+    width: 100%;
+    padding: 10px 16px 10px 36px;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    transition: all var(--transition);
+}
+.search-bar-wrap input:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Estadísticas de Gestión -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4 col-lg-2">
+        <div class="stat-card-admin">
+            <div class="stat-icon-admin"><i class="fas fa-users"></i></div>
+            <div class="stat-info-admin">
+                <span class="stat-value-admin">{{ stats.total_usuarios }}</span>
+                <span class="stat-label-admin">Usuarios</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="stat-card-admin">
+            <div class="stat-icon-admin" style="background:rgba(59,130,246,0.1); color:#3b82f6;"><i class="fas fa-user-graduate"></i></div>
+            <div class="stat-info-admin">
+                <span class="stat-value-admin" style="color:#3b82f6;">{{ stats.total_estudiantes }}</span>
+                <span class="stat-label-admin">Alumnos</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="stat-card-admin">
+            <div class="stat-icon-admin" style="background:rgba(16,185,129,0.1); color:#10b981;"><i class="fas fa-user-tie"></i></div>
+            <div class="stat-info-admin">
+                <span class="stat-value-admin" style="color:#10b981;">{{ stats.total_personal }}</span>
+                <span class="stat-label-admin">Personal</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="stat-card-admin">
+            <div class="stat-icon-admin"><i class="fas fa-shield-alt"></i></div>
+            <div class="stat-info-admin">
+                <span class="stat-value-admin">{{ stats.total_admins }}</span>
+                <span class="stat-label-admin">Admins</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="stat-card-admin">
+            <div class="stat-icon-admin" style="background:rgba(16, 185, 129, 0.1); color:#10b981;"><i class="fas fa-ticket-alt"></i></div>
+            <div class="stat-info-admin">
+                <span class="stat-value-admin" style="color:#10b981;">{{ stats.turnos_atendidos }}</span>
+                <span class="stat-label-admin">Atendidos</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="stat-card-admin">
+            <div class="stat-icon-admin" style="background:rgba(217, 119, 6, 0.1); color:#d97706;"><i class="fas fa-clock"></i></div>
+            <div class="stat-info-admin">
+                <span class="stat-value-admin" style="color:#d97706;">{{ stats.turnos_espera }}</span>
+                <span class="stat-label-admin">En Cola</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Administración de Cuentas y Roles -->
+<div class="card-uride">
+    <div class="card-header-uride d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <h5 class="fw-bold mb-0"><i class="fas fa-users-cog me-2" style="color:var(--accent)"></i>Administración de Cuentas de la UTA</h5>
+        <div class="search-bar-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" id="userInput" placeholder="Buscar por nombre, email o cédula..." onkeyup="filtrarUsuarios()">
+        </div>
+    </div>
+    <div class="card-body-uride p-0" style="overflow-x:auto;">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nombre Completo</th>
+                    <th>Cédula</th>
+                    <th>Correo Institucional</th>
+                    <th>Rol Actual</th>
+                    <th>Acciones Rol</th>
+                    <th>Estado Cuenta</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                {% for u in usuarios %}
+                <tr class="user-row">
+                    <td>
+                        <div class="fw-bold">{{ u.nombres }} {{ u.apellidos }}</div>
+                    </td>
+                    <td class="text-monospace">{{ u.cedula }}</td>
+                    <td>{{ u.email }}</td>
+                    <td>
+                        <span class="badge-role {{ u.tipo_usuario }}">{{ u.tipo_usuario }}</span>
+                    </td>
+                    <td>
+                        <form method="POST" class="d-inline d-flex align-items-center gap-1">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="action" value="cambiar_rol">
+                            <input type="hidden" name="user_id" value="{{ u.id }}">
+                            <select name="nuevo_rol" class="form-select form-select-sm" style="background:var(--bg-main); border-color:var(--border); color:var(--text-primary); font-size:0.75rem; width:110px;">
+                                <option value="estudiante" {% if u.tipo_usuario == 'estudiante' %}selected{% endif %}>Estudiante</option>
+                                <option value="empleado" {% if u.tipo_usuario == 'empleado' %}selected{% endif %}>Empleado</option>
+                                <option value="admin" {% if u.tipo_usuario == 'admin' %}selected{% endif %}>Admin</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline-warning" title="Cambiar rol">
+                                <i class="fas fa-save"></i>
+                            </button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="POST" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="action" value="toggle_activo">
+                            <input type="hidden" name="user_id" value="{{ u.id }}">
+                            {% if u.activo %}
+                            <button type="submit" class="btn btn-sm btn-success px-2 py-1" style="font-size:0.75rem;" {% if u.id == current_user.id %}disabled title="No puedes desactivarte a ti mismo"{% endif %}>
+                                <i class="fas fa-check-circle me-1"></i>Activo
+                            </button>
+                            {% else %}
+                            <button type="submit" class="btn btn-sm btn-danger px-2 py-1" style="font-size:0.75rem;">
+                                <i class="fas fa-times-circle me-1"></i>Bloqueado
+                            </button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filtrarUsuarios() {
+    const input = document.getElementById('userInput');
+    const filter = input.value.toLowerCase();
+    const rows = document.getElementsByClassName('user-row');
+
+    for (let i = 0; i < rows.length; i++) {
+        const text = rows[i].textContent.toLowerCase();
+        if (text.indexOf(filter) > -1) {
+            rows[i].style.display = "";
+        } else {
+            rows[i].style.display = "none";
+        }
+    }
+}
+</script>
+{% endblock %}

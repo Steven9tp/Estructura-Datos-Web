@@ -224,3 +224,11 @@ El sistema se diseñó para ejecutarse de forma persistente y gratuita empleando
 2.  Selecciona un edificio de origen (ej. Facultad de Sistemas) y uno de destino (ej. Biblioteca Central).
 3.  Haz clic en "Calcular Ruta Óptima".
 4.  El sistema carga los puntos y caminos de la base de datos, inicializa el TDA **Grafo**, ejecuta el algoritmo de **Dijkstra** en peor caso, y muestra en pantalla la ruta exacta nodo por nodo junto a la distancia total acumulada.
+
+### 7.5 Panel de Control de Administración (RF2, RF3, RF11)
+1.  Los usuarios con rol de **Administrador** (`admin`) tienen acceso exclusivo al menú **"Panel Control"** en la barra lateral.
+2.  **Panel de Estadísticas (RF11):** Muestra de forma consolidada la cantidad de usuarios activos agrupados por tipo (Alumnos, Personal, Administradores) y el estado global de los turnos en cola.
+3.  **Gestión de Cuentas y Roles (RF2, RF3):** Presenta una tabla interactiva con todos los usuarios registrados. El administrador puede:
+    *   Buscar/filtrar usuarios al instante por nombres, correo o cédula mediante el buscador integrado en JavaScript.
+    *   Modificar roles de usuarios en tiempo real seleccionando el nuevo rol (Estudiante, Empleado, Administrador) en el selector y guardándolo.
+    *   Bloquear o desbloquear cuentas de forma segura (excepto la propia cuenta del administrador activo por seguridad) haciendo clic en el indicador de estado.

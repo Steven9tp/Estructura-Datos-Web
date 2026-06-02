@@ -162,10 +162,7 @@ def pantalla():
 @bp.route('/atender', methods=['POST'])
 @login_required
 def atender():
-    if current_user.tipo_usuario == 'estudiante':
-        flash('Acceso denegado. Solo personal puede atender turnos.', 'danger')
-        return redirect(url_for('atencion.pantalla'))
-
+    # Para la defensa académica, permitimos a todos (incluidos estudiantes) simular el avance de turnos
     sincronizar_colas()
 
     # Opción: el admin especifica qué dependencia atender

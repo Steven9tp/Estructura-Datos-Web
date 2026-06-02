@@ -45,6 +45,12 @@
 {% endblock %}
 
 {% block content %}
+{% if atendidos and current_user.is_authenticated and atendidos[0].usuario_id == current_user.id %}
+<div class="alert text-center fw-bold py-3 mb-4" style="background: rgba(217, 119, 6, 0.2); border: 2px solid #d97706; color: #fff; font-size: 1.25rem; border-radius: 12px; animation: pulse-ring 1.5s infinite;">
+    🚨 ¡ES TU TURNO! Tu turno <span style="color:#c9a227; font-size:1.6rem; font-weight:900;">{{ atendidos[0].codigo_turno }}</span> está siendo atendido en Ventanilla.
+    <audio autoplay src="https://assets.mixkit.co/active_storage/sfx/2869/2869-120.wav"></audio>
+</div>
+{% endif %}
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="pantalla-turno-activo mb-3">
@@ -128,6 +134,20 @@
                     </form>
                     <p class="text-muted text-center mt-2" style="font-size:.72rem;">Desencola al próximo estudiante de la fila seleccionada (FIFO)</p>
                 </div>
+                {% else %}
+                <!-- Simulador rápido para defensa académica (visible para estudiantes para facilitar pruebas) -->
+                <div class="mt-4 pt-3" style="border-top:1px dashed rgba(201,162,39,.3);">
+                    <div style="font-size:.75rem; color:#c9a227; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">
+                        <i class="fas fa-vial me-1"></i>Simulador de Cola (Para Defensa)
+                    </div>
+                    <form method="POST" action="{{ url_for('atencion.atender') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-atender" style="background: linear-gradient(135deg, #d97706, #b45309); color:#fff; padding: 12px 20px; font-size:.9rem; box-shadow: none;">
+                            <i class="fas fa-fast-forward me-2"></i>Simular Avance de Turno
+                        </button>
+                    </form>
+                    <p class="text-muted text-center mt-2" style="font-size:.68rem;">Llama al siguiente estudiante de la cola sin requerir rol administrativo.</p>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -135,5 +155,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>setTimeout(() => window.location.reload(), 30000);</script>
+<script>setTimeout(() => window.location.reload(), 5000);</script>
 {% endblock %}

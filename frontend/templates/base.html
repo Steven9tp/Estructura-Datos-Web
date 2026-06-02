@@ -111,6 +111,11 @@
             <i class="fas fa-clipboard-list"></i><span>Bitácora</span>
         </a>
         {% endif %}
+        {% if current_user.tipo_usuario == 'admin' %}
+        <a href="{{ url_for('main.admin_panel') }}" class="nav-link-item {% if request.endpoint == 'main.admin_panel' %}active{% endif %}">
+            <i class="fas fa-user-shield"></i><span>Panel Control</span>
+        </a>
+        {% endif %}
     </nav>
 
     <!-- Footer del sidebar: solo nombre + logout -->
