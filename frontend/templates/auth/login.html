@@ -67,6 +67,7 @@
                     <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;color:var(--text-secondary);">
                         {{ form.remember_me(style="accent-color:var(--accent);") }} Recordarme
                     </label>
+                    <a href="{{ url_for('auth.olvide_password') }}" style="font-size:.85rem;color:var(--accent);text-decoration:none;font-weight:500;">¿Olvidaste tu contraseña?</a>
                 </div>
 
                 {{ form.submit(class="btn-uride btn-primary-uride btn-full btn-lg-uride") }}
@@ -75,6 +76,10 @@
             <div class="text-center mt-4" style="font-size:.85rem;color:var(--text-secondary);">
                 ¿No tienes cuenta?
                 <a href="{{ url_for('auth.registro') }}" style="color:var(--accent);font-weight:600;text-decoration:none;">Regístrate aquí</a>
+            </div>
+            
+            <div class="text-center mt-2" style="font-size:.82rem;">
+                <a href="{{ url_for('auth.reenviar_verificacion') }}" style="color:var(--text-secondary);text-decoration:none;">¿No recibiste el correo de verificación? Reenviar</a>
             </div>
         </div>
     </div>
