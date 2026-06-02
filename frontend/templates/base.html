@@ -107,6 +107,9 @@
         <!-- ADMINISTRACIÓN (solo empleado/admin) -->
         {% if current_user.tipo_usuario in ['empleado', 'admin'] %}
         <div class="nav-section-label mt-3">ADMINISTRACIÓN</div>
+        <a href="{{ url_for('reportes.dashboard') }}" class="nav-link-item {% if request.endpoint == 'reportes.dashboard' %}active{% endif %}">
+            <i class="fas fa-chart-pie"></i><span>Reportes</span>
+        </a>
         <a href="{{ url_for('tramites.bitacora') }}" class="nav-link-item {% if request.endpoint == 'tramites.bitacora' %}active{% endif %}">
             <i class="fas fa-clipboard-list"></i><span>Bitácora</span>
         </a>

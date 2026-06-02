@@ -66,6 +66,8 @@ def create_app(config_name=None):
     app.register_blueprint(campus_bp, url_prefix='/campus')
     from app.tramites import bp as tramites_bp
     app.register_blueprint(tramites_bp, url_prefix='/tramites')
+    from app.reportes import bp as reportes_bp
+    app.register_blueprint(reportes_bp, url_prefix='/reportes')
 
     @app.after_request
     def add_no_cache(response):
