@@ -20,6 +20,8 @@ class RegistroForm(FlaskForm):
     submit = SubmitField('Registrarse')
 
     def validate_email(self, email):
+        if not email.data.endswith('@uta.edu.ec'):
+            raise ValidationError('Solo se permite el registro con correos institucionales de la UTA (@uta.edu.ec).')
         user = Usuario.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError('Por favor, usa un correo electrónico diferente. Este ya está registrado.')
