@@ -71,7 +71,7 @@ A continuación se detalla por qué se usó, cómo funciona y en qué archivo ex
 
 ---
 
-## 4. DETALLE TÉCNICO DE IMPLEMENTACIÓN DE ALGORITMOS
+## 4. DETALLE TÉCNICO DE IMPLEMENTACIÓN DE ALGORITMOS Y MÓDULOS DE EXPOSICIÓN
 
 ### A. Algoritmo de Dijkstra (Cálculo de Rutas)
 Usa una cola de prioridad (`heapq`) para calcular la ruta más corta entre dos puntos del campus.
@@ -89,6 +89,26 @@ def dijkstra(self, inicio, fin):
 Para renderizar el organigrama y buscar dependencias se usan algoritmos recursivos:
 *   **Búsqueda Recursiva:** Busca un nodo recorriendo los hijos de forma recursiva.
 *   **Altura del Árbol:** Determina el número máximo de niveles jerárquicos.
+
+### C. Simulador de Cola y Transmisión en Tiempo Real (Demo de Exposición)
+Para facilitar la demostración ante el tribunal sin requerir múltiples navegadores o sesiones abiertas:
+*   **Bypass de Permisos:** Se modificó temporalmente el endpoint `/atender` en `app/atencion/routes.py` para permitir que el cliente envíe una petición de atención (avanzar la cola) de forma directa.
+*   **Botón de Avance Rápido:** La pantalla de turnos (`/atencion/pantalla`) incorpora un botón de simulación visible en modo demo que ejecuta el avance de la cola.
+*   **Alerta y Timbre de Turno:** En el frontend, un script de JS compara el turno activo con el turno del estudiante en sesión. Si coinciden, se emite una alerta visual dorada parpadeante (`¡ES TU TURNO!`) y se reproduce una señal sonora mediante la API de Audio de HTML5.
+*   **Transmisión:** La pantalla se recarga automáticamente cada **5 segundos** para asegurar dinamismo y respuesta inmediata.
+
+### D. Panel de Control de Administración (RF2, RF3, RF11)
+El panel administrativo (`/admin_panel`) implementa de forma directa las exigencias de la guía académica:
+*   **Panel de Estadísticas (RF11):** Mapea contadores en tiempo real desde la base de datos (Total usuarios, Estudiantes, Personal de la UTA, Turnos en espera y Turnos atendidos).
+*   **Administración de Cuentas (RF3):** Una tabla lista todos los usuarios.
+*   **Gestión de Roles y Permisos (RF2):** Permite cambiar el rol de un usuario en caliente (Estudiante, Empleado, Administrador) y activar/bloquear cuentas con un clic.
+*   **Buscador Dinámico:** Filtro en Javascript en el cliente para buscar usuarios por nombres, cédula o email al instante.
+
+### E. Optimización Visual de la Red del Grafo (Huachi)
+Se rediseñó el mapa para enfocar la red del grafo y maximizar la legibilidad:
+*   **Fondo de Grilla Tecnológica:** Se eliminó el mapa de bits pesado de fondo y se reemplazó por un fondo oscuro (#0f172a) con gradientes radiales dorados y grillas lineales de contraste.
+*   **Ampliación del Canvas:** Se aumentó el alto del canvas a **`750px`** para ocupar todo el espacio disponible en pantalla.
+*   **Zoom de la Cámara (ViewBox):** Se modificó la vista SVG a `viewBox="150 100 600 780"`. Esto encuadra perfectamente los nodos del campus Huachi, haciéndolos más grandes y previniendo que los nodos inferiores (Complejo Acuático, FEUE, Servicio Médico) se recorten o queden fuera de la pantalla.
 
 ---
 
@@ -115,7 +135,13 @@ Para renderizar el organigrama y buscar dependencias se usan algoritmos recursiv
 ### P6: ¿Cómo solucionaron el bloqueo de envío de correos en Render?
 *   **Respuesta:** "Las plataformas de alojamiento en la nube gratuitas como Render bloquean los puertos tradicionales de SMTP (465 y 587) para evitar spam, lo cual causa fallos de red (`[Errno 101] Network is unreachable`). Solucionamos esto implementando un puente HTTP. En lugar de usar sockets SMTP directo, nuestra aplicación hace una solicitud HTTP POST (puerto seguro 443, no bloqueado) a una API web desarrollada en **Google Apps Script** vinculada al correo del proyecto, la cual envía los correos reales de activación y recuperación utilizando la infraestructura nativa de Google."
 
+### P7: ¿Cómo simularon la atención de turnos en tiempo real para la exposición?
+*   **Respuesta:** "Implementamos una ruta de omisión temporal en el servidor para avanzar la cola (`/atender`), unida a un botón en la pantalla de turnos. Además, usamos Javascript en el cliente para comparar el ID del usuario en sesión y el ID del turno llamado. Al coincidir, el navegador reproduce un sonido de alerta y muestra una advertencia de llamada, emulando la transmisión real de una ventanilla."
+
+### P8: ¿Por qué decidieron remover el mapa físico de fondo en la visualización del grafo?
+*   **Respuesta:** "Para mejorar la experiencia visual de usuario (UX) y evitar sobrecarga cognitiva. El mapa físico de bits competía con las líneas del grafo y tapaba los textos de las facultades. Al usar un fondo oscuro de grilla con contraste y adaptar la caja de vista (`viewBox`), los nodos y conexiones del grafo se aprecian al 100% de su tamaño sin recortar los edificios de la zona sur del campus Huachi."
+
 ---
 
 ## 6. CONCLUSIÓN
-El sistema **SmartCampus UTA Web** demuestra la viabilidad de integrar conceptos académicos avanzados de estructuras de datos en una aplicación moderna del mundo real. A través del aislamiento de capas, el uso del ORM relacional para persistencia y el puente HTTP para el correo, el proyecto se presenta como una solución técnica estable, segura y óptima para su despliegue y defensa.
+El sistema **SmartCampus UTA Web** demuestra la viabilidad de integrar conceptos académicos avanzados de estructuras de datos en una aplicación moderna del mundo real. A través del aislamiento de capas, el uso del ORM relacional para persistencia, la optimización visual de grafos y el puente HTTP para el correo, el proyecto se presenta como una solución técnica estable, segura y óptima para su despliegue y defensa.
