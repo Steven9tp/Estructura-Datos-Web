@@ -1,11 +1,11 @@
 from flask import render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, current_user
 from werkzeug.urls import url_parse
-from app import db, mail
-from flask_mail import Message
+from app import db
 from app.auth import bp
 from app.forms import LoginForm, RegistroForm, OlvidePasswordForm, ResetPasswordForm
 from app.models import Usuario
+from app.auth.utils import enviar_correo_verificacion, enviar_correo_recuperacion
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -53,25 +53,17 @@ def registro():
         db.session.commit()
         
         token = user.get_token()
-        msg = Message('Verifica tu correo institucional - SmartCampus UTA',
-                      sender=current_app.config.get('MAIL_DEFAULT_SENDER', 'noreply@smartcampus.com'),
-                      recipients=[user.email])
-        link = url_for('auth.verificar_email', token=token, _external=True)
-        msg.body = f'''¡Hola {user.nombres}! Gracias por registrarte en SmartCampus UTA.
-Para completar tu registro y activar tu cuenta, haz clic en el siguiente enlace:
-{link}
-
-Si tú no solicitaste este registro, ignora este correo.
-'''
-        try:
-            mail.send(msg)
+        enviado = enviar_correo_verificacion(user, token)
+        
+        if enviado:
             flash('¡Te has registrado con éxito! Te hemos enviado un correo institucional para verificar tu cuenta.', 'success')
-        except Exception as e:
-            print("Error enviando correo:", e)
+        else:
+            link = url_for('auth.verificar_email', token=token, _external=True)
+            print("Error enviando correo, aplicando auto-activación")
             print(f"ENLACE DE VERIFICACION (FALLBACK): {link}")
             user.email_verificado = True
             db.session.commit()
-            flash('¡Registro exitoso! Como el servidor gratuito de Render bloquea el correo, tu cuenta ha sido ACTIVADA AUTOMÁTICAMENTE para que puedas probarla.', 'warning')
+            flash('¡Registro exitoso! Como el servidor de correos no respondió, tu cuenta ha sido ACTIVADA AUTOMÁTICAMENTE.', 'warning')
 
         return redirect(url_for('auth.login'))
     return render_template('auth/registro.html', title='Registro', form=form)
@@ -102,23 +94,13 @@ def reenviar_verificacion():
         user = Usuario.query.filter_by(email=email).first()
         if user and not user.email_verificado:
             token = user.get_token()
-            msg = Message('Verifica tu correo institucional - SmartCampus UTA',
-                          sender=current_app.config.get('MAIL_DEFAULT_SENDER', 'noreply@smartcampus.com'),
-                          recipients=[user.email])
-            link = url_for('auth.verificar_email', token=token, _external=True)
-            msg.body = f'''¡Hola {user.nombres}! Gracias por registrarte en SmartCampus UTA.
-Para completar tu registro y activar tu cuenta, haz clic en el siguiente enlace:
-{link}
-
-Si tú no solicitaste este registro, ignora este correo.
-'''
-            try:
-                mail.send(msg)
+            enviado = enviar_correo_verificacion(user, token)
+            if enviado:
                 flash('Correo de verificación reenviado. Revisa tu bandeja de entrada o spam.', 'success')
-            except Exception as e:
-                print("Error enviando correo:", e)
+            else:
+                link = url_for('auth.verificar_email', token=token, _external=True)
                 print(f"ENLACE DE VERIFICACION (FALLBACK): {link}")
-                flash('El servidor de correo de Render está bloqueado, pero tu enlace se imprimió en los logs.', 'warning')
+                flash('El servidor de correo falló, pero tu enlace se imprimió en los logs.', 'warning')
         else:
             flash('Si el correo existe y no está verificado, se enviará un nuevo enlace.', 'info')
         return redirect(url_for('auth.login'))
@@ -133,20 +115,11 @@ def olvide_password():
         user = Usuario.query.filter_by(email=form.email.data).first()
         if user:
             token = user.get_token()
-            msg = Message('Restablecer Contraseña - SmartCampus UTA',
-                          sender=current_app.config.get('MAIL_DEFAULT_SENDER', 'noreply@smartcampus.com'),
-                          recipients=[user.email])
-            link = url_for('auth.reset_password', token=token, _external=True)
-            msg.body = f'''Para restablecer tu contraseña, visita el siguiente enlace:
-{link}
-
-Si no realizaste esta solicitud, ignora este correo.
-'''
-            try:
-                mail.send(msg)
-            except Exception as e:
-                print("Error enviando correo de reset:", e)
+            enviado = enviar_correo_recuperacion(user, token)
+            if not enviado:
+                link = url_for('auth.reset_password', token=token, _external=True)
                 print(f"ENLACE DE RECUPERACION (FALLBACK): {link}")
+                flash('El servidor de correo falló, pero tu enlace se imprimió en los logs.', 'warning')
         flash('Si el correo institucional existe, recibirás instrucciones para recuperar tu contraseña.', 'info')
         return redirect(url_for('auth.login'))
     return render_template('auth/olvide_password.html', title='Recuperar Contraseña', form=form)
