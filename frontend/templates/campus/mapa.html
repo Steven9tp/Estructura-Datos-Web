@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Mapa del Campus{% endblock %}
+{% block page_title %}<i class="fas fa-map-marked-alt me-2" style="color:var(--accent)"></i>Mapa del Campus{% endblock %}
+
+{% block styles %}
+<style>
+.grafo-canvas {
+    background: var(--sidebar-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(201,162,39,.15);
+    width: 100%; height: 500px;
+    position: relative; overflow: hidden;
+    /* IMAGEN DE FONDO DEL CAMPUS */
+    background-image: url("{{ url_for('static', filename='img/mapa_fondo.png') }}");
+    background-size: cover;
+    background-position: center;
+}
+.grafo-svg { width:100%; height:100%; position: absolute; top:0; left:0; z-index: 10;}
+/* Estilo similar a los pines azules de la imagen de referencia */
+.nodo-circulo { fill: #4c70b8; stroke: #ffffff; stroke-width: 2; cursor: pointer; transition: all .3s; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5)); }
+.nodo-circulo:hover, .nodo-circulo.active { stroke: #c9a227; stroke-width: 4; fill: #3b5998; }
+.nodo-label { fill: #ffffff; font-size: 13px; font-family: 'Inter',sans-serif; font-weight: 800; text-anchor: middle; pointer-events: none; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+.arista-linea { stroke: rgba(255,255,255,0.7); stroke-width: 4; stroke-dasharray: 6 6; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.4)); }
+.arista-activa { stroke: #10b981; stroke-width: 6; stroke-dasharray: none; animation: dash 1s linear infinite; filter: drop-shadow(0 0 8px rgba(16,185,129,0.8)); }
+@keyframes dash { to { stroke-dashoffset: -12; } }
+.peso-label { fill: #111; background: #fff; font-size: 13px; font-family:'Inter',sans-serif; font-weight: 800; text-shadow: 1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff; }
+.result-step {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    background: var(--bg-main);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+    margin-bottom: 8px;
+    animation: slideIn .3s ease;
+}
+@keyframes slideIn { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:none; } }
+.step-num { width:24px;height:24px;border-radius:50%;background:#c9a227;color:#111;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;flex-shrink:0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Panel de control -->
+    <div class="col-lg-4">
+        <div class="card-uride">
+            <div class="card-header-uride" style="background:var(--sidebar-bg);color:#fff;">
+                <h6 class="fw-bold mb-0"><i class="fas fa-search-location me-2" style="color:#c9a227;"></i>Calcular Ruta</h6>
+            </div>
+            <div class="card-body-uride">
+                <form method="POST" id="rutaForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="form-group mb-3">
+                        <label class="form-label-uride"><i class="fas fa-map-pin me-2" style="color:#10b981;"></i>Punto de Origen</label>
+                        <select class="form-control-uride form-select-uride" name="origen" required id="sel-origen">
+                            <option value="" disabled selected>Seleccione el inicio...</option>
+                            {% for p in puntos %}
+                            <option value="{{ p.id }}" {% if origen_sel == p.id %}selected{% endif %}>{{ p.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="text-center my-2">
+                        <div style="width:32px;height:32px;border-radius:50%;background:rgba(201,162,39,.1);border:2px dashed rgba(201,162,39,.3);display:inline-flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-arrows-alt-v" style="color:#c9a227;font-size:.8rem;"></i>
+                        </div>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="form-label-uride"><i class="fas fa-flag-checkered me-2" style="color:#ef4444;"></i>Punto de Destino</label>
+                        <select class="form-control-uride form-select-uride" name="destino" required id="sel-destino">
+                            <option value="" disabled selected>Seleccione el destino...</option>
+                            {% for p in puntos %}
+                            <option value="{{ p.id }}" {% if destino_sel == p.id %}selected{% endif %}>{{ p.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-uride btn-primary-uride btn-full">
+                        <i class="fas fa-route me-2"></i>Calcular Ruta Óptima
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Resultado -->
+        {% if ruta %}
+        <div class="card-uride mt-3">
+            <div class="card-header-uride">
+                <h6 class="fw-bold mb-0"><i class="fas fa-check-circle me-2 text-success"></i>Ruta Encontrada</h6>
+                <span class="badge" style="background:rgba(16,185,129,.1);color:#10b981;font-size:.75rem;">{{ distancia|int }}m</span>
+            </div>
+            <div class="card-body-uride">
+                {% for paso in ruta %}
+                <div class="result-step">
+                    <div class="step-num">{{ loop.index }}</div>
+                    <span style="font-size:.875rem;font-weight:600;">{{ paso }}</span>
+                </div>
+                {% endfor %}
+                <div class="text-muted text-center mt-3" style="font-size:.78rem;">
+                    <i class="fas fa-info-circle me-1"></i>Distancia total: <strong>{{ distancia|int }} metros</strong>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Visualización del Mapa con Imagen de Fondo -->
+    <div class="col-lg-8">
+        <div class="card-uride">
+            <div class="card-header-uride" style="background:var(--sidebar-bg);color:#fff;">
+                <h6 class="fw-bold mb-0"><i class="fas fa-map me-2" style="color:#c9a227;"></i>Rutas del Campus Huachi</h6>
+                <span style="font-size:.75rem;color:rgba(255,255,255,.4);">Vista de Facultades - {{ puntos|length }} ubicaciones</span>
+            </div>
+            <div class="grafo-canvas">
+                <svg class="grafo-svg" id="grafoSVG" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet">
+                    <!-- Aristas -->
+                    {% for c in conexiones %}
+                    {% set po = puntos_dict[c.punto_origen_id] %}
+                    {% set pd = puntos_dict[c.punto_destino_id] %}
+                    <line class="arista-linea {% if ruta and po.nombre in ruta and pd.nombre in ruta %}arista-activa{% endif %}"
+                          x1="{{ pos[po.id][0] }}" y1="{{ pos[po.id][1] }}"
+                          x2="{{ pos[pd.id][0] }}" y2="{{ pos[pd.id][1] }}"
+                          data-origen="{{ po.id }}" data-destino="{{ pd.id }}"/>
+                    <text class="peso-label"
+                          x="{{ ((pos[po.id][0] + pos[pd.id][0]) / 2)|int }}"
+                          y="{{ ((pos[po.id][1] + pos[pd.id][1]) / 2)|int - 5 }}">{{ c.distancia_metros|int }}m</text>
+                    {% endfor %}
+                    <!-- Nodos -->
+                    {% for p in puntos %}
+                    <circle class="nodo-circulo {% if ruta and p.nombre in ruta %}active{% endif %}"
+                            cx="{{ pos[p.id][0] }}" cy="{{ pos[p.id][1] }}" r="35"
+                            data-id="{{ p.id }}" data-nombre="{{ p.nombre }}"/>
+                    
+                    <!-- Lógica para que nombres muy largos se dividan en dos líneas -->
+                    {% set partes = p.nombre.split() %}
+                    {% if partes|length == 1 %}
+                        <text class="nodo-label" x="{{ pos[p.id][0] }}" y="{{ pos[p.id][1] + 5 }}">{{ partes[0] }}</text>
+                    {% else %}
+                        <text class="nodo-label" x="{{ pos[p.id][0] }}" y="{{ pos[p.id][1] - 5 }}">{{ partes[0] }}</text>
+                        <text class="nodo-label" x="{{ pos[p.id][0] }}" y="{{ pos[p.id][1] + 12 }}" style="font-size:10px;">{{ " ".join(partes[1:])[:15] }}</text>
+                    {% endif %}
+                    {% endfor %}
+                </svg>
+            </div>
+            <div class="card-body-uride py-2" style="background:rgba(0,0,0,.02);">
+                <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Las líneas conectan las facultades de la UTA. La línea verde resaltada indica la ruta trazada.</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

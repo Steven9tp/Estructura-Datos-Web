@@ -1,11 +1,10 @@
 """
-Fábrica de la aplicación Flask para U-Ride
-Frontend y Backend separados
+Fábrica de la aplicación Flask para SmartCampus
 """
 import os
 import re
 import logging
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -13,73 +12,28 @@ from config import config
 
 logger = logging.getLogger(__name__)
 import sys
-logging.basicConfig(
-    level=logging.ERROR,
-    format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s',
-    handlers=[
-        logging.FileHandler("error.log"),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+logging.basicConfig(level=logging.ERROR, handlers=[logging.StreamHandler(sys.stdout)])
 
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 
-try:
-    from flask_mail import Mail
-    mail = Mail()
-    HAS_MAIL = True
-except ImportError:
-    mail = None
-    HAS_MAIL = False
-
-# Rutas absolutas: frontend separado del backend
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _FRONTEND_TEMPLATES = os.path.join(_BASE_DIR, 'frontend', 'templates')
 _FRONTEND_STATIC = os.path.join(_BASE_DIR, 'frontend', 'static')
 
-
 def create_app(config_name=None):
-    if config_name is None:
-        config_name = 'default'
-
-    app = Flask(
-        __name__,
-        template_folder=_FRONTEND_TEMPLATES,
-        static_folder=_FRONTEND_STATIC
-    )
+    if config_name is None: config_name = 'default'
+    app = Flask(__name__, template_folder=_FRONTEND_TEMPLATES, static_folder=_FRONTEND_STATIC)
     app.config.from_object(config[config_name])
+    # Forzar recarga de archivos estáticos en desarrollo
+    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-    # ── Configuración de Base de Datos (MySQL + SSL Aiven) ────────
     db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
-    
-    if db_uri:
-        # 1. Asegurar driver pymysql
-        if db_uri.startswith('mysql://'):
-            db_uri = db_uri.replace('mysql://', 'mysql+pymysql://', 1)
-        
-        # 2. Limpieza de parámetros ssl-mode
-        if 'ssl-mode' in db_uri:
-            if '?' in db_uri:
-                base_part, query_part = db_uri.split('?', 1)
-                params = [p for p in query_part.split('&') if not p.startswith('ssl-mode')]
-                db_uri = base_part + ('?' + '&'.join(params) if params else '')
-
-        # 3. Forzar SSL para Aiven
-        if 'aivencloud.com' in db_uri or 'ssl' in db_uri:
-            engine_options = app.config.get('SQLALCHEMY_ENGINE_OPTIONS', {}).copy()
-            connect_args = engine_options.get('connect_args', {}).copy()
-            connect_args['ssl'] = {} 
-            engine_options['connect_args'] = connect_args
-            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
-            
+    if db_uri.startswith('mysql://'): db_uri = db_uri.replace('mysql://', 'mysql+pymysql://', 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
     
-    # Log de inicio
-    masked_uri = re.sub(r':([^@:]+)@', ':****@', db_uri)
-    print(f"INFO: Base de datos configurada -> {masked_uri}")
-
     from flask_wtf.csrf import CSRFProtect
     csrf = CSRFProtect()
     
@@ -88,78 +42,31 @@ def create_app(config_name=None):
     login_manager.init_app(app)
     csrf.init_app(app)
 
-    if HAS_MAIL and mail is not None:
-        port = int(os.getenv('MAIL_PORT', 587))
-        app.config['MAIL_USE_TLS'] = (port == 587)
-        app.config['MAIL_USE_SSL'] = (port == 465)
-        mail.init_app(app)
-        
-        # Log para verificar que Render lee las variables
-        mail_user = os.getenv('MAIL_USERNAME', 'NO_CONFIGURADO')
-        print(f"INFO: Sistema de Email inicializado para: {mail_user}")
-
     login_manager.login_view = 'auth.login'
-    login_manager.login_message = 'Por favor inicia sesión para acceder.'
-    login_manager.login_message_category = 'warning'
 
-    # Registro de Blueprints (Nombres corregidos a 'bp')
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
-
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
+    from app.atencion import bp as atencion_bp
+    app.register_blueprint(atencion_bp, url_prefix='/atencion')
+    from app.organizacion import bp as organizacion_bp
+    app.register_blueprint(organizacion_bp, url_prefix='/organizacion')
+    from app.campus import bp as campus_bp
+    app.register_blueprint(campus_bp, url_prefix='/campus')
+    from app.tramites import bp as tramites_bp
+    app.register_blueprint(tramites_bp, url_prefix='/tramites')
 
-    from app.admin import bp as admin_bp
-    app.register_blueprint(admin_bp, url_prefix='/admin')
-
-    from app.viajes import bp as viajes_bp
-    app.register_blueprint(viajes_bp, url_prefix='/viajes')
-
-    from app.seguridad import bp as seguridad_bp
-    app.register_blueprint(seguridad_bp, url_prefix='/seguridad')
-
-    from app.api import bp as api_bp
-    app.register_blueprint(api_bp, url_prefix='/api/v1')
-
-    # ── Safety-net de migración automática ────────────────────────────────────
-    # Agrega columnas nuevas a la BD de producción (Aiven/MySQL) si no existen.
-    # Cada ALTER TABLE se ejecuta de forma independiente; si la columna ya
-    # existe MySQL lanza un error que se captura y se ignora silenciosamente.
-    _migraciones = [
-        # Tabla usuarios — columnas añadidas en iteraciones posteriores al deploy
-        "ALTER TABLE usuarios ADD COLUMN contacto_emergencia_nombre VARCHAR(100) DEFAULT ''",
-        "ALTER TABLE usuarios ADD COLUMN contacto_emergencia_telefono VARCHAR(20) DEFAULT ''",
-        "ALTER TABLE usuarios ADD COLUMN calles_secundarias VARCHAR(200) DEFAULT ''",
-        "ALTER TABLE usuarios ADD COLUMN direccion_lat FLOAT NULL",
-        "ALTER TABLE usuarios ADD COLUMN direccion_lng FLOAT NULL",
-        "ALTER TABLE usuarios ADD COLUMN cedula VARCHAR(20) DEFAULT ''",
-        "ALTER TABLE usuarios ADD COLUMN tipo_sangre VARCHAR(50) DEFAULT ''",
-        "ALTER TABLE usuarios ADD COLUMN facultad VARCHAR(100) DEFAULT ''",
-        "ALTER TABLE usuarios ADD COLUMN semestre VARCHAR(50) DEFAULT ''",
-        "ALTER TABLE usuarios ADD COLUMN apellido VARCHAR(100) DEFAULT ''",
-        "ALTER TABLE usuarios ADD COLUMN genero VARCHAR(10) DEFAULT ''",
-        "ALTER TABLE usuarios ADD COLUMN zona_barrio VARCHAR(100) NULL",
-        "ALTER TABLE usuarios ADD COLUMN contacto_emergencia VARCHAR(100) DEFAULT ''",
-        # Tabla viajes — columnas de geolocalización e inicio inmediato
-        "ALTER TABLE viajes ADD COLUMN inicio_inmediato TINYINT(1) NOT NULL DEFAULT 0",
-        "ALTER TABLE viajes ADD COLUMN limite_espera_minutos INT NULL",
-        "ALTER TABLE viajes ADD COLUMN created_at DATETIME NULL",
-        "ALTER TABLE viajes ADD COLUMN origen_lat FLOAT NULL",
-        "ALTER TABLE viajes ADD COLUMN origen_lng FLOAT NULL",
-        "ALTER TABLE viajes ADD COLUMN destino_lat FLOAT NULL",
-        "ALTER TABLE viajes ADD COLUMN destino_lng FLOAT NULL",
-    ]
-
-    with app.app_context():
-        for _sql in _migraciones:
-            try:
-                with db.engine.begin() as _conn:
-                    _conn.execute(db.text(_sql))
-            except Exception:
-                pass  # Columna ya existe → ignorar
+    @app.after_request
+    def add_no_cache(response):
+        """Evitar caché de CSS/JS durante desarrollo."""
+        if request.path.startswith('/static/'):
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+        return response
 
     return app
-
 
 @login_manager.user_loader
 def load_user(user_id):

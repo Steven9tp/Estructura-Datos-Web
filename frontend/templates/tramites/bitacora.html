@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Bitácora del Sistema{% endblock %}
+{% block page_title %}<i class="fas fa-clipboard-list me-2" style="color:var(--accent)"></i>Bitácora de Acciones{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="fw-bold m-0">Registro de Eventos</h5>
+    <div class="d-flex gap-2">
+        {% if ultimo_evento %}
+        <form method="POST" action="{{ url_for('tramites.deshacer_accion') }}" onsubmit="return confirm('¿Deshacer la última acción registrada en la Pila (LIFO)?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-warning" style="font-weight:700; border-radius:var(--radius-sm);">
+                <i class="fas fa-undo-alt me-2"></i>Deshacer Último Evento (LIFO)
+            </button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('tramites.exportar_csv') }}" class="btn-uride btn-ghost">
+            <i class="fas fa-file-csv me-2"></i>Exportar CSV
+        </a>
+    </div>
+</div>
+<div class="card-uride">
+    <div class="card-header-uride d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold m-0">Últimos Eventos del Sistema</h6>
+        <span class="badge bg-secondary">Mostrando últimos 100</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table-uride">
+            <thead>
+                <tr>
+                    <th>Fecha y Hora</th>
+                    <th>Usuario (ID)</th>
+                    <th>Acción Realizada</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.fecha.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td class="fw-bold text-primary">{{ log.usuario_id or 'Sistema' }}</td>
+                    <td>{{ log.accion }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" class="text-center py-4 text-muted">
+                        No hay registros en la bitácora.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Paginación -->
+{% if paginacion.pages > 1 %}
+<div class="d-flex justify-content-center gap-2 mt-4">
+    <a href="{{ url_for('tramites.bitacora', page=paginacion.prev_num) }}"
+       class="page-btn {% if not paginacion.has_prev %}disabled{% endif %}" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;font-size:.85rem;font-weight:600;text-decoration:none;color:var(--text-secondary);border:1.5px solid var(--border);">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+    {% for p in paginacion.iter_pages() %}
+        {% if p %}
+        <a href="{{ url_for('tramites.bitacora', page=p) }}"
+           style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;font-size:.85rem;font-weight:600;text-decoration:none;border:1.5px solid var(--border);{% if p == paginacion.page %}background:var(--accent);border-color:var(--accent);color:#111;{% else %}color:var(--text-secondary);{% endif %}">{{ p }}</a>
+        {% else %}
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;">…</span>
+        {% endif %}
+    {% endfor %}
+    <a href="{{ url_for('tramites.bitacora', page=paginacion.next_num) }}"
+       class="page-btn {% if not paginacion.has_next %}disabled{% endif %}" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;font-size:.85rem;font-weight:600;text-decoration:none;color:var(--text-secondary);border:1.5px solid var(--border);">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+</div>
+{% endif %}
+{% endblock %}

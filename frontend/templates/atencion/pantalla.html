@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Pantalla de Turnos{% endblock %}
+{% block page_title %}<i class="fas fa-tv me-2" style="color:var(--accent)"></i>Pantalla de Atención{% endblock %}
+
+{% block styles %}
+<style>
+.pantalla-turno-activo {
+    background: var(--sidebar-bg);
+    border-radius: var(--radius-lg);
+    padding: 48px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(201,162,39,.2);
+}
+.turno-numero {
+    font-size: 7rem; font-weight: 900; color: #c9a227; line-height: 1;
+    letter-spacing: -4px; text-shadow: 0 0 40px rgba(201,162,39,.3);
+}
+.turno-ventanilla { font-size: 1rem; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: 2px; margin-top: 8px; }
+.pulse-ring { animation: pulse-ring 2s ease-in-out infinite; }
+@keyframes pulse-ring { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+.cola-item {
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    padding: 14px 18px;
+    display: flex; align-items: center; gap: 12px;
+    animation: slideIn .4s ease;
+}
+@keyframes slideIn { from { opacity:0; transform: translateX(20px); } to { opacity:1; transform: none; } }
+.cola-item:first-child { border-color: rgba(201,162,39,.4); background: rgba(201,162,39,.04); }
+.cola-codigo { font-size: 1.2rem; font-weight: 800; }
+.cola-item:first-child .cola-codigo { color: #c9a227; }
+.cola-pos { width:28px;height:28px;border-radius:50%;background:var(--bg-main);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0; }
+.cola-item:first-child .cola-pos { background:#c9a227;color:#111; }
+.btn-atender {
+    background: linear-gradient(135deg,#c9a227,#a07d1a); color:#111; font-weight:800;
+    border:none; border-radius:var(--radius-md); padding:16px 40px; font-size:1rem;
+    cursor:pointer; width:100%; transition:all var(--transition);
+    box-shadow: 0 6px 20px rgba(201,162,39,.3);
+}
+.btn-atender:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(201,162,39,.5); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="pantalla-turno-activo mb-3">
+            <div class="text-muted mb-3" style="font-size:.8rem;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.4)!important;">
+                <i class="fas fa-circle text-success me-2 pulse-ring"></i>En transmisión — Cola FIFO
+            </div>
+            {% if atendidos %}
+            <div class="turno-numero">{{ atendidos[0].codigo_turno }}</div>
+            <div class="turno-ventanilla">Ventanilla · {{ atendidos[0].dependencia_lugar.nombre }}</div>
+            <div class="mt-3" style="color:rgba(255,255,255,.4);font-size:.82rem;">
+                Atendido a las {{ atendidos[0].fecha_atencion.strftime('%H:%M') if atendidos[0].fecha_atencion else '–' }}
+            </div>
+            {% else %}
+            <div class="turno-numero" style="color:rgba(255,255,255,.2);">–</div>
+            <div class="turno-ventanilla" style="color:rgba(255,255,255,.3);">Esperando primer turno...</div>
+            {% endif %}
+        </div>
+        {% if atendidos|length > 1 %}
+        <div class="card-uride">
+            <div class="card-header-uride">
+                <h6 class="fw-bold mb-0" style="font-size:.8rem;text-transform:uppercase;letter-spacing:.8px;">
+                    <i class="fas fa-check-double me-2 text-success"></i>Últimos atendidos
+                </h6>
+            </div>
+            <div class="card-body-uride py-2">
+                <div class="d-flex gap-2 flex-wrap">
+                    {% for t in atendidos[1:] %}
+                    <span class="badge px-3 py-2" style="background:rgba(16,185,129,.1);color:#10b981;border-radius:8px;font-size:.82rem;font-weight:700;">
+                        <i class="fas fa-check me-1"></i>{{ t.codigo_turno }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card-uride">
+            <div class="card-header-uride">
+                <h6 class="fw-bold mb-0"><i class="fas fa-list-ol me-2" style="color:var(--accent)"></i>Cola de Espera</h6>
+                <span class="badge" style="background:rgba(201,162,39,.15);color:#c9a227;font-size:.75rem;">{{ turnos|length }} en fila</span>
+            </div>
+            <div class="card-body-uride">
+                {% if turnos %}
+                <div class="d-flex flex-column gap-2">
+                    {% for turno in turnos[:8] %}
+                    <div class="cola-item">
+                        <div class="cola-pos">{{ loop.index }}</div>
+                        <div style="flex:1;">
+                            <div class="cola-codigo">{{ turno.codigo_turno }}</div>
+                            <div style="font-size:.75rem;color:var(--text-secondary);">{{ turno.dependencia_lugar.nombre }}</div>
+                        </div>
+                        <span style="font-size:.72rem;color:var(--text-secondary);">{{ turno.fecha_emision.strftime('%H:%M') }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-check-circle fa-3x mb-3" style="color:#10b981;opacity:.5;"></i>
+                    <p>La cola está vacía en este momento.</p>
+                </div>
+                {% endif %}
+
+                {% if current_user.tipo_usuario in ['empleado','admin'] %}
+                <div class="mt-4 pt-3" style="border-top:1px solid var(--border);">
+                    <form method="POST" action="{{ url_for('atencion.atender') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size:.8rem;color:var(--text-secondary);">Selecciona qué ventanilla vas a atender:</label>
+                            <select name="dep_id" class="form-select" style="background:var(--bg-main); border-color:var(--border); color:var(--text-primary);">
+                                <option value="">Atender la cola general (más antiguo)</option>
+                                {% for d in dependencias %}
+                                <option value="{{ d.id }}">{{ d.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-atender">
+                            <i class="fas fa-bell me-2"></i>Llamar Siguiente Turno
+                        </button>
+                    </form>
+                    <p class="text-muted text-center mt-2" style="font-size:.72rem;">Desencola al próximo estudiante de la fila seleccionada (FIFO)</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>setTimeout(() => window.location.reload(), 30000);</script>
+{% endblock %}

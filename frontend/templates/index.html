@@ -1,192 +1,257 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — U-Ride{% endblock %}
-{% block page_title %}<i class="fas fa-th-large me-2" style="color:var(--accent)"></i>Dashboard{% endblock %}
-{% block content %}
+{% block title %}Inicio{% endblock %}
+{% block page_title %}<i class="fas fa-th-large me-2" style="color:var(--accent)"></i>Panel Principal{% endblock %}
 
-<!-- Stats rápidos -->
-<div class="row g-3 mb-4">
-    <div class="col-6 col-lg-3">
-        <div class="stat-card">
-            <div class="stat-icon accent"><i class="fas fa-car-side"></i></div>
-            <div class="stat-info">
-                <div class="stat-num" id="stat-viajes-activos">…</div>
-                <div class="stat-label">Viajes activos</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-lg-3">
-        <div class="stat-card">
-            <div class="stat-icon green"><i class="fas fa-users"></i></div>
-            <div class="stat-info">
-                <div class="stat-num" id="stat-usuarios">…</div>
-                <div class="stat-label">Estudiantes</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-lg-3">
-        <div class="stat-card">
-            <div class="stat-icon blue"><i class="fas fa-handshake"></i></div>
-            <div class="stat-info">
-                <div class="stat-num" id="stat-solicitudes">…</div>
-                <div class="stat-label">Solicitudes aceptadas</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-lg-3">
-        <div class="stat-card">
-            <div class="stat-icon red"><i class="fas fa-star"></i></div>
-            <div class="stat-info">
-                <div class="stat-num" id="stat-calificaciones">…</div>
-                <div class="stat-label">Calificaciones</div>
-            </div>
-        </div>
-    </div>
-</div>
+{% block styles %}
+<style>
+.kpi-card {
+    background:var(--bg-card); border-radius:var(--radius-md);
+    padding:20px 22px; box-shadow:var(--shadow-sm);
+    border:1px solid var(--border);
+    display:flex; align-items:center; gap:16px;
+    transition:all var(--transition);
+}
+.kpi-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-md); }
+.kpi-icon {
+    width:52px; height:52px; border-radius:14px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.4rem; flex-shrink:0;
+}
+.kpi-num   { font-size:1.8rem; font-weight:800; line-height:1; color:var(--text-primary); }
+.kpi-label { font-size:.72rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.5px; margin-top:3px; }
 
-<!-- Sección principal: viajes + mapa -->
-<div class="row g-4">
-    <!-- Lista de viajes disponibles -->
-    <div class="col-lg-5">
-        <div class="card-uride h-100">
-            <div class="card-header-uride">
-                <h6 class="fw-bold mb-0"><i class="fas fa-list me-2" style="color:var(--accent)"></i>Viajes Disponibles</h6>
-                <a href="{{ url_for('viajes.buscar_viajes') }}" class="btn-uride btn-outline-uride" style="padding:6px 14px;font-size:.75rem">
-                    Ver todos
-                </a>
-            </div>
-            <div class="card-body-uride" id="viajes-lista" style="max-height:520px;overflow-y:auto">
-                <div class="spinner"></div>
-            </div>
-        </div>
-    </div>
+.mod-card {
+    background:var(--bg-card); border-radius:var(--radius-md);
+    border:1px solid var(--border); text-decoration:none; color:inherit;
+    display:block; overflow:hidden;
+    transition:all var(--transition); box-shadow:var(--shadow-sm);
+}
+.mod-card:hover { transform:translateY(-5px); box-shadow:var(--shadow-lg); color:inherit; }
+.mod-card-top { padding:24px 22px 18px; display:flex; align-items:center; gap:14px; }
+.mod-card-icon { width:48px; height:48px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+.mod-card-body { padding:0 22px 18px; }
+.mod-card-title{ font-weight:700; font-size:1rem; margin-bottom:2px; }
+.mod-card-sub  { font-size:.75rem; color:var(--text-secondary); }
+.mod-card-desc { font-size:.82rem; color:var(--text-secondary); line-height:1.6; }
+.mod-card-footer {
+    padding:11px 22px; border-top:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:.78rem; font-weight:600;
+}
 
-    <!-- Mapa interactivo -->
-    <div class="col-lg-7">
-        <div class="card-uride">
-            <div class="card-header-uride">
-                <h6 class="fw-bold mb-0"><i class="fas fa-map-marked-alt me-2" style="color:var(--accent)"></i>Mapa de Zonas</h6>
-                <small class="text-muted">Click en un viaje para ver la ruta</small>
-            </div>
-            <div class="card-body-uride p-0">
-                <div id="mapa-viaje" style="height:420px;border-radius:0 0 14px 14px"></div>
-            </div>
-        </div>
-        <!-- Stats del viaje seleccionado -->
-        <div class="card-uride mt-3" style="background:var(--sidebar-bg);color:#fff;">
-            <div class="card-body-uride py-3">
-                <div id="mapa-stats" class="text-center text-muted" style="color:#9ca3af !important;font-size:.85rem">
-                    <i class="fas fa-hand-pointer me-2"></i>Selecciona un viaje para ver estadísticas de ruta
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Acciones rápidas -->
-<div class="row g-3 mt-2">
-    <div class="col-12">
-        <h6 class="fw-bold text-muted mb-2" style="font-size:.8rem;text-transform:uppercase;letter-spacing:.8px">
-            Acciones Rápidas
-        </h6>
-    </div>
-    <div class="col-6 col-md-3">
-        <a href="{{ url_for('viajes.publicar_viaje') }}" class="btn-uride btn-primary-uride btn-full btn-lg-uride" style="border-radius:12px">
-            <i class="fas fa-plus-circle"></i> Publicar Viaje
-        </a>
-    </div>
-    <div class="col-6 col-md-3">
-        <a href="{{ url_for('viajes.buscar_viajes') }}" class="btn-uride btn-ghost btn-full btn-lg-uride" style="border-radius:12px">
-            <i class="fas fa-search"></i> Buscar Viaje
-        </a>
-    </div>
-    <div class="col-6 col-md-3">
-        <a href="{{ url_for('viajes.mis_viajes') }}" class="btn-uride btn-ghost btn-full btn-lg-uride" style="border-radius:12px">
-            <i class="fas fa-route"></i> Mis Viajes
-        </a>
-    </div>
-    <div class="col-6 col-md-3">
-        <a href="{{ url_for('seguridad.reglas_seguridad') }}" class="btn-uride btn-ghost btn-full btn-lg-uride" style="border-radius:12px">
-            <i class="fas fa-shield-alt"></i> Reglas
-        </a>
-    </div>
-</div>
-
+/* Actividad reciente */
+.activity-item {
+    display:flex; align-items:center; gap:12px;
+    padding:12px 0; border-bottom:1px solid var(--border);
+}
+.activity-item:last-child { border-bottom:none; }
+.activity-dot {
+    width:8px; height:8px; border-radius:50%;
+    background:var(--accent); flex-shrink:0;
+}
+</style>
 {% endblock %}
 
-{% block scripts %}
-<script>
-// Cargar estadísticas desde API
-fetch('/api/v1/estadisticas')
-    .then(r => r.json())
-    .then(d => {
-        document.getElementById('stat-viajes-activos').textContent = d.viajes_activos;
-        document.getElementById('stat-usuarios').textContent        = d.usuarios;
-        document.getElementById('stat-solicitudes').textContent     = d.solicitudes_aceptadas;
-        document.getElementById('stat-calificaciones').textContent  = d.calificaciones;
-    }).catch(() => {});
+{% block content %}
+<!-- Saludo personalizado -->
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+        <h4 class="fw-bold mb-1">Hola, {{ current_user.nombres.split()[0] }} 👋</h4>
+        <p class="text-muted mb-0" style="font-size:.88rem;">
+            <i class="fas fa-id-badge me-1" style="color:var(--accent);"></i>
+            {{ current_user.tipo_usuario|capitalize }} · Cédula {{ current_user.cedula }}
+        </p>
+    </div>
+    <div class="d-none d-md-block text-end">
+        <div style="font-size:.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;">Período</div>
+        <div style="font-weight:700;font-size:.9rem;">2026 – 2027</div>
+    </div>
+</div>
 
-// Cargar lista de viajes
-fetch('/api/v1/viajes')
-    .then(r => r.json())
-    .then(d => {
-        const cont = document.getElementById('viajes-lista');
-        if (!d.viajes || d.viajes.length === 0) {
-            cont.innerHTML = `<div style="text-align:center;padding:40px;color:#9ca3af">
-                <i class="fas fa-car" style="font-size:2.5rem;color:#c9a227;opacity:.5"></i>
-                <p style="margin-top:12px">No hay viajes disponibles</p>
-                <a href="/viajes/publicar" class="btn-uride btn-primary-uride" style="margin-top:12px">Publicar el primero</a>
-            </div>`;
-            return;
-        }
-        cont.innerHTML = d.viajes.map(v => `
-        <div class="viaje-card" style="border-radius:10px;margin-bottom:10px;padding:14px 16px;display:block;cursor:default">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-                <div style="flex:1">
-                    <div class="viaje-origin-dest" style="font-weight:700;font-size:.9rem">
-                        <span>${v.origen}</span>
-                        <i class="fas fa-long-arrow-alt-right route-arrow"></i>
-                        <span>${v.destino}</span>
-                    </div>
-                    <div class="viaje-meta" style="margin-top:5px">
-                        <span class="meta-item"><i class="fas fa-clock"></i>${v.fecha}</span>
-                        <span class="meta-item"><i class="fas fa-user"></i>${v.conductor}</span>
-                        ${v.reputacion > 0 ? `<span class="meta-item" style="color:#c9a227"><i class="fas fa-star"></i>${v.reputacion}</span>` : ''}
-                    </div>
+<!-- KPIs -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(201,162,39,.1);">
+                <i class="fas fa-users" style="color:#c9a227;"></i>
+            </div>
+            <div>
+                <div class="kpi-num">{{ stats.usuarios }}</div>
+                <div class="kpi-label">Usuarios activos</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(13,148,136,.1);">
+                <i class="fas fa-ticket-alt" style="color:#0d9488;"></i>
+            </div>
+            <div>
+                <div class="kpi-num">{{ stats.turnos_hoy }}</div>
+                <div class="kpi-label">Turnos hoy</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(37,99,235,.1);">
+                <i class="fas fa-hourglass-half" style="color:#2563eb;"></i>
+            </div>
+            <div>
+                <div class="kpi-num">{{ stats.turnos_espera }}</div>
+                <div class="kpi-label">En espera ahora</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(220,38,38,.1);">
+                <i class="fas fa-file-alt" style="color:#dc2626;"></i>
+            </div>
+            <div>
+                <div class="kpi-num">{{ stats.tramites_pendientes }}</div>
+                <div class="kpi-label">Trámites pendientes</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Módulos -->
+<h6 class="fw-bold text-muted mb-3" style="font-size:.7rem;text-transform:uppercase;letter-spacing:1.2px;">Módulos del Sistema</h6>
+<div class="row g-3 mb-4">
+
+    <!-- Ventanilla -->
+    <div class="col-md-6 col-xl-3">
+        <a href="{{ url_for('atencion.tomar_turno') }}" class="mod-card">
+            <div class="mod-card-top">
+                <div class="mod-card-icon" style="background:rgba(201,162,39,.1);">
+                    <i class="fas fa-ticket-alt" style="color:#c9a227;"></i>
                 </div>
-                <div class="cupos-badge" onclick="URideMapa.cargarViaje(${v.id},'mapa-viaje','mapa-stats')" style="cursor:pointer" title="Ver en mapa">
-                    <span class="cupos-num">${v.cupos}</span>
-                    <span class="cupos-label">cupos</span>
+                <div>
+                    <div class="mod-card-title">Ventanilla Virtual</div>
+                    <div class="mod-card-sub">Atención estudiantil</div>
                 </div>
             </div>
-            <div style="display:flex;gap:8px">
-                <a href="/viajes/detalle/${v.id}"
-                   style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:linear-gradient(135deg,#c9a227,#a07d1a);color:#fff;border:none;border-radius:9px;padding:9px 14px;font-size:.82rem;font-weight:700;text-decoration:none;transition:opacity .2s"
-                   onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-                    <i class="fas fa-eye"></i> Ver Detalle y Unirme
+            <div class="mod-card-body">
+                <p class="mod-card-desc">Solicita un turno de atención y monitorea tu posición en tiempo real.</p>
+            </div>
+            <div class="mod-card-footer" style="color:#c9a227;">
+                <span>Solicitar turno</span><i class="fas fa-arrow-right"></i>
+            </div>
+        </a>
+    </div>
+
+    <!-- Trámites -->
+    <div class="col-md-6 col-xl-3">
+        <a href="{{ url_for('tramites.historial') }}" class="mod-card">
+            <div class="mod-card-top">
+                <div class="mod-card-icon" style="background:rgba(220,38,38,.1);">
+                    <i class="fas fa-file-signature" style="color:#dc2626;"></i>
+                </div>
+                <div>
+                    <div class="mod-card-title">Trámites</div>
+                    <div class="mod-card-sub">Solicitudes y seguimiento</div>
+                </div>
+            </div>
+            <div class="mod-card-body">
+                <p class="mod-card-desc">Gestiona tus solicitudes de certificados, justificaciones y más.</p>
+            </div>
+            <div class="mod-card-footer" style="color:#dc2626;">
+                <span>Ver mis trámites</span><i class="fas fa-arrow-right"></i>
+            </div>
+        </a>
+    </div>
+
+    <!-- Directorio -->
+    <div class="col-md-6 col-xl-3">
+        <a href="{{ url_for('organizacion.organigrama') }}" class="mod-card">
+            <div class="mod-card-top">
+                <div class="mod-card-icon" style="background:rgba(13,148,136,.1);">
+                    <i class="fas fa-sitemap" style="color:#0d9488;"></i>
+                </div>
+                <div>
+                    <div class="mod-card-title">Directorio UTA</div>
+                    <div class="mod-card-sub">Organigrama institucional</div>
+                </div>
+            </div>
+            <div class="mod-card-body">
+                <p class="mod-card-desc">Visualiza la jerarquía de facultades, carreras y dependencias.</p>
+            </div>
+            <div class="mod-card-footer" style="color:#0d9488;">
+                <span>Ver organigrama</span><i class="fas fa-arrow-right"></i>
+            </div>
+        </a>
+    </div>
+
+    <!-- Campus -->
+    <div class="col-md-6 col-xl-3">
+        <a href="{{ url_for('campus.rutas') }}" class="mod-card">
+            <div class="mod-card-top">
+                <div class="mod-card-icon" style="background:rgba(37,99,235,.1);">
+                    <i class="fas fa-map-marked-alt" style="color:#2563eb;"></i>
+                </div>
+                <div>
+                    <div class="mod-card-title">Mapa del Campus</div>
+                    <div class="mod-card-sub">Rutas y ubicaciones</div>
+                </div>
+            </div>
+            <div class="mod-card-body">
+                <p class="mod-card-desc">Encuentra la ruta más corta entre puntos del campus universitario.</p>
+            </div>
+            <div class="mod-card-footer" style="color:#2563eb;">
+                <span>Calcular ruta</span><i class="fas fa-arrow-right"></i>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Accesos rápidos según rol -->
+{% if current_user.tipo_usuario == 'estudiante' %}
+<div class="row g-3">
+    <div class="col-12">
+        <div class="card-uride" style="background:var(--sidebar-bg);border-color:rgba(201,162,39,.15);">
+            <div class="card-body-uride d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div>
+                    <div style="color:rgba(255,255,255,.5);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;">Acción rápida</div>
+                    <div style="color:#fff;font-weight:700;font-size:1rem;margin-top:4px;">¿Necesitas atención presencial?</div>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ url_for('atencion.tomar_turno') }}" class="btn-uride btn-primary-uride">
+                        <i class="fas fa-ticket-alt"></i> Tomar turno ahora
+                    </a>
+                    <a href="{{ url_for('tramites.solicitar') }}" class="btn-uride btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.2);">
+                        <i class="fas fa-file-signature"></i> Nueva solicitud
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="row g-3">
+    <div class="col-12">
+        <div class="card-uride">
+            <div class="card-header-uride">
+                <h6 class="fw-bold mb-0"><i class="fas fa-cogs me-2" style="color:var(--accent);"></i>Panel de Administración</h6>
+            </div>
+            <div class="card-body-uride d-flex gap-3 flex-wrap">
+                <a href="{{ url_for('atencion.pantalla') }}" class="btn-uride btn-outline-uride">
+                    <i class="fas fa-tv me-1"></i> Pantalla de Turnos
                 </a>
-                <button onclick="URideMapa.cargarViaje(${v.id},'mapa-viaje','mapa-stats')"
-                        style="background:rgba(201,162,39,.12);border:1.5px solid rgba(201,162,39,.3);border-radius:9px;padding:9px 12px;cursor:pointer;font-size:.82rem;color:var(--accent)"
-                        title="Ver ruta en mapa">
-                    <i class="fas fa-map-marked-alt"></i>
-                </button>
+                <a href="{{ url_for('tramites.historial') }}" class="btn-uride btn-outline-uride">
+                    <i class="fas fa-list me-1"></i> Todos los Trámites
+                </a>
+                <a href="{{ url_for('tramites.bitacora') }}" class="btn-uride btn-outline-uride">
+                    <i class="fas fa-clipboard-list me-1"></i> Bitácora
+                </a>
+                {% if current_user.tipo_usuario == 'admin' %}
+                <a href="{{ url_for('organizacion.nuevo_documento') }}" class="btn-uride btn-outline-uride">
+                    <i class="fas fa-file-upload me-1"></i> Publicar Documento
+                </a>
+                {% endif %}
             </div>
-        </div>`).join('');
-
-        // Cargar el primer viaje en el mapa
-        if (d.viajes[0]) {
-            URideMapa.cargarViaje(d.viajes[0].id, 'mapa-viaje', 'mapa-stats');
-        }
-    })
-    .catch(() => {
-        // Si API falla, inicializar mapa vacío centrado en ecuador
-        if (typeof URideMapa !== 'undefined') {
-            URideMapa.init('mapa-viaje', {
-                origen: { zona: 'Universidad', coords: [-0.2105, -78.4925] },
-                destino: { zona: 'Centro',     coords: [-0.2299, -78.5249] },
-                centro: [-0.2202, -78.5087]
-            });
-        }
-    });
-
-</script>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

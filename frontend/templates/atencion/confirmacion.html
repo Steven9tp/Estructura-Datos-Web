@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Tu Turno{% endblock %}
+{% block page_title %}<i class="fas fa-ticket-alt me-2" style="color:var(--accent)"></i>Turno Asignado{% endblock %}
+
+{% block styles %}
+<style>
+@keyframes fadeInUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:none; } }
+@keyframes popIn { 0% { transform:scale(.5); opacity:0; } 70% { transform:scale(1.08); } 100% { transform:scale(1); opacity:1; } }
+.confirmacion-card {
+    background: var(--sidebar-bg);
+    border: 1px solid rgba(201,162,39,.25);
+    border-radius: var(--radius-lg);
+    padding: 56px 40px;
+    text-align: center;
+    animation: fadeInUp .5s ease;
+    position: relative; overflow: hidden;
+}
+.confirmacion-card::before {
+    content:'';
+    position:absolute; top:-80px; left:50%; transform:translateX(-50%);
+    width:300px; height:300px;
+    background: radial-gradient(circle, rgba(201,162,39,.08), transparent 70%);
+    border-radius:50%; pointer-events:none;
+}
+.turno-badge {
+    display: inline-block;
+    font-size: 6rem; font-weight: 900; color: #c9a227;
+    line-height: 1; letter-spacing: -4px;
+    animation: popIn .6s .2s both;
+}
+.info-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 20px; padding: 8px 18px; font-size: .85rem; color: rgba(255,255,255,.7);
+    margin: 6px;
+}
+.info-chip i { color: #c9a227; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="confirmacion-card">
+            <div style="color:rgba(255,255,255,.4); font-size:.8rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:16px;">
+                <i class="fas fa-check-circle me-2" style="color:#10b981;"></i>Turno Generado Exitosamente
+            </div>
+
+            <div class="turno-badge">{{ turno.codigo_turno }}</div>
+
+            <div style="margin:24px 0;">
+                <div class="info-chip"><i class="fas fa-building"></i>{{ turno.dependencia_lugar.nombre }}</div>
+                <div class="info-chip"><i class="fas fa-list-ol"></i>Posición #{{ posicion }} en la cola</div>
+                <div class="info-chip"><i class="fas fa-clock"></i>~{{ tiempo_estimado }} min de espera</div>
+                <div class="info-chip"><i class="fas fa-calendar"></i>{{ turno.fecha_emision.strftime('%H:%M') }}</div>
+            </div>
+
+            <p style="color:rgba(255,255,255,.4); font-size:.85rem; max-width:340px; margin:0 auto 32px;">
+                Por favor, mantente atento a la pantalla de turnos. Te llamaremos cuando sea tu turno.
+            </p>
+
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{{ url_for('atencion.pantalla') }}" class="btn-uride btn-primary-uride">
+                    <i class="fas fa-tv me-2"></i>Ver Pantalla de Turnos
+                </a>
+                <a href="{{ url_for('main.index') }}" class="btn-uride btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.2);">
+                    <i class="fas fa-home me-2"></i>Ir al Inicio
+                </a>
+            </div>
+        </div>
+
+        <!-- Auto-refresh countdown -->
+        <div class="text-center mt-3 text-muted" style="font-size:.8rem;">
+            <i class="fas fa-sync-alt me-1"></i>La pantalla se actualizará automáticamente en <span id="cnt">30</span>s
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let s = 30;
+const cnt = document.getElementById('cnt');
+setInterval(() => {
+    s--;
+    if (cnt) cnt.textContent = s;
+    if (s <= 0) window.location.href = "{{ url_for('atencion.pantalla') }}";
+}, 1000);
+</script>
+{% endblock %}

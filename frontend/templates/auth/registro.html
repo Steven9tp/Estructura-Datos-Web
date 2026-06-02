@@ -1,146 +1,81 @@
 {% extends "base.html" %}
-{% block title %}Registro — U-Ride{% endblock %}
+{% block title %}Registro — SmartCampus UTA{% endblock %}
+
 {% block content %}
-<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px">
-    <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:0;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.25);width:100%;max-width:900px">
-        <!-- Panel izquierdo -->
-        <div style="background:#111827;padding:48px;display:flex;flex-direction:column;justify-content:center">
-            <div style="font-size:2.5rem;margin-bottom:16px">🎓</div>
-            <h2 style="color:#fff;font-weight:800;font-size:1.8rem;line-height:1.2">Únete a la comunidad <span style="color:#dc2626">U-Ride</span></h2>
-            <p style="color:#9ca3af;margin-top:14px;line-height:1.7">Solo estudiantes con correo institucional verificado pueden registrarse.</p>
-            <div style="margin-top:28px;display:flex;flex-direction:column;gap:12px">
-                <div style="display:flex;align-items:center;gap:12px;color:#d1d5db;font-size:.875rem">
-                    <div style="width:32px;height:32px;border-radius:50%;background:rgba(220,38,38,.2);display:flex;align-items:center;justify-content:center;color:#dc2626;flex-shrink:0"><i class="fas fa-shield-alt"></i></div>
-                    Transporte 100% verificado
-                </div>
-                <div style="display:flex;align-items:center;gap:12px;color:#d1d5db;font-size:.875rem">
-                    <div style="width:32px;height:32px;border-radius:50%;background:rgba(220,38,38,.2);display:flex;align-items:center;justify-content:center;color:#dc2626;flex-shrink:0"><i class="fas fa-star"></i></div>
-                    Sistema de reputación
-                </div>
-                <div style="display:flex;align-items:center;gap:12px;color:#d1d5db;font-size:.875rem">
-                    <div style="width:32px;height:32px;border-radius:50%;background:rgba(220,38,38,.2);display:flex;align-items:center;justify-content:center;color:#dc2626;flex-shrink:0"><i class="fas fa-map-marked-alt"></i></div>
-                    Seguimiento de rutas en mapa
-                </div>
+<div class="auth-container">
+    <div style="width:100%;max-width:540px;">
+        <!-- Logo -->
+        <div class="text-center mb-4">
+            <div style="width:52px;height:52px;background:var(--accent);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:1.4rem;color:#111;margin-bottom:16px;">
+                <i class="fas fa-university"></i>
             </div>
-            
-            <div style="margin-top:24px;background:rgba(220,38,38,.1);border-left:3px solid #dc2626;padding:12px;border-radius:4px;color:#9ca3af;font-size:.8rem;line-height:1.5">
-                <strong style="color:#dc2626"><i class="fas fa-info-circle"></i> ¿Conductor o pasajero?</strong><br>
-                En U-Ride no tienes que elegir un tipo de cuenta. Una vez registrado, podrás <b>ofrecer viajes</b> a otros si traes coche, o <b>unirte como pasajero</b> a los viajes de tus compañeros desde el mismo panel.
-            </div>
+            <h2 style="color:#fff;font-weight:800;font-size:1.6rem;">Crear cuenta institucional</h2>
+            <p style="color:#94a3b8;font-size:.88rem;margin-top:4px;">Únete a la comunidad SmartCampus UTA</p>
         </div>
 
-        <!-- Formulario -->
-        <div style="padding:40px;overflow-y:auto;max-height:90vh">
-            <div style="text-align:center;margin-bottom:24px">
-                <div class="auth-logo" style="margin-bottom:12px"><i class="fas fa-car-side"></i></div>
-                <h3 style="font-weight:800">Crear Cuenta</h3>
-                <p style="color:var(--text-secondary);font-size:.875rem">Completa tus datos</p>
-            </div>
-
-            <form method="post" autocomplete="off">
+        <div class="auth-card">
+            <form method="POST" action="{{ url_for('auth.registro') }}">
                 {{ form.hidden_tag() }}
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-                    <div class="form-group">
-                        <label class="form-label-uride">Nombre</label>
-                        {{ form.nombre(class="form-control-uride", placeholder="Tu nombre") }}
-                        {% for e in form.nombre.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label-uride">Apellido</label>
-                        {{ form.apellido(class="form-control-uride", placeholder="Tu apellido") }}
-                        {% for e in form.apellido.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label-uride">Correo institucional</label>
-                    {{ form.email(class="form-control-uride", placeholder="tu@uta.edu.ec") }}
-                    {% for e in form.email.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-                    <div class="form-group">
-                        <label class="form-label-uride">Carrera</label>
-                        {{ form.carrera(class="form-control-uride", placeholder="Ingeniería…") }}
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label-uride">Teléfono</label>
-                        {{ form.telefono(class="form-control-uride", placeholder="09…") }}
-                    </div>
-                </div>
-                <div class="form-group position-relative">
-                    <label class="form-label-uride">Dirección o Sector de residencia</label>
-                    {{ form.direccion(class="form-control-uride", id="direccion_reg", placeholder="Ej: Ficoa, Ambato", autocomplete="off") }}
-                    <ul id="reg-suggestions" class="list-group position-absolute w-100" style="z-index:1000; display:none; max-height: 200px; overflow-y: auto;"></ul>
-                    {% for e in form.direccion.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
-                </div>
 
-                <script>
-                window.addEventListener('load', function() {
-                    const inputDir = document.getElementById('direccion_reg');
-                    const suggestions = document.getElementById('reg-suggestions');
-                    let timeout;
-
-                    inputDir.addEventListener('input', function() {
-                        clearTimeout(timeout);
-                        const query = this.value;
-                        if (query.length < 4) { suggestions.style.display = 'none'; return; }
-
-                        timeout = setTimeout(() => {
-                            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`)
-                                .then(r => r.json())
-                                .then(data => {
-                                    suggestions.innerHTML = '';
-                                    if (data.length > 0) {
-                                        data.forEach(item => {
-                                            const li = document.createElement('li');
-                                            li.className = 'list-group-item list-group-item-action';
-                                            li.style.cursor = 'pointer';
-                                            li.style.fontSize = '0.8rem';
-                                            li.innerText = item.display_name;
-                                            li.onclick = () => {
-                                                inputDir.value = item.display_name;
-                                                suggestions.style.display = 'none';
-                                            };
-                                            suggestions.appendChild(li);
-                                        });
-                                        suggestions.style.display = 'block';
-                                    } else {
-                                        suggestions.style.display = 'none';
-                                    }
-                                });
-                        }, 500);
-                    });
-
-                    document.addEventListener('click', e => {
-                        if (!inputDir.contains(e.target) && !suggestions.contains(e.target)) {
-                            suggestions.style.display = 'none';
-                        }
-                    });
-                });
-                </script>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-                    <div class="form-group">
-                        <label class="form-label-uride">Contraseña</label>
-                        {{ form.password(class="form-control-uride", placeholder="Mín. 8 caracteres") }}
-                        {% for e in form.password.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
+                <div class="row g-3 mb-1">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.nombres.label(class="form-label-uride") }}
+                            {{ form.nombres(class="form-control-uride", placeholder="Ej: Carlos") }}
+                            {% if form.nombres.errors %}<div class="text-danger" style="font-size:.75rem;margin-top:3px;">{{ form.nombres.errors[0] }}</div>{% endif %}
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label-uride">Confirmar contraseña</label>
-                        {{ form.confirm_password(class="form-control-uride", placeholder="••••••••") }}
-                        {% for e in form.confirm_password.errors %}<span style="color:#ef4444;font-size:.78rem">{{ e }}</span>{% endfor %}
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.apellidos.label(class="form-label-uride") }}
+                            {{ form.apellidos(class="form-control-uride", placeholder="Ej: Pérez") }}
+                            {% if form.apellidos.errors %}<div class="text-danger" style="font-size:.75rem;margin-top:3px;">{{ form.apellidos.errors[0] }}</div>{% endif %}
+                        </div>
                     </div>
                 </div>
 
-                <div style="background:#fef3c7;border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:.8rem;color:#92400e">
-                    <i class="fas fa-envelope me-1"></i> Recibirás un correo de verificación. <strong>Debes verificarlo antes de iniciar sesión.</strong>
+                <div class="form-group mb-3">
+                    {{ form.cedula.label(class="form-label-uride") }}
+                    {{ form.cedula(class="form-control-uride", placeholder="1801234567") }}
+                    {% if form.cedula.errors %}<div class="text-danger" style="font-size:.75rem;margin-top:3px;">{{ form.cedula.errors[0] }}</div>{% endif %}
                 </div>
 
-                <button type="submit" class="btn-uride btn-primary-uride btn-full btn-lg-uride">
-                    <i class="fas fa-user-plus"></i> Crear Cuenta
-                </button>
+                <div class="form-group mb-3">
+                    {{ form.email.label(class="form-label-uride") }}
+                    {{ form.email(class="form-control-uride", placeholder="nombre@uta.edu.ec") }}
+                    {% if form.email.errors %}<div class="text-danger" style="font-size:.75rem;margin-top:3px;">{{ form.email.errors[0] }}</div>{% endif %}
+                </div>
+
+                <div class="form-group mb-3">
+                    {{ form.tipo_usuario.label(class="form-label-uride") }}
+                    {{ form.tipo_usuario(class="form-control-uride form-select-uride") }}
+                </div>
+
+                <div class="row g-3 mb-1">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.password.label(class="form-label-uride") }}
+                            {{ form.password(class="form-control-uride", placeholder="Mínimo 6 caracteres") }}
+                            {% if form.password.errors %}<div class="text-danger" style="font-size:.75rem;margin-top:3px;">{{ form.password.errors[0] }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.confirmar_password.label(class="form-label-uride") }}
+                            {{ form.confirmar_password(class="form-control-uride", placeholder="Repite la clave") }}
+                            {% if form.confirmar_password.errors %}<div class="text-danger" style="font-size:.75rem;margin-top:3px;">{{ form.confirmar_password.errors[0] }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    {{ form.submit(class="btn-uride btn-primary-uride btn-full btn-lg-uride") }}
+                </div>
             </form>
-            <div style="text-align:center;margin-top:20px;font-size:.875rem;color:var(--text-secondary)">
+
+            <div class="text-center mt-4" style="font-size:.85rem;color:var(--text-secondary);">
                 ¿Ya tienes cuenta?
-                <a href="{{ url_for('auth.login') }}" style="color:var(--accent);font-weight:600;margin-left:4px">Iniciar sesión</a>
+                <a href="{{ url_for('auth.login') }}" style="color:var(--accent);font-weight:600;text-decoration:none;">Inicia sesión</a>
             </div>
         </div>
     </div>

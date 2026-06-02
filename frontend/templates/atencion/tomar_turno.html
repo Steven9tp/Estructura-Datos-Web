@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+{% block title %}Tomar Turno{% endblock %}
+{% block page_title %}<i class="fas fa-ticket-alt me-2" style="color:var(--accent)"></i>Ventanilla Virtual{% endblock %}
+
+{% block styles %}
+<style>
+.cola-banner {
+    background:var(--sidebar-bg); border-radius:var(--radius-md);
+    padding:16px 24px; display:flex; align-items:center; justify-content:space-between;
+    border:1px solid rgba(201,162,39,.2); margin-bottom:24px;
+}
+.cola-num  { color:#fff; font-size:1.5rem; font-weight:800; }
+.cola-sub  { color:rgba(255,255,255,.45); font-size:.82rem; margin-left:6px; }
+.cola-lbl  { color:rgba(255,255,255,.5); font-size:.68rem; text-transform:uppercase; letter-spacing:1px; }
+.cola-min  { color:var(--accent); font-size:2rem; font-weight:900; text-align:right; }
+.cola-mlbl { color:rgba(255,255,255,.4); font-size:.67rem; text-align:right; }
+
+.sec-title {
+    font-size:.68rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:1.5px; color:var(--text-secondary); margin-bottom:14px;
+}
+
+/* Faculty grid */
+.fac-grid {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:28px;
+}
+.fac-tile {
+    background:var(--bg-card); border:2px solid var(--border);
+    border-radius:var(--radius-md); padding:20px 14px 16px;
+    cursor:pointer; transition:all .2s;
+    display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center;
+    user-select:none;
+}
+.fac-tile:hover { border-color:var(--accent); transform:translateY(-3px); box-shadow:0 6px 20px rgba(201,162,39,.15); }
+.fac-tile.selected { border-color:var(--accent); background:rgba(201,162,39,.08); box-shadow:0 0 0 3px rgba(201,162,39,.18); }
+.fac-icon {
+    width:52px; height:52px; border-radius:14px;
+    display:flex; align-items:center; justify-content:center; font-size:1.25rem;
+}
+.fac-name { font-weight:700; font-size:.82rem; color:var(--text-primary); line-height:1.35; }
+.fac-badge {
+    font-size:.65rem; font-weight:600; padding:2px 8px;
+    border-radius:50px; background:rgba(201,162,39,.12); color:var(--accent);
+}
+
+/* Career panel */
+.car-panel {
+    display:none; background:var(--bg-card);
+    border:2px solid var(--accent); border-radius:var(--radius-md);
+    padding:20px; margin-bottom:24px;
+    animation:fadeIn .2s ease;
+}
+.car-panel.open { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
+
+.car-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:16px; gap:12px; flex-wrap:wrap;
+}
+.car-header-left { display:flex; align-items:center; gap:10px; }
+.car-h-icon {
+    width:38px; height:38px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; font-size:.95rem;
+}
+.car-h-name  { font-weight:700; font-size:.95rem; color:var(--text-primary); }
+.car-h-sub   { font-size:.73rem; color:var(--text-secondary); }
+.btn-back {
+    display:inline-flex; align-items:center; gap:6px;
+    background:none; border:1.5px solid var(--border); color:var(--text-secondary);
+    font-size:.8rem; font-weight:600; padding:7px 14px;
+    border-radius:var(--radius-sm); cursor:pointer; transition:all .2s;
+}
+.btn-back:hover { border-color:var(--accent); color:var(--accent); }
+
+.car-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px;
+}
+.car-tile {
+    background:var(--bg-main); border:2px solid var(--border); border-radius:var(--radius-sm);
+    padding:13px 15px; cursor:pointer; display:flex; align-items:center; gap:12px;
+    transition:all .2s; user-select:none;
+}
+.car-tile:hover   { border-color:var(--accent); background:rgba(201,162,39,.04); }
+.car-tile.selected{ border-color:var(--accent); background:rgba(201,162,39,.09); }
+.car-ico { width:32px; height:32px; border-radius:8px; background:rgba(201,162,39,.12); display:flex; align-items:center; justify-content:center; font-size:.85rem; color:var(--accent); flex-shrink:0; }
+.car-name { font-weight:600; font-size:.83rem; color:var(--text-primary); flex:1; }
+.car-chk {
+    width:18px; height:18px; border-radius:50%; border:2px solid var(--border);
+    background:var(--bg-card); display:flex; align-items:center; justify-content:center;
+    font-size:.55rem; color:transparent; transition:all .2s; flex-shrink:0;
+}
+.car-tile.selected .car-chk { background:var(--accent); border-color:var(--accent); color:#111; }
+
+/* Confirm bar */
+.confirm-bar {
+    position:sticky; bottom:0; background:var(--bg-card);
+    border-top:1px solid var(--border); padding:14px 0 0;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    margin-top:8px; box-shadow:0 -4px 20px rgba(0,0,0,.08);
+}
+.confirm-info { display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
+.confirm-avatar { width:36px; height:36px; border-radius:10px; background:rgba(201,162,39,.1); display:flex; align-items:center; justify-content:center; color:var(--accent); flex-shrink:0; }
+.confirm-main { font-weight:700; font-size:.85rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.confirm-sub  { font-size:.72rem; color:var(--text-secondary); }
+
+@media(max-width:1100px){ .fac-grid{ grid-template-columns:repeat(3,1fr); } }
+@media(max-width:720px) { .fac-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:480px) {
+    .fac-grid{ grid-template-columns:1fr 1fr; }
+    .confirm-bar{ flex-direction:column; align-items:stretch; }
+    #btnTomar{ width:100%; justify-content:center; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<form method="POST" id="turnoForm">
+    <input type="hidden" name="csrf_token"     value="{{ csrf_token() }}">
+    <input type="hidden" name="dependencia_id" id="hiddenDepId">
+
+    <!-- Banner cola -->
+    <div class="cola-banner" id="colaBanner">
+        <div>
+            <div class="cola-lbl" id="colaLabel">Estado actual de la cola (general)</div>
+            <div class="cola-num" id="colaNum">{{ total_espera }}<span class="cola-sub"> personas esperando</span></div>
+        </div>
+        <div>
+            <div class="cola-min" id="colaMin">~{{ total_espera * 5 }} min</div>
+            <div class="cola-mlbl">espera estimada</div>
+        </div>
+    </div>
+
+    <!-- Facultades (renderizado por JS) -->
+    <div class="sec-title"><i class="fas fa-university me-1"></i> Selecciona la Facultad</div>
+    <div class="fac-grid" id="facGrid"></div>
+
+    <!-- Panel de carreras (oculto) -->
+    <div class="car-panel" id="carPanel">
+        <div class="car-header">
+            <div class="car-header-left">
+                <div class="car-h-icon" id="carHIcon"></div>
+                <div>
+                    <div class="car-h-name" id="carHName"></div>
+                    <div class="car-h-sub">Elige la carrera</div>
+                </div>
+            </div>
+            <button type="button" class="btn-back" onclick="volverFacultades()">
+                <i class="fas fa-arrow-left"></i> Cambiar facultad
+            </button>
+        </div>
+        <div class="sec-title"><i class="fas fa-graduation-cap me-1"></i> Carrera</div>
+        <div class="car-grid" id="carGrid"></div>
+    </div>
+
+    <!-- Barra confirmar -->
+    <div class="confirm-bar">
+        <div class="confirm-info">
+            <div class="confirm-avatar" id="confAvatar" style="opacity:.35">
+                <i class="fas fa-hand-pointer"></i>
+            </div>
+            <div style="min-width:0;">
+                <div class="confirm-main" id="confMain" style="color:var(--text-secondary);opacity:.5">Elige una facultad arriba</div>
+                <div class="confirm-sub"  id="confSub">Toca la tarjeta de tu facultad</div>
+            </div>
+        </div>
+        <button type="submit" class="btn-uride btn-primary-uride" id="btnTomar" disabled>
+            <i class="fas fa-ticket-alt"></i> Confirmar Turno
+        </button>
+    </div>
+
+    <a href="{{ url_for('atencion.pantalla') }}"
+       style="display:block;text-align:center;font-size:.78rem;color:var(--text-secondary);text-decoration:none;padding:10px 8px;margin-top:4px;">
+        <i class="fas fa-tv me-1"></i> Ver pantalla de turnos en tiempo real
+    </a>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Datos de la DB ─────────────────────────────────────────
+const DEPS = {{ deps_json | safe }};
+
+// ── Mapa de íconos por nombre de facultad ──────────────────
+function getIconInfo(nombre) {
+    const n = nombre.toLowerCase();
+    if (n.includes('rectorado'))                         return {ico:'fa-landmark',       bg:'rgba(201,162,39,.12)', color:'#c9a227'};
+    if (n.includes('sistemas')||n.includes('industrial'))return {ico:'fa-microchip',      bg:'rgba(37,99,235,.12)',  color:'#2563eb'};
+    if (n.includes('administrativ'))                     return {ico:'fa-briefcase',      bg:'rgba(13,148,136,.12)', color:'#0d9488'};
+    if (n.includes('alimentos')||n.includes('biotecno')) return {ico:'fa-flask',          bg:'rgba(22,163,74,.12)',  color:'#16a34a'};
+    if (n.includes('agropecuaria'))                      return {ico:'fa-seedling',       bg:'rgba(101,163,13,.12)', color:'#65a30d'};
+    if (n.includes('civil')||n.includes('mec'))          return {ico:'fa-hard-hat',       bg:'rgba(234,88,12,.12)',  color:'#ea580c'};
+    if (n.includes('salud'))                             return {ico:'fa-heartbeat',      bg:'rgba(225,29,72,.12)',  color:'#e11d48'};
+    if (n.includes('dise')||n.includes('arquitectura'))  return {ico:'fa-drafting-compass',bg:'rgba(124,58,237,.12)',color:'#7c3aed'};
+    if (n.includes('contabilidad'))                      return {ico:'fa-calculator',     bg:'rgba(8,145,178,.12)',  color:'#0891b2'};
+    if (n.includes('humanas')||n.includes('educaci'))    return {ico:'fa-chalkboard-teacher',bg:'rgba(219,39,119,.12)',color:'#db2777'};
+    if (n.includes('jurisprudencia')||n.includes('social'))return {ico:'fa-balance-scale',bg:'rgba(180,83,9,.12)',  color:'#b45309'};
+    return {ico:'fa-building', bg:'rgba(201,162,39,.12)', color:'#c9a227'};
+}
+
+// ── Construir jerarquía ────────────────────────────────────
+const root   = DEPS.find(d => d.padre_id === null);
+const facIds = root ? DEPS.filter(d => d.padre_id === root.id).map(d => d.id) : [];
+const facultades = root
+    ? [root, ...DEPS.filter(d => d.padre_id === root.id)]
+    : DEPS.filter(d => d.padre_id === null);
+
+const carrerasDe = {};
+facultades.forEach(f => {
+    carrerasDe[f.id] = DEPS.filter(d => d.padre_id === f.id);
+});
+
+let selFacId = null;
+
+// ── Renderizar grid de facultades ──────────────────────────
+function renderFacultades() {
+    const grid = document.getElementById('facGrid');
+    grid.innerHTML = '';
+    facultades.forEach(f => {
+        const info  = getIconInfo(f.nombre);
+        const cars  = carrerasDe[f.id] || [];
+        const badge = cars.length > 0 ? `${cars.length} carreras` : 'Atención directa';
+
+        const div = document.createElement('div');
+        div.className = 'fac-tile';
+        div.id = 'fac-' + f.id;
+        div.innerHTML = `
+            <div class="fac-icon" style="background:${info.bg}">
+                <i class="fas ${info.ico}" style="color:${info.color}"></i>
+            </div>
+            <div class="fac-name">${f.nombre}</div>
+            <div class="fac-badge">${badge}</div>`;
+        div.onclick = () => clickFacultad(f.id);
+        grid.appendChild(div);
+    });
+}
+
+// ── Clic en facultad ───────────────────────────────────────
+function clickFacultad(facId) {
+    document.querySelectorAll('.fac-tile').forEach(t => t.classList.remove('selected'));
+    const tile = document.getElementById('fac-' + facId);
+    if (tile) tile.classList.add('selected');
+    selFacId = facId;
+
+    const fac  = DEPS.find(d => d.id === facId);
+    const cars = carrerasDe[facId] || [];
+
+    // Actualizar banner con datos de esta facultad
+    actualizarBanner(facId, fac.nombre);
+
+    if (cars.length === 0) {
+        document.getElementById('carPanel').classList.remove('open');
+        setConfirm(facId, fac.nombre);
+    } else {
+        mostrarCarreras(facId, fac, cars);
+        resetConfirm();
+    }
+}
+
+// ── Mostrar panel de carreras ──────────────────────────────
+function mostrarCarreras(facId, fac, cars) {
+    const info = getIconInfo(fac.nombre);
+    const icon = document.getElementById('carHIcon');
+    icon.style.background = info.bg;
+    icon.innerHTML = `<i class="fas ${info.ico}" style="color:${info.color}"></i>`;
+    document.getElementById('carHName').textContent = fac.nombre;
+
+    const grid = document.getElementById('carGrid');
+    grid.innerHTML = '';
+    cars.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'car-tile';
+        div.id = 'car-' + c.id;
+        div.innerHTML = `
+            <div class="car-ico"><i class="fas fa-graduation-cap"></i></div>
+            <div class="car-name">${c.nombre}</div>
+            <div class="car-chk"><i class="fas fa-check"></i></div>`;
+        div.onclick = () => clickCarrera(c.id, c.nombre, fac.nombre);
+        grid.appendChild(div);
+    });
+
+    const panel = document.getElementById('carPanel');
+    panel.classList.add('open');
+    panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// ── Clic en carrera ────────────────────────────────────────
+function clickCarrera(carId, carNombre, facNombre) {
+    document.querySelectorAll('.car-tile').forEach(t => t.classList.remove('selected'));
+    const tile = document.getElementById('car-' + carId);
+    if (tile) tile.classList.add('selected');
+    // Actualizar banner con datos de la carrera específica
+    actualizarBanner(carId, carNombre);
+    setConfirm(carId, facNombre + ' → ' + carNombre);
+}
+
+// ── Volver a facultades ────────────────────────────────────
+function volverFacultades() {
+    document.getElementById('carPanel').classList.remove('open');
+    document.querySelectorAll('.fac-tile').forEach(t => t.classList.remove('selected'));
+    selFacId = null;
+    resetConfirm();
+}
+
+// ── Establecer confirmación ────────────────────────────────
+function setConfirm(depId, label) {
+    document.getElementById('hiddenDepId').value = depId;
+    const m = document.getElementById('confMain');
+    m.textContent = label;
+    m.style.opacity = '1';
+    m.style.color   = 'var(--text-primary)';
+    document.getElementById('confAvatar').style.opacity = '1';
+    document.getElementById('confSub').textContent = 'Presiona "Confirmar Turno" para continuar';
+    document.getElementById('btnTomar').disabled = false;
+}
+
+function resetConfirm() {
+    document.getElementById('hiddenDepId').value = '';
+    document.getElementById('btnTomar').disabled = true;
+    const m = document.getElementById('confMain');
+    m.textContent = 'Elige una facultad arriba';
+    m.style.opacity = '.5';
+    m.style.color   = 'var(--text-secondary)';
+    document.getElementById('confAvatar').style.opacity = '.35';
+    document.getElementById('confSub').textContent = 'Toca la tarjeta de tu facultad';
+}
+
+// ── Actualizar banner con cola de la dependencia seleccionada ──
+function actualizarBanner(depId, depNombre) {
+    fetch(`/atencion/cola_info/${depId}`)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('colaLabel').textContent =
+                `Cola en: ${depNombre}`;
+            document.getElementById('colaNum').innerHTML =
+                `${data.en_espera}<span class="cola-sub"> personas esperando</span>`;
+            document.getElementById('colaMin').textContent =
+                `~${data.tiempo_min} min`;
+        })
+        .catch(() => {});
+}
+
+// ── Init ──────────────────────────────────────────────────────
+renderFacultades();
+</script>
+{% endblock %}

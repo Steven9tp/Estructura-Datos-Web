@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Historial de Trámites{% endblock %}
+{% block page_title %}<i class="fas fa-folder-open me-2" style="color:var(--accent)"></i>Seguimiento de Trámites{% endblock %}
+
+{% block styles %}
+<style>
+.filtro-btn {
+    padding: 6px 16px; border-radius: 20px; font-size:.8rem; font-weight:600;
+    border: 1.5px solid var(--border); background: transparent; cursor: pointer;
+    color: var(--text-secondary); text-decoration: none; transition: all .2s;
+}
+.filtro-btn:hover { border-color: var(--accent); color: var(--accent); }
+.filtro-btn.active { background: var(--accent); border-color: var(--accent); color: #111; }
+.page-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 8px; font-size:.85rem; font-weight:600;
+    text-decoration: none; color: var(--text-secondary); border: 1.5px solid var(--border);
+    transition: all .2s;
+}
+.page-btn:hover, .page-btn.current { background: var(--accent); border-color: var(--accent); color: #111; }
+.page-btn.disabled { opacity:.4; pointer-events: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h5 class="fw-bold m-0">Bandeja de Trámites</h5>
+        <small class="text-muted">{{ paginacion.total }} solicitudes en total</small>
+    </div>
+    {% if current_user.tipo_usuario == 'estudiante' %}
+    <a href="{{ url_for('tramites.solicitar') }}" class="btn-uride btn-primary-uride">
+        <i class="fas fa-plus me-1"></i>Nueva Solicitud
+    </a>
+    {% endif %}
+</div>
+
+<!-- Filtros -->
+<div class="d-flex gap-2 flex-wrap mb-3">
+    <a href="{{ url_for('tramites.historial', estado='todos') }}"
+       class="filtro-btn {% if filtro_estado == 'todos' %}active{% endif %}">
+        Todos
+    </a>
+    <a href="{{ url_for('tramites.historial', estado='iniciado') }}"
+       class="filtro-btn {% if filtro_estado == 'iniciado' %}active{% endif %}">
+        <i class="fas fa-clock me-1"></i>Iniciado
+    </a>
+    <a href="{{ url_for('tramites.historial', estado='en_revision') }}"
+       class="filtro-btn {% if filtro_estado == 'en_revision' %}active{% endif %}">
+        <i class="fas fa-search me-1"></i>En Revisión
+    </a>
+    <a href="{{ url_for('tramites.historial', estado='aprobado') }}"
+       class="filtro-btn {% if filtro_estado == 'aprobado' %}active{% endif %}">
+        <i class="fas fa-check me-1"></i>Aprobado
+    </a>
+    <a href="{{ url_for('tramites.historial', estado='rechazado') }}"
+       class="filtro-btn {% if filtro_estado == 'rechazado' %}active{% endif %}">
+        <i class="fas fa-times me-1"></i>Rechazado
+    </a>
+</div>
+
+<div class="card-uride">
+    <div class="table-responsive">
+        <table class="table-uride">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tipo de Trámite</th>
+                    <th>Solicitante</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    {% if current_user.tipo_usuario in ['empleado','admin'] %}
+                    <th>Acciones</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tramites %}
+                <tr>
+                    <td class="fw-bold text-muted" style="font-size:.85rem;">#{{ t.id }}</td>
+                    <td class="fw-semibold">{{ t.tipo_tramite.replace('_',' ')|title }}</td>
+                    <td>{{ t.solicitante.nombre_completo }}</td>
+                    <td style="font-size:.82rem;color:var(--text-secondary);">{{ t.fecha_inicio.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>
+                        <span class="estado-badge
+                            {% if t.estado == 'aprobado' %}estado-abierto
+                            {% elif t.estado == 'rechazado' %}estado-cancelado
+                            {% elif t.estado == 'en_revision' %}estado-completo
+                            {% else %}estado-finalizado{% endif %}">
+                            {{ t.estado.replace('_',' ')|upper }}
+                        </span>
+                    </td>
+                    {% if current_user.tipo_usuario in ['empleado','admin'] %}
+                    <td>
+                        <form method="POST" action="{{ url_for('tramites.cambiar_estado', tramite_id=t.id) }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <select name="estado" class="form-control-uride" style="padding:4px 8px;font-size:.8rem;width:auto;display:inline-block" onchange="this.form.submit()">
+                                {% for e in estados %}
+                                <option value="{{ e }}" {% if t.estado == e %}selected{% endif %}>{{ e.replace('_',' ')|title }}</option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="fas fa-inbox fa-2x mb-3 d-block opacity-25"></i>
+                        No hay trámites con ese filtro.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Paginación -->
+{% if paginacion.pages > 1 %}
+<div class="d-flex justify-content-center gap-2 mt-4">
+    <a href="{{ url_for('tramites.historial', page=paginacion.prev_num, estado=filtro_estado) }}"
+       class="page-btn {% if not paginacion.has_prev %}disabled{% endif %}">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+    {% for p in paginacion.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+        <a href="{{ url_for('tramites.historial', page=p, estado=filtro_estado) }}"
+           class="page-btn {% if p == paginacion.page %}current{% endif %}">{{ p }}</a>
+        {% else %}
+        <span class="page-btn" style="border:none;cursor:default;">…</span>
+        {% endif %}
+    {% endfor %}
+    <a href="{{ url_for('tramites.historial', page=paginacion.next_num, estado=filtro_estado) }}"
+       class="page-btn {% if not paginacion.has_next %}disabled{% endif %}">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+</div>
+{% endif %}
+{% endblock %}

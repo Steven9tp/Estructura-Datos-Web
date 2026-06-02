@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Nueva Solicitud{% endblock %}
+{% block page_title %}<i class="fas fa-file-signature me-2" style="color:var(--accent)"></i>Nueva Solicitud{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Panel principal -->
+    <div class="col-lg-7">
+        <div class="card-uride">
+            <div class="card-header-uride">
+                <h6 class="fw-bold mb-0">Datos del Requerimiento</h6>
+            </div>
+            <div class="card-body-uride">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="form-group mb-4">
+                        {{ form.tipo_tramite.label(class="form-label-uride") }}
+                        {{ form.tipo_tramite(class="form-control-uride form-select-uride") }}
+                    </div>
+
+                    <div class="form-group mb-4">
+                        {{ form.observaciones.label(class="form-label-uride") }}
+                        {{ form.observaciones(class="form-control-uride", rows=5, placeholder="Describe el motivo o detalle adicional de tu solicitud...") }}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-3">
+                        <a href="{{ url_for('tramites.historial') }}" class="btn-uride btn-ghost">
+                            <i class="fas fa-times me-1"></i>Cancelar
+                        </a>
+                        {{ form.submit(class="btn-uride btn-primary-uride") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel informativo -->
+    <div class="col-lg-5">
+        <div class="card-uride" style="background:var(--sidebar-bg);border-color:rgba(201,162,39,.15);">
+            <div class="card-body-uride">
+                <div style="color:var(--accent);font-weight:700;margin-bottom:16px;font-size:.9rem;text-transform:uppercase;letter-spacing:.5px;">
+                    <i class="fas fa-info-circle me-2"></i>Información
+                </div>
+                <p style="color:rgba(255,255,255,.6);font-size:.85rem;line-height:1.7;">
+                    Tu solicitud será registrada y revisada por el personal correspondiente. Podrás consultar el estado de tu trámite en la sección <strong style="color:#c9a227;">Mis Trámites</strong>.
+                </p>
+                <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;">
+                    <div style="display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.5);font-size:.82rem;">
+                        <i class="fas fa-clock" style="color:#c9a227;width:16px;text-align:center;"></i>
+                        Tiempo de respuesta estimado: 24–48 horas
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.5);font-size:.82rem;">
+                        <i class="fas fa-bell" style="color:#c9a227;width:16px;text-align:center;"></i>
+                        Recibirás notificación al cambiar el estado
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.5);font-size:.82rem;">
+                        <i class="fas fa-shield-alt" style="color:#c9a227;width:16px;text-align:center;"></i>
+                        Tu información es confidencial y segura
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <a href="{{ url_for('tramites.historial') }}" class="card-uride d-block mt-3 text-decoration-none" style="padding:16px 20px;display:flex;align-items:center;gap:12px;">
+            <i class="fas fa-list" style="color:var(--accent);"></i>
+            <span style="font-weight:600;font-size:.88rem;">Ver mis solicitudes anteriores</span>
+            <i class="fas fa-chevron-right ms-auto text-muted"></i>
+        </a>
+    </div>
+</div>
+{% endblock %}
