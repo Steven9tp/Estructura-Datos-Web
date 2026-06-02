@@ -44,3 +44,17 @@ class SolicitarTramiteForm(FlaskForm):
 class GenerarTurnoForm(FlaskForm):
     dependencia_id = SelectField('Dependencia / Ventanilla', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Tomar Turno Virtual')
+
+class OlvidePasswordForm(FlaskForm):
+    email = StringField('Correo Institucional', validators=[DataRequired(), Email()])
+    submit = SubmitField('Enviar Link de Recuperación')
+
+    def validate_email(self, email):
+        user = Usuario.query.filter_by(email=email.data).first()
+        if user is None:
+            raise ValidationError('No existe ninguna cuenta con este correo.')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Nueva Contraseña', validators=[DataRequired(), Length(min=6)])
+    confirmar_password = PasswordField('Confirmar Contraseña', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Restablecer Contraseña')

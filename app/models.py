@@ -34,6 +34,7 @@ class Usuario(UserMixin, db.Model):
     rol_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=True)
     fecha_registro = db.Column(db.DateTime, default=_utcnow)
     activo = db.Column(db.Boolean, default=True)
+    email_verificado = db.Column(db.Boolean, default=False)
 
     # Relaciones adicionales según tipo
     tramites_solicitados = db.relationship('Tramite', backref='solicitante', lazy='dynamic')
@@ -48,6 +49,23 @@ class Usuario(UserMixin, db.Model):
     @property
     def nombre_completo(self):
         return f'{self.nombres} {self.apellidos}'
+
+    def get_token(self):
+        from itsdangerous import URLSafeTimedSerializer
+        from flask import current_app
+        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        return s.dumps({'user_id': self.id})
+
+    @staticmethod
+    def verify_token(token, expires_sec=3600):
+        from itsdangerous import URLSafeTimedSerializer
+        from flask import current_app
+        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token, max_age=expires_sec)['user_id']
+        except:
+            return None
+        return Usuario.query.get(user_id)
 
 # ── 2. Procesos (Trámites y Atención) ─────────────────────────────
 

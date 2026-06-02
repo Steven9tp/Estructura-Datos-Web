@@ -14,9 +14,12 @@ logger = logging.getLogger(__name__)
 import sys
 logging.basicConfig(level=logging.ERROR, handlers=[logging.StreamHandler(sys.stdout)])
 
+from flask_mail import Mail
+
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
+mail = Mail()
 
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _FRONTEND_TEMPLATES = os.path.join(_BASE_DIR, 'frontend', 'templates')
@@ -32,6 +35,10 @@ def create_app(config_name=None):
 
     db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
     if db_uri.startswith('mysql://'): db_uri = db_uri.replace('mysql://', 'mysql+pymysql://', 1)
+    # PyMySQL no soporta el parámetro ssl-mode con guion, lo quitamos porque negocia TLS automáticamente
+    if '?ssl-mode=REQUIRED' in db_uri:
+        db_uri = db_uri.replace('?ssl-mode=REQUIRED', '')
+    
     app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
     
     from flask_wtf.csrf import CSRFProtect
@@ -41,6 +48,7 @@ def create_app(config_name=None):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     csrf.init_app(app)
+    mail.init_app(app)
 
     login_manager.login_view = 'auth.login'
 
