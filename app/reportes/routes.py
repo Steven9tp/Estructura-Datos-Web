@@ -242,8 +242,8 @@ def imprimir_individual(estudiante_id):
 
     estudiante = Usuario.query.get_or_404(estudiante_id)
     
-    # Trámites del estudiante
-    tramites = Tramite.query.filter_by(solicitante_id=estudiante_id).order_by(Tramite.fecha_inicio.desc()).all()
+    # Trámites del estudiante (la columna en la BD es usuario_id, no solicitante_id)
+    tramites = Tramite.query.filter_by(usuario_id=estudiante_id).order_by(Tramite.fecha_inicio.desc()).all()
     
     # Turnos del estudiante
     turnos = Turno.query.filter_by(usuario_id=estudiante_id).order_by(Turno.fecha_emision.desc()).all()
