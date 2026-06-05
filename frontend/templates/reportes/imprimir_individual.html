@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39+Text&display=swap" rel="stylesheet">
     
-    <!-- Librería para Código QR (no intrusiva) -->
+    <!-- Librería para Código QR -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
@@ -30,7 +30,6 @@
             z-index: 100;
         }
 
-        /* Contenedor del documento - Formato A4 proporcional */
         .document-wrapper {
             width: 210mm;
             min-height: 297mm;
@@ -46,14 +45,11 @@
             z-index: 1;
             height: 100%;
             padding: 40px;
-            
-            /* Borde perimetral Premium Oficial */
             border: 3px solid #c9a227;
             outline: 10px solid #fff;
             outline-offset: -13px;
             box-shadow: inset 0 0 0 4px #c9a227;
             
-            /* Marca de agua individual Premium */
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 100 100" opacity="0.03"><text x="50" y="50" font-size="8" text-anchor="middle" dominant-baseline="middle" transform="rotate(-45 50 50)" fill="%23c9a227" font-weight="bold" font-family="Arial">SMARTCAMPUS UTA OFICIAL</text><circle cx="50" cy="50" r="40" fill="none" stroke="%23c9a227" stroke-width="0.5"/></svg>');
             background-position: center;
             background-repeat: no-repeat;
@@ -61,7 +57,6 @@
             background-color: #ffffff;
         }
 
-        /* Esquinas Ornamentales Simples */
         .certificate-container::before, .certificate-container::after {
             content: ''; position: absolute; width: 40px; height: 40px; border: 3px solid #c9a227;
         }
@@ -77,21 +72,9 @@
             margin-bottom: 30px;
         }
 
-        .header-left {
-            flex: 1;
-        }
-
-        .header-center {
-            flex: 2;
-            text-align: center;
-        }
-
-        .header-right {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
+        .header-left { flex: 1; }
+        .header-center { flex: 2; text-align: center; }
+        .header-right { flex: 1; display: flex; flex-direction: column; align-items: flex-end; }
 
         .cert-title {
             font-family: 'Playfair Display', serif;
@@ -124,249 +107,69 @@
         .folio-box strong { color: #c9a227; font-size: 0.8rem; }
         .folio-number { font-family: monospace; font-size: 0.95rem; font-weight: bold; color: #111; }
 
-        /* Código QR */
-        #qrcode-container {
-            padding: 3px;
-            background: #fff;
-            border: 1px solid #ccc;
-        }
-        .qr-label {
-            font-size: 0.55rem;
-            text-align: center;
-            margin-top: 3px;
-            color: #444;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        #qrcode-container { padding: 3px; background: #fff; border: 1px solid #ccc; }
+        .qr-label { font-size: 0.55rem; text-align: center; margin-top: 3px; color: #444; text-transform: uppercase; }
 
-        .cert-body {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            text-align: justify;
-            margin-bottom: 25px;
-            color: #333;
-        }
+        .cert-body { font-size: 0.95rem; line-height: 1.6; text-align: justify; margin-bottom: 25px; color: #333; }
 
-        .student-highlight {
-            background: #fafafa;
-            border: 1px solid #eaeaea;
-            padding: 15px;
-            margin: 20px 0;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+        .student-highlight { background: #fafafa; border: 1px solid #eaeaea; padding: 15px; margin: 20px 0; display: flex; align-items: center; gap: 20px; }
 
         .student-photo-placeholder {
-            width: 80px;
-            height: 100px;
-            background: #fff;
-            border: 1px solid #ccc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #bbb;
-            font-size: 2rem;
-            flex-shrink: 0;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+            width: 80px; height: 100px; background: #fff; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; color: #bbb; font-size: 2rem; flex-shrink: 0; box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
         }
 
         .student-details { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .student-details-full { grid-column: span 2; }
 
-        .student-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #000;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
-            margin-bottom: 5px;
-        }
+        .student-name { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: #000; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 5px; }
 
         .data-label { font-size: 0.75rem; color: #777; text-transform: uppercase; }
         .data-value { font-weight: 600; color: #222; font-size: 0.9rem; }
 
-        /* Métricas Analíticas Premium */
-        .metrics-container {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .metric-card {
-            flex: 1;
-            background: #fdfbf5;
-            border: 1px solid #e5e7eb;
-            padding: 12px;
-            text-align: center;
-            border-top: 3px solid #ccc;
-        }
-        
+        .metrics-container { display: flex; gap: 15px; margin-bottom: 30px; }
+        .metric-card { flex: 1; background: #fdfbf5; border: 1px solid #e5e7eb; padding: 12px; text-align: center; border-top: 3px solid #ccc; }
         .metric-total { border-top-color: #c9a227; }
         .metric-approved { border-top-color: #10b981; }
         .metric-efficiency { border-top-color: #3b82f6; }
-
-        .metric-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 2px;
-            font-family: 'Playfair Display', serif;
-        }
-
-        .metric-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: #555;
-            font-weight: 600;
-        }
+        .metric-value { font-size: 1.8rem; font-weight: 700; margin-bottom: 2px; font-family: 'Playfair Display', serif; }
+        .metric-label { font-size: 0.7rem; text-transform: uppercase; color: #555; font-weight: 600; }
 
         .timeline-box { margin-bottom: 30px; }
+        .timeline-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: #111; margin-bottom: 10px; border-bottom: 1px solid #eaeaea; padding-bottom: 5px; }
 
-        .timeline-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #111;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #eaeaea;
-            padding-bottom: 5px;
-        }
+        .table-cert { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .table-cert th { text-align: left; padding: 8px; background: #f1f5f9; color: #334155; text-transform: uppercase; font-weight: 700; border: 1px solid #cbd5e1; font-size: 0.7rem; }
+        .table-cert td { padding: 8px; border: 1px solid #e2e8f0; vertical-align: middle; }
 
-        .table-cert {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.8rem;
-        }
-        .table-cert th {
-            text-align: left;
-            padding: 8px;
-            background: #f1f5f9;
-            color: #334155;
-            text-transform: uppercase;
-            font-weight: 700;
-            border: 1px solid #cbd5e1;
-            font-size: 0.7rem;
-        }
-        .table-cert td {
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-            vertical-align: middle;
-        }
-
-        .status-badge {
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.7rem;
-        }
+        .status-badge { font-weight: 700; text-transform: uppercase; font-size: 0.7rem; }
         .status-aprobado { color: #059669; }
         .status-rechazado { color: #dc2626; }
         .status-revision { color: #d97706; }
         .status-iniciado { color: #4b5563; }
 
-        .legal-text {
-            background: #fffbeb;
-            border-left: 4px solid #f59e0b;
-            padding: 10px 15px;
-            font-size: 0.8rem;
-            color: #78350f;
-            margin-bottom: 30px;
-            text-align: justify;
-        }
+        .legal-text { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 10px 15px; font-size: 0.8rem; color: #78350f; margin-bottom: 30px; text-align: justify; }
 
-        .signatures {
-            margin-top: 50px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding: 0 20px;
-        }
-
-        .sig-block {
-            width: 35%;
-            text-align: center;
-            position: relative;
-        }
-
-        .sig-line {
-            border-top: 1px solid #111;
-            padding-top: 5px;
-            margin-top: 60px;
-        }
-
+        .signatures { margin-top: 50px; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 20px; }
+        .sig-block { width: 35%; text-align: center; position: relative; }
+        .sig-line { border-top: 1px solid #111; padding-top: 5px; margin-top: 60px; }
         .sig-name { font-weight: 700; font-size: 0.85rem; color: #111; text-transform: uppercase; }
         .sig-role { font-size: 0.75rem; color: #666; }
 
-        /* Sello oficial simulado */
         .official-seal {
-            position: absolute;
-            top: -50px;
-            left: 50%;
-            transform: translateX(-50%) rotate(-15deg);
-            width: 80px;
-            height: 80px;
-            border: 2px dashed #b68b20;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #b68b20;
-            font-size: 0.6rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            text-align: center;
-            z-index: 0;
-            opacity: 0.6;
+            position: absolute; top: -50px; left: 50%; transform: translateX(-50%) rotate(-15deg);
+            width: 80px; height: 80px; border: 2px dashed #b68b20; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #b68b20; font-size: 0.6rem; font-weight: bold; text-transform: uppercase; text-align: center; z-index: 0; opacity: 0.6;
         }
 
-        .footer-cert {
-            margin-top: 30px;
-            font-size: 0.7rem;
-            color: #888;
-            border-top: 1px solid #eaeaea;
-            padding-top: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-        
-        .code-hash { font-family: monospace; color: #555; background: #f4f4f5; padding: 2px 5px; }
+        .footer-cert { margin-top: 30px; font-size: 0.7rem; color: #888; border-top: 1px solid #eaeaea; padding-top: 10px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .barcode { font-family: 'Libre Barcode 39 Text', cursive; font-size: 2.2rem; line-height: 1; color: #000; }
 
-        .barcode {
-            font-family: 'Libre Barcode 39 Text', cursive;
-            font-size: 2.2rem;
-            line-height: 1;
-            color: #000;
-        }
-
-        /* === CONFIGURACIÓN DE IMPRESIÓN FORZADA PERFECTA === */
         @media print {
             body { background: transparent; padding: 0; margin: 0; }
             .print-controls { display: none !important; }
-            
-            /* Forzar fondos e imágenes */
-            * {
-                -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            
-            .document-wrapper { 
-                box-shadow: none; 
-                margin: 0; 
-                padding: 0;
-                width: 100%;
-                min-height: 100%;
-            }
-            
-            .certificate-container {
-                border-color: #c9a227 !important;
-            }
-
-            @page {
-                size: A4 portrait;
-                margin: 10mm;
-            }
+            * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; }
+            .document-wrapper { box-shadow: none; margin: 0; padding: 0; width: 100%; min-height: 100%; }
+            .certificate-container { border-color: #c9a227 !important; }
+            @page { size: A4 portrait; margin: 10mm; }
         }
     </style>
 </head>
@@ -416,7 +219,7 @@
                     </div>
                     <div class="student-details">
                         <div class="student-details-full">
-                            <div class="student-name">{{ estudiante.apellidos }}, {{ estudiante.nombres }}</div>
+                            <div class="student-name">{{ estudiante.apellidos or '' }}, {{ estudiante.nombres or '' }}</div>
                         </div>
                         <div>
                             <div class="data-label">Identificador</div>
@@ -424,11 +227,11 @@
                         </div>
                         <div>
                             <div class="data-label">Rol Sistema</div>
-                            <div class="data-value">{{ estudiante.tipo_usuario|upper }}</div>
+                            <div class="data-value">{{ (estudiante.tipo_usuario or '')|upper }}</div>
                         </div>
                         <div class="student-details-full">
                             <div class="data-label">Correo Institucional</div>
-                            <div class="data-value">{{ estudiante.correo }}</div>
+                            <div class="data-value">{{ estudiante.correo or '' }}</div>
                         </div>
                     </div>
                 </div>
@@ -439,15 +242,15 @@
             <!-- Métricas Visuales Analíticas -->
             <div class="metrics-container">
                 <div class="metric-card metric-total">
-                    <div class="metric-value">{{ total_tramites }}</div>
+                    <div class="metric-value">{{ total_tramites|default(0) }}</div>
                     <div class="metric-label">Trámites Totales</div>
                 </div>
                 <div class="metric-card metric-approved">
-                    <div class="metric-value">{{ tramites_aprobados }}</div>
+                    <div class="metric-value">{{ tramites_aprobados|default(0) }}</div>
                     <div class="metric-label">Trámites Aprobados</div>
                 </div>
                 <div class="metric-card metric-efficiency">
-                    <div class="metric-value">{{ eficiencia }}%</div>
+                    <div class="metric-value">{{ eficiencia|default(0) }}%</div>
                     <div class="metric-label">Tasa de Resolución</div>
                 </div>
             </div>
@@ -472,10 +275,10 @@
                         {% for tr in tramites %}
                         <tr>
                             <td style="font-family: monospace; font-weight: bold; color: #555;">TRM-{{ "%04d"|format(tr.id) }}</td>
-                            <td>{{ tr.fecha_inicio.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ tr.fecha_inicio.strftime('%Y-%m-%d') if tr.fecha_inicio else 'N/A' }}</td>
                             <td><strong style="color: #222;">{{ tipos_traducidos.get(tr.tipo_tramite, tr.tipo_tramite) }}</strong></td>
                             <td style="font-size: 0.75rem; color: #666;">
-                                {% if tr.fecha_actualizacion and tr.estado in ['aprobado', 'rechazado'] %}
+                                {% if tr.fecha_actualizacion and tr.fecha_inicio and tr.estado in ['aprobado', 'rechazado'] %}
                                     {% set diff = tr.fecha_actualizacion - tr.fecha_inicio %}
                                     {% if diff.days > 0 %}
                                         {{ diff.days }} días
@@ -522,13 +325,13 @@
                         Sello Oficial<br>SmartCampus
                     </div>
                     <div class="sig-line">
-                        <div class="sig-name">{{ current_user.nombre_completo }}</div>
+                        <div class="sig-name">{{ current_user.nombre_completo or '' }}</div>
                         <div class="sig-role">Firma Funcionario Emisor</div>
                     </div>
                 </div>
                 <div class="sig-block">
                     <div class="sig-line">
-                        <div class="sig-name">{{ estudiante.apellidos }}, {{ estudiante.nombres }}</div>
+                        <div class="sig-name">{{ estudiante.apellidos or '' }}, {{ estudiante.nombres or '' }}</div>
                         <div class="sig-role">Firma de Responsabilidad</div>
                     </div>
                 </div>
