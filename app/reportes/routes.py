@@ -255,11 +255,19 @@ def imprimir_individual(estudiante_id):
         'retiro_asignatura': 'Retiro de Asignatura'
     }
 
+    # Calcular métricas para evitar errores en Jinja
+    total_tramites = len(tramites)
+    tramites_aprobados = sum(1 for tr in tramites if tr.estado == 'aprobado')
+    eficiencia = round((tramites_aprobados / total_tramites * 100), 1) if total_tramites > 0 else 0
+
     return render_template(
         'reportes/imprimir_individual.html',
         estudiante=estudiante,
         tramites=tramites,
         turnos=turnos,
+        total_tramites=total_tramites,
+        tramites_aprobados=tramites_aprobados,
+        eficiencia=eficiencia,
         tipos_traducidos=tipos_traducidos,
         ahora=datetime.now()
     )
