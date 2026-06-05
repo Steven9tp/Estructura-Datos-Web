@@ -181,3 +181,38 @@ def exportar(tipo):
 
     flash('Tipo de reporte no válido.', 'warning')
     return redirect(url_for('reportes.dashboard'))
+
+@bp.route('/imprimir', methods=['GET'])
+@login_required
+def imprimir():
+    if current_user.tipo_usuario == 'estudiante':
+        flash('Acceso denegado.', 'danger')
+        return redirect(url_for('main.index'))
+
+    # Obtenemos los trámites
+    tramites = Tramite.query.order_by(Tramite.fecha_inicio.desc()).all()
+    
+    # Obtenemos los turnos
+    turnos = Turno.query.order_by(Turno.fecha_emision.desc()).all()
+    
+    # Resumen estadístico
+    total_tramites = len(tramites)
+    tramites_completados = sum(1 for t in tramites if t.estado == 'aprobado')
+    tramites_pendientes = sum(1 for t in tramites if t.estado in ['iniciado', 'en_revision'])
+    
+    tipos_traducidos = {
+        'certificado_matricula': 'Certificado de Matrícula',
+        'solicitud_especie': 'Solicitud de Especie Valorada',
+        'justificacion_falta': 'Justificación de Falta',
+        'retiro_asignatura': 'Retiro de Asignatura'
+    }
+
+    return render_template(
+        'reportes/imprimir.html',
+        tramites=tramites,
+        total_tramites=total_tramites,
+        tramites_completados=tramites_completados,
+        tramites_pendientes=tramites_pendientes,
+        tipos_traducidos=tipos_traducidos,
+        ahora=datetime.now()
+    )

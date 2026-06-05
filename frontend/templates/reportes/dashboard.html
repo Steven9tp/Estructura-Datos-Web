@@ -122,11 +122,14 @@
         <p class="text-muted mb-0" style="font-size:.85rem;">Métricas en tiempo real alineadas a las estructuras de datos y requerimientos del SmartCampus.</p>
     </div>
     <div class="d-flex gap-2">
+        <a href="{{ url_for('reportes.imprimir') }}" class="export-btn" target="_blank">
+            <i class="fas fa-file-pdf text-danger"></i> Imprimir PDF
+        </a>
         <a href="{{ url_for('reportes.exportar', tipo='turnos') }}" class="export-btn">
             <i class="fas fa-file-csv text-success"></i> Exportar Turnos
         </a>
         <a href="{{ url_for('reportes.exportar', tipo='tramites') }}" class="export-btn">
-            <i class="fas fa-file-csv text-danger"></i> Exportar Trámites
+            <i class="fas fa-file-csv text-primary"></i> Exportar Trámites
         </a>
     </div>
 </div>
