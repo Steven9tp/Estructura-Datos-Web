@@ -96,6 +96,9 @@ def dashboard():
     
     promedio_espera = sum(tiempos_espera) / len(tiempos_espera) if tiempos_espera else 0.0
 
+    # ── 6. Historial Reciente (Últimos movimientos) ──
+    historial_reciente = HistorialAccion.query.order_by(HistorialAccion.fecha.desc()).limit(8).all()
+
     return render_template(
         'reportes/dashboard.html',
         total_usuarios=total_usuarios,
@@ -120,7 +123,8 @@ def dashboard():
         detalles_colas=detalles_colas,
         total_logs=total_logs,
         reporte_tramites=reporte_tramites,
-        promedio_espera=round(promedio_espera, 1)
+        promedio_espera=round(promedio_espera, 1),
+        historial_reciente=historial_reciente
     )
 
 @bp.route('/exportar/<string:tipo>', methods=['GET'])

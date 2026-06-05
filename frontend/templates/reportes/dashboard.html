@@ -188,9 +188,45 @@
         <div class="report-value">{{ promedio_espera }} <span style="font-size: 1.2rem; font-weight: 500;">min</span></div>
         <div class="report-desc">Basado en tiempos reales de atención de la cola FIFO.</div>
     </div>
-<div class="row justify-content-center">
+</div>
+
+<div class="row">
+    <!-- Historial de Auditoría (Requerimiento Institucional) -->
+    <div class="col-lg-7 mb-4">
+        <div class="chart-card h-100">
+            <h5 class="fw-bold mb-1"><i class="fas fa-history me-2 text-info"></i>Auditoría Institucional (Últimos Movimientos)</h5>
+            <p class="text-muted mb-4" style="font-size: 0.8rem;">Registro de eventos recientes y trazabilidad operativa de los funcionarios.</p>
+            
+            <div class="table-responsive">
+                <table class="table table-hover table-sm" style="font-size: 0.85rem;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--border);">
+                            <th>Usuario</th>
+                            <th>Acción</th>
+                            <th>Fecha y Hora</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for accion in historial_reciente %}
+                        <tr>
+                            <td><span class="fw-semibold text-primary">{{ accion.usuario.nombre_completo if accion.usuario else 'Sistema' }}</span></td>
+                            <td>{{ accion.descripcion }}</td>
+                            <td class="text-muted">{{ accion.fecha.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-3">No hay registros recientes.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+    </div>
+
     <!-- Distribución de Trámites y Ventanilla Virtual -->
-    <div class="col-lg-8 mb-4">
+    <div class="col-lg-5 mb-4">
         <div class="chart-card h-100">
             <h5 class="fw-bold mb-1"><i class="fas fa-chart-bar me-2 text-primary"></i>Distribución de Trámites</h5>
             <p class="text-muted mb-4" style="font-size: 0.8rem;">Volumen de solicitudes académicas según su tipo correspondiente.</p>
