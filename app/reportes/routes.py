@@ -192,6 +192,14 @@ def imprimir():
     # Obtenemos los trámites
     tramites = Tramite.query.order_by(Tramite.fecha_inicio.desc()).all()
     
+    # Agrupamos por estudiante
+    tramites_por_estudiante = {}
+    for t in tramites:
+        est = t.solicitante.nombre_completo if t.solicitante else 'Desconocido'
+        if est not in tramites_por_estudiante:
+            tramites_por_estudiante[est] = []
+        tramites_por_estudiante[est].append(t)
+    
     # Obtenemos los turnos
     turnos = Turno.query.order_by(Turno.fecha_emision.desc()).all()
     
@@ -209,7 +217,7 @@ def imprimir():
 
     return render_template(
         'reportes/imprimir.html',
-        tramites=tramites,
+        tramites_por_estudiante=tramites_por_estudiante,
         total_tramites=total_tramites,
         tramites_completados=tramites_completados,
         tramites_pendientes=tramites_pendientes,

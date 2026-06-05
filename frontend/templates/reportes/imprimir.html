@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Trámites - SmartCampus UTA</title>
-    <!-- Incluimos Bootstrap para los estilos base de la tabla, pero luego sobrescribimos para impresión -->
+    <!-- FontAwesome y Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -215,43 +216,51 @@
             </div>
         </div>
 
-        <!-- Tabla de Datos -->
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th width="8%">ID</th>
-                    <th width="15%">Fecha Solicitud</th>
-                    <th width="25%">Solicitante</th>
-                    <th width="22%">Tipo de Trámite</th>
-                    <th width="15%">Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for tr in tramites %}
-                <tr>
-                    <td class="text-center">{{ tr.id }}</td>
-                    <td>{{ tr.fecha_inicio.strftime('%Y-%m-%d %H:%M') if tr.fecha_inicio else 'N/A' }}</td>
-                    <td>{{ tr.solicitante.nombre_completo if tr.solicitante else 'N/A' }}</td>
-                    <td>{{ tipos_traducidos.get(tr.tipo_tramite, tr.tipo_tramite) }}</td>
-                    <td class="text-center">
-                        {% if tr.estado == 'aprobado' %}
-                            <span class="badge bg-success badge-estado">Aprobado</span>
-                        {% elif tr.estado == 'rechazado' %}
-                            <span class="badge bg-danger badge-estado">Rechazado</span>
-                        {% elif tr.estado == 'en_revision' %}
-                            <span class="badge bg-warning text-dark badge-estado">En Revisión</span>
-                        {% else %}
-                            <span class="badge bg-secondary badge-estado">Iniciado</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="5" class="text-center text-muted py-4">No hay trámites registrados en el sistema.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <!-- Tabla de Datos Agrupada por Estudiante -->
+        {% if tramites_por_estudiante %}
+            {% for estudiante, tramites_lista in tramites_por_estudiante.items() %}
+            <div class="mb-4">
+                <h5 style="color: #343a40; border-bottom: 2px solid #c9a227; padding-bottom: 5px; margin-bottom: 15px;">
+                    <i class="fas fa-user-graduate me-2"></i> Estudiante: <strong>{{ estudiante }}</strong>
+                    <span class="badge bg-secondary float-end" style="font-size: 0.8rem;">{{ tramites_lista|length }} trámite(s)</span>
+                </h5>
+                <table class="table table-bordered table-sm" style="font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa;">
+                            <th width="10%" class="text-center">ID</th>
+                            <th width="25%">Fecha Solicitud</th>
+                            <th width="40%">Tipo de Trámite</th>
+                            <th width="25%" class="text-center">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tr in tramites_lista %}
+                        <tr>
+                            <td class="text-center fw-bold text-muted">{{ tr.id }}</td>
+                            <td>{{ tr.fecha_inicio.strftime('%Y-%m-%d %H:%M') if tr.fecha_inicio else 'N/A' }}</td>
+                            <td>{{ tipos_traducidos.get(tr.tipo_tramite, tr.tipo_tramite) }}</td>
+                            <td class="text-center">
+                                {% if tr.estado == 'aprobado' %}
+                                    <span class="badge bg-success badge-estado">Aprobado</span>
+                                {% elif tr.estado == 'rechazado' %}
+                                    <span class="badge bg-danger badge-estado">Rechazado</span>
+                                {% elif tr.estado == 'en_revision' %}
+                                    <span class="badge bg-warning text-dark badge-estado">En Revisión</span>
+                                {% else %}
+                                    <span class="badge bg-secondary badge-estado">Iniciado</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="alert alert-light text-center py-5 border">
+            <h5 class="text-muted">No hay trámites registrados en el sistema.</h5>
+        </div>
+        {% endif %}
 
         <!-- Firmas -->
         <div class="signatures">
