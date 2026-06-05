@@ -99,6 +99,9 @@ def dashboard():
     # ── 6. Historial Reciente (Últimos movimientos) ──
     historial_reciente = HistorialAccion.query.order_by(HistorialAccion.fecha.desc()).limit(8).all()
 
+    # ── 7. Lista de Estudiantes para el Reporte Individual ──
+    lista_estudiantes = Usuario.query.filter_by(tipo_usuario='estudiante').order_by(Usuario.apellidos.asc()).all()
+
     return render_template(
         'reportes/dashboard.html',
         total_usuarios=total_usuarios,
@@ -124,7 +127,8 @@ def dashboard():
         total_logs=total_logs,
         reporte_tramites=reporte_tramites,
         promedio_espera=round(promedio_espera, 1),
-        historial_reciente=historial_reciente
+        historial_reciente=historial_reciente,
+        lista_estudiantes=lista_estudiantes
     )
 
 @bp.route('/exportar/<string:tipo>', methods=['GET'])
@@ -225,6 +229,37 @@ def imprimir():
         total_tramites=total_tramites,
         tramites_completados=tramites_completados,
         tramites_pendientes=tramites_pendientes,
+        tipos_traducidos=tipos_traducidos,
+        ahora=datetime.now()
+    )
+
+@bp.route('/imprimir_individual/<int:estudiante_id>', methods=['GET'])
+@login_required
+def imprimir_individual(estudiante_id):
+    if current_user.tipo_usuario == 'estudiante' and current_user.id != estudiante_id:
+        flash('Acceso denegado.', 'danger')
+        return redirect(url_for('main.index'))
+
+    estudiante = Usuario.query.get_or_404(estudiante_id)
+    
+    # Trámites del estudiante
+    tramites = Tramite.query.filter_by(solicitante_id=estudiante_id).order_by(Tramite.fecha_inicio.desc()).all()
+    
+    # Turnos del estudiante
+    turnos = Turno.query.filter_by(usuario_id=estudiante_id).order_by(Turno.fecha_emision.desc()).all()
+    
+    tipos_traducidos = {
+        'certificado_matricula': 'Certificado de Matrícula',
+        'solicitud_especie': 'Solicitud de Especie Valorada',
+        'justificacion_falta': 'Justificación de Falta',
+        'retiro_asignatura': 'Retiro de Asignatura'
+    }
+
+    return render_template(
+        'reportes/imprimir_individual.html',
+        estudiante=estudiante,
+        tramites=tramites,
+        turnos=turnos,
         tipos_traducidos=tipos_traducidos,
         ahora=datetime.now()
     )

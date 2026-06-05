@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificado de Trámites - {{ estudiante.nombre_completo }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #555;
+            color: #111;
+        }
+        
+        .certificate-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 60px 80px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 1;
+            /* Borde perimetral estilo certificado */
+            border: 15px solid #f9f9f9;
+            outline: 2px solid #b68b20;
+            outline-offset: -10px;
+            
+            /* Marca de agua individual */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 100 100" opacity="0.03"><text x="50" y="50" font-size="12" text-anchor="middle" dominant-baseline="middle" transform="rotate(-30 50 50)" fill="black" font-weight="bold">UTA - CERTIFICADO OFICIAL</text></svg>');
+            background-repeat: repeat;
+        }
+
+        .header-cert {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #b68b20;
+            padding-bottom: 20px;
+        }
+
+        .header-cert img.logo {
+            height: 80px;
+            margin-bottom: 15px;
+        }
+
+        .cert-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            color: #1a1a1a;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 10px 0;
+        }
+
+        .cert-subtitle {
+            font-size: 1rem;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        .cert-body {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            text-align: justify;
+            margin-bottom: 30px;
+        }
+
+        .student-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #000;
+            display: inline-block;
+            border-bottom: 1px solid #000;
+            padding: 0 10px;
+        }
+
+        .barcode-container {
+            text-align: center;
+            margin-top: -20px;
+            margin-bottom: 20px;
+        }
+        .barcode {
+            font-family: 'Libre Barcode 39', monospace, cursive; /* Fake barcode if font fails, just looks like stripes or we use svg */
+            font-size: 2rem;
+            letter-spacing: 2px;
+            color: #000;
+        }
+
+        .timeline-box {
+            background: rgba(182,139,32,0.05);
+            border: 1px solid rgba(182,139,32,0.2);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .timeline-title {
+            font-weight: 700;
+            color: #b68b20;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(182,139,32,0.2);
+            padding-bottom: 5px;
+        }
+
+        .table-cert {
+            width: 100%;
+            font-size: 0.85rem;
+        }
+        .table-cert th {
+            text-align: left;
+            padding: 8px 5px;
+            border-bottom: 1px solid #ccc;
+            color: #555;
+            text-transform: uppercase;
+        }
+        .table-cert td {
+            padding: 8px 5px;
+            border-bottom: 1px dotted #eee;
+        }
+
+        .signatures {
+            margin-top: 80px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .sig-block {
+            width: 40%;
+            text-align: center;
+        }
+
+        .sig-line {
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            margin-top: 60px;
+        }
+
+        .sig-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .sig-role {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .print-controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        @media print {
+            body { background: transparent; }
+            .certificate-container {
+                margin: 0;
+                padding: 40px;
+                box-shadow: none;
+                border: 8px solid #f9f9f9;
+                max-width: 100%;
+            }
+            .print-controls { display: none !important; }
+            @page { size: A4 portrait; margin: 15mm; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="print-controls">
+        <button onclick="window.print()" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+            <i class="fas fa-print me-2"></i> Emitir Certificado Individual
+        </button>
+        <button onclick="window.close()" class="btn btn-outline-secondary btn-lg rounded-pill shadow-sm ms-2">
+            Cerrar Ventana
+        </button>
+    </div>
+
+    <div class="certificate-container">
+        
+        <div class="header-cert">
+            <i class="fas fa-university" style="font-size: 3rem; color: #b68b20; margin-bottom: 10px;"></i>
+            <div class="cert-subtitle">Universidad Técnica de Ambato</div>
+            <div class="cert-title">Certificado de Expediente</div>
+            <div class="cert-subtitle" style="font-size: 0.75rem; letter-spacing: 2px;">Sistema SmartCampus Web</div>
+        </div>
+
+        <div class="barcode-container">
+            <!-- Simulated Barcode using inline SVG -->
+            <svg width="250" height="40" viewBox="0 0 250 40">
+                <rect x="10" y="0" width="3" height="40" fill="black"></rect>
+                <rect x="15" y="0" width="1" height="40" fill="black"></rect>
+                <rect x="18" y="0" width="5" height="40" fill="black"></rect>
+                <rect x="25" y="0" width="2" height="40" fill="black"></rect>
+                <rect x="30" y="0" width="4" height="40" fill="black"></rect>
+                <rect x="36" y="0" width="1" height="40" fill="black"></rect>
+                <rect x="40" y="0" width="6" height="40" fill="black"></rect>
+                <rect x="48" y="0" width="2" height="40" fill="black"></rect>
+                <rect x="52" y="0" width="1" height="40" fill="black"></rect>
+                <rect x="56" y="0" width="5" height="40" fill="black"></rect>
+                <rect x="65" y="0" width="2" height="40" fill="black"></rect>
+                <rect x="70" y="0" width="4" height="40" fill="black"></rect>
+                <rect x="76" y="0" width="1" height="40" fill="black"></rect>
+                <rect x="80" y="0" width="3" height="40" fill="black"></rect>
+                <rect x="86" y="0" width="2" height="40" fill="black"></rect>
+                <!-- Repeat pattern to fill -->
+                <rect x="90" y="0" width="5" height="40" fill="black"></rect>
+                <rect x="97" y="0" width="1" height="40" fill="black"></rect>
+                <rect x="100" y="0" width="4" height="40" fill="black"></rect>
+                <rect x="107" y="0" width="2" height="40" fill="black"></rect>
+                <rect x="111" y="0" width="6" height="40" fill="black"></rect>
+                <rect x="119" y="0" width="1" height="40" fill="black"></rect>
+                <rect x="122" y="0" width="3" height="40" fill="black"></rect>
+                <rect x="128" y="0" width="2" height="40" fill="black"></rect>
+                <rect x="132" y="0" width="5" height="40" fill="black"></rect>
+                <rect x="139" y="0" width="1" height="40" fill="black"></rect>
+                <rect x="142" y="0" width="4" height="40" fill="black"></rect>
+                <rect x="148" y="0" width="2" height="40" fill="black"></rect>
+                <rect x="152" y="0" width="6" height="40" fill="black"></rect>
+                <rect x="160" y="0" width="1" height="40" fill="black"></rect>
+                <rect x="163" y="0" width="3" height="40" fill="black"></rect>
+                <rect x="169" y="0" width="2" height="40" fill="black"></rect>
+                <rect x="173" y="0" width="5" height="40" fill="black"></rect>
+                <rect x="180" y="0" width="1" height="40" fill="black"></rect>
+                <rect x="183" y="0" width="4" height="40" fill="black"></rect>
+                <rect x="189" y="0" width="2" height="40" fill="black"></rect>
+                <rect x="193" y="0" width="6" height="40" fill="black"></rect>
+                <rect x="201" y="0" width="1" height="40" fill="black"></rect>
+                <rect x="204" y="0" width="3" height="40" fill="black"></rect>
+                <rect x="210" y="0" width="2" height="40" fill="black"></rect>
+                <rect x="214" y="0" width="5" height="40" fill="black"></rect>
+                <rect x="221" y="0" width="1" height="40" fill="black"></rect>
+                <rect x="224" y="0" width="4" height="40" fill="black"></rect>
+                <rect x="230" y="0" width="2" height="40" fill="black"></rect>
+                <rect x="234" y="0" width="6" height="40" fill="black"></rect>
+            </svg>
+            <div style="font-family: monospace; font-size: 0.7rem; color: #666; margin-top: 5px;">
+                VAL-{{ estudiante.id }}-{{ ahora.strftime('%Y%m%d%H%M') }}
+            </div>
+        </div>
+
+        <div class="cert-body">
+            A petición verbal de la parte interesada y para los fines pertinentes, la Dirección Operativa del Sistema SmartCampus <strong>CERTIFICA</strong> que el/la ciudadano/a:
+            <div style="text-align: center; margin: 25px 0;">
+                <span class="student-name">{{ estudiante.nombres }} {{ estudiante.apellidos }}</span>
+            </div>
+            Registrado/a en la base de datos institucional bajo el identificador único <strong>ID-{{ estudiante.id }}</strong> con correo electrónico <strong>{{ estudiante.correo }}</strong>, ha tramitado a través de la plataforma académica las siguientes solicitudes:
+        </div>
+
+        <div class="timeline-box">
+            <div class="timeline-title">
+                <i class="fas fa-folder-open me-2"></i> Detalle del Historial de Trámites
+            </div>
+            
+            {% if tramites %}
+            <table class="table-cert">
+                <thead>
+                    <tr>
+                        <th width="15%">Código</th>
+                        <th width="20%">Fecha Solicitud</th>
+                        <th width="45%">Tipo de Solicitud</th>
+                        <th width="20%">Resolución</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tr in tramites %}
+                    <tr>
+                        <td style="font-family: monospace;">TRM-{{ tr.id }}</td>
+                        <td>{{ tr.fecha_inicio.strftime('%Y-%m-%d') }}</td>
+                        <td><strong>{{ tipos_traducidos.get(tr.tipo_tramite, tr.tipo_tramite) }}</strong></td>
+                        <td>
+                            {% if tr.estado == 'aprobado' %}
+                                <span style="color: #137333; font-weight: bold;">APROBADO</span>
+                            {% elif tr.estado == 'rechazado' %}
+                                <span style="color: #c5221f; font-weight: bold;">RECHAZADO</span>
+                            {% elif tr.estado == 'en_revision' %}
+                                <span style="color: #b06000; font-weight: bold;">EN REVISIÓN</span>
+                            {% else %}
+                                <span style="color: #333; font-weight: bold;">INICIADO</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="text-align: center; color: #666; padding: 10px;">
+                <em>El estudiante no ha registrado ningún trámite en el sistema hasta la fecha.</em>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="cert-body" style="font-size: 0.9rem;">
+            Se expide el presente certificado de forma automática garantizando la integridad de los datos, en la ciudad de Ambato, el <strong>{{ ahora.strftime('%d de %B de %Y') }}</strong> a las <strong>{{ ahora.strftime('%H:%M') }}</strong>.
+        </div>
+
+        <div class="signatures">
+            <div class="sig-block">
+                <div class="sig-line">
+                    <div class="sig-name">{{ current_user.nombre_completo }}</div>
+                    <div class="sig-role">Emisor / Autoridad Competente</div>
+                </div>
+            </div>
+            <div class="sig-block">
+                <div class="sig-line">
+                    <div class="sig-name">{{ estudiante.nombres }} {{ estudiante.apellidos }}</div>
+                    <div class="sig-role">Estudiante Titular</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

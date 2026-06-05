@@ -3,131 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Trámites - SmartCampus UTA</title>
+    <title>Reporte General Académico - SmartCampus UTA</title>
     <!-- FontAwesome y Bootstrap -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Fuente Institucional Oficial (Serif) -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
+            font-family: 'Roboto', sans-serif;
+            background-color: #e9ecef;
+            color: #111;
         }
         
         .report-container {
-            max-width: 1000px;
-            margin: 0 auto;
+            max-width: 1050px;
+            margin: 30px auto;
             background: white;
-            padding: 40px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 50px 60px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+            z-index: 1;
+            /* Marca de agua */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 100 100" opacity="0.03"><text x="50" y="50" font-size="20" text-anchor="middle" dominant-baseline="middle" transform="rotate(-45 50 50)" fill="black" font-weight="bold">UTA</text></svg>');
+            background-repeat: repeat;
         }
 
-        /* Estilos del Encabezado */
-        .header {
+        /* Encabezado Profesional */
+        .header-official {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            border-bottom: 3px solid #c9a227; /* Dorado UTA */
-            padding-bottom: 20px;
-            margin-bottom: 30px;
+            align-items: flex-start;
+            border-bottom: 4px solid #b68b20; /* Dorado UTA */
+            padding-bottom: 25px;
+            margin-bottom: 35px;
         }
 
-        .header-logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
+        .header-left {
             display: flex;
             align-items: center;
         }
 
-        .header-logo img {
-            height: 60px;
-            margin-right: 15px;
+        .shield-icon {
+            font-size: 3.5rem;
+            color: #b68b20;
+            margin-right: 20px;
         }
 
-        .header-info {
-            text-align: right;
-            font-size: 0.9rem;
+        .university-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1.1;
+            text-transform: uppercase;
+        }
+        .department-name {
+            font-size: 0.95rem;
+            font-weight: 500;
             color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .qr-placeholder {
+            width: 70px;
+            height: 70px;
+            border: 2px solid #333;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto;
+            margin-bottom: 10px;
+            background: #fff;
+        }
+
+        .document-meta {
+            font-size: 0.75rem;
+            color: #555;
+            font-family: monospace;
         }
 
         .report-title {
             text-align: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #222;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #000;
+            letter-spacing: 0.5px;
         }
 
-        /* Resumen Estadístico */
-        .summary-box {
+        /* Analíticas del reporte */
+        .analytics-ribbon {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-left: 5px solid #b68b20;
+            padding: 15px 20px;
+            margin-bottom: 30px;
             display: flex;
-            justify-content: space-around;
-            background-color: #f1f3f5;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            border: 1px solid #ddd;
+            justify-content: space-between;
         }
-
-        .summary-item {
+        .metric {
             text-align: center;
         }
-
-        .summary-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #c9a227;
+        .metric-val {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #111;
         }
-
-        .summary-label {
-            font-size: 0.85rem;
+        .metric-lbl {
+            font-size: 0.75rem;
             color: #666;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         /* Tabla de Datos */
-        .table th {
-            background-color: #343a40 !important;
-            color: white !important;
+        .table-official {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .table-official th {
+            background-color: #212529 !important;
+            color: #fff !important;
             font-weight: 600;
+            padding: 12px 10px;
+            border: 1px solid #212529;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.75rem;
+        }
+        .table-official td {
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+        .table-official tbody tr:nth-child(even) {
+            background-color: rgba(0,0,0,0.02);
         }
 
-        .badge-estado {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
+        .status-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border: 1px solid transparent;
         }
+        .status-success { background: #e6f4ea; color: #137333; border-color: #ceead6; }
+        .status-danger { background: #fce8e6; color: #c5221f; border-color: #fad2cf; }
+        .status-warning { background: #fef7e0; color: #b06000; border-color: #fef0b3; }
+        .status-neutral { background: #f1f3f4; color: #3c4043; border-color: #e8eaed; }
 
-        /* Firmas */
-        .signatures {
-            margin-top: 80px;
+        /* Firmas Oficiales */
+        .official-signatures {
+            margin-top: 70px;
             display: flex;
-            justify-content: center;
+            justify-content: space-around;
         }
-
-        .signature-line {
-            border-top: 1px solid #333;
-            width: 300px;
+        .signature-box {
             text-align: center;
-            padding-top: 10px;
+            width: 30%;
+        }
+        .signature-line {
+            border-bottom: 1px solid #000;
+            height: 60px;
+            margin-bottom: 10px;
+        }
+        .signature-name {
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        .signature-role {
+            font-size: 0.75rem;
+            color: #555;
         }
 
-        .signature-line p {
-            margin: 0;
-            font-size: 0.9rem;
-            font-weight: bold;
+        .footer-legal {
+            margin-top: 50px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            font-size: 0.7rem;
+            color: #777;
+            text-align: justify;
         }
 
-        .signature-line span {
-            font-size: 0.8rem;
-            color: #666;
-        }
-
-        /* Controles de Impresión (se ocultan al imprimir) */
         .print-controls {
             text-align: center;
             margin: 20px 0;
@@ -135,35 +207,31 @@
 
         /* === REGLAS ESPECÍFICAS PARA IMPRESIÓN === */
         @media print {
-            body {
-                background-color: white;
-            }
+            body { background-color: transparent; }
             .report-container {
                 box-shadow: none;
                 padding: 0;
                 margin: 0;
                 max-width: 100%;
             }
-            .print-controls {
-                display: none !important; /* Oculta el botón al imprimir */
-            }
-            .table th {
-                background-color: #343a40 !important;
+            .print-controls { display: none !important; }
+            .table-official th {
+                background-color: #212529 !important;
                 -webkit-print-color-adjust: exact; 
                 color-adjust: exact;
             }
-            .badge {
-                border: 1px solid #000;
+            .status-pill {
+                border: 1px solid #000 !important;
                 color: #000 !important;
                 background-color: transparent !important;
             }
-            @page {
-                size: A4;
-                margin: 20mm;
-            }
-            .summary-box {
+            .analytics-ribbon {
                 -webkit-print-color-adjust: exact; 
-                background-color: #f1f3f5 !important;
+                background-color: #f8f9fa !important;
+            }
+            @page {
+                size: A4 portrait;
+                margin: 20mm;
             }
         }
     </style>
@@ -171,83 +239,96 @@
 <body>
 
     <div class="print-controls">
-        <button onclick="window.print()" class="btn btn-primary btn-lg">
-            🖨️ Imprimir / Guardar como PDF
+        <button onclick="window.print()" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+            <i class="fas fa-print me-2"></i> Emitir Documento Oficial
         </button>
-        <a href="{{ url_for('reportes.dashboard') }}" class="btn btn-secondary btn-lg ms-2">
-            Volver al Dashboard
+        <a href="{{ url_for('reportes.dashboard') }}" class="btn btn-outline-secondary btn-lg rounded-pill shadow-sm ms-2">
+            Volver
         </a>
     </div>
 
     <div class="report-container">
         <!-- Encabezado -->
-        <div class="header">
-            <div class="header-logo">
-                <div style="background-color: #c9a227; color: white; padding: 10px 15px; border-radius: 5px; margin-right: 15px;">UTA</div>
+        <div class="header-official">
+            <div class="header-left">
+                <i class="fas fa-university shield-icon"></i>
                 <div>
-                    Universidad Técnica de Ambato<br>
-                    <span style="font-size: 0.9rem; font-weight: normal; color: #666;">Sistema SmartCampus Web</span>
+                    <div class="university-name">Universidad Técnica de Ambato</div>
+                    <div class="department-name">Dirección Operativa · Plataforma SmartCampus</div>
                 </div>
             </div>
-            <div class="header-info">
-                <strong>Fecha de Emisión:</strong> {{ ahora.strftime('%Y-%m-%d %H:%M') }}<br>
-                <strong>Emitido por:</strong> {{ current_user.nombre_completo }}<br>
-                <strong>Rol:</strong> {{ current_user.tipo_usuario|capitalize }}
+            <div class="header-right">
+                <!-- Código QR Falso Simulado -->
+                <div class="qr-placeholder">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=70x70&data=SMARTCAMPUS-{{ ahora.strftime('%Y%m%d%H%M') }}-UTA" alt="QR Code">
+                </div>
+                <div class="document-meta">
+                    <strong>FOLIO:</strong> SC-REP-{{ ahora.strftime('%Y%m%d') }}-{{ total_tramites }}<br>
+                    <strong>FECHA:</strong> {{ ahora.strftime('%Y-%m-%d %H:%M') }}
+                </div>
             </div>
         </div>
 
         <div class="report-title">
-            Reporte Oficial de Trámites Registrados
+            ACTA CONSOLIDADA DE GESTIÓN DE TRÁMITES
         </div>
 
-        <!-- Resumen Estadístico -->
-        <div class="summary-box">
-            <div class="summary-item">
-                <div class="summary-value">{{ total_tramites }}</div>
-                <div class="summary-label">Total Trámites</div>
+        <p style="font-size: 0.85rem; text-align: justify; margin-bottom: 25px;">
+            El presente documento constituye un informe oficial consolidado de todas las solicitudes y trámites procesados a través del sistema SmartCampus UTA hasta la fecha de emisión. 
+            Este reporte es generado por <strong>{{ current_user.nombre_completo }}</strong> bajo el rol de <strong>{{ current_user.tipo_usuario|upper }}</strong>.
+        </p>
+
+        <!-- Resumen Analítico -->
+        <div class="analytics-ribbon">
+            <div class="metric">
+                <div class="metric-val">{{ total_tramites }}</div>
+                <div class="metric-lbl">Trámites Emitidos</div>
             </div>
-            <div class="summary-item">
-                <div class="summary-value" style="color: #198754;">{{ tramites_completados }}</div>
-                <div class="summary-label">Completados</div>
+            <div class="metric">
+                <div class="metric-val text-success">{{ tramites_completados }}</div>
+                <div class="metric-lbl">Aprobados</div>
             </div>
-            <div class="summary-item">
-                <div class="summary-value" style="color: #ffc107;">{{ tramites_pendientes }}</div>
-                <div class="summary-label">En Proceso / Pendientes</div>
+            <div class="metric">
+                <div class="metric-val text-warning">{{ tramites_pendientes }}</div>
+                <div class="metric-lbl">En Revisión</div>
+            </div>
+            <div class="metric">
+                <div class="metric-val" style="font-family: monospace;">{{ ((tramites_completados / total_tramites * 100) if total_tramites > 0 else 0)|round(1) }}%</div>
+                <div class="metric-lbl">Tasa Resolución</div>
             </div>
         </div>
 
-        <!-- Tabla de Datos Agrupada por Estudiante -->
+        <!-- Agrupación por Estudiante -->
         {% if tramites_por_estudiante %}
             {% for estudiante, tramites_lista in tramites_por_estudiante.items() %}
-            <div class="mb-4">
-                <h5 style="color: #343a40; border-bottom: 2px solid #c9a227; padding-bottom: 5px; margin-bottom: 15px;">
-                    <i class="fas fa-user-graduate me-2"></i> Estudiante: <strong>{{ estudiante }}</strong>
-                    <span class="badge bg-secondary float-end" style="font-size: 0.8rem;">{{ tramites_lista|length }} trámite(s)</span>
-                </h5>
-                <table class="table table-bordered table-sm" style="font-size: 0.9rem;">
+            <div style="margin-bottom: 30px;">
+                <div style="background-color: #212529; color: white; padding: 6px 12px; font-size: 0.85rem; font-weight: bold; text-transform: uppercase;">
+                    <i class="fas fa-user me-2" style="color: #b68b20;"></i> TITULAR: {{ estudiante }}
+                </div>
+                <table class="table-official">
                     <thead>
-                        <tr style="background-color: #f8f9fa;">
-                            <th width="10%" class="text-center">ID</th>
-                            <th width="25%">Fecha Solicitud</th>
-                            <th width="40%">Tipo de Trámite</th>
-                            <th width="25%" class="text-center">Estado</th>
+                        <tr>
+                            <th width="10%">ID</th>
+                            <th width="20%">Fecha de Emisión</th>
+                            <th width="45%">Detalle del Trámite</th>
+                            <th width="25%" class="text-center">Dictamen / Estado</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for tr in tramites_lista %}
                         <tr>
-                            <td class="text-center fw-bold text-muted">{{ tr.id }}</td>
+                            <td class="text-center" style="font-family: monospace;">{{ tr.id }}</td>
                             <td>{{ tr.fecha_inicio.strftime('%Y-%m-%d %H:%M') if tr.fecha_inicio else 'N/A' }}</td>
-                            <td>{{ tipos_traducidos.get(tr.tipo_tramite, tr.tipo_tramite) }}</td>
+                            <td><strong>{{ tipos_traducidos.get(tr.tipo_tramite, tr.tipo_tramite) }}</strong></td>
                             <td class="text-center">
                                 {% if tr.estado == 'aprobado' %}
-                                    <span class="badge bg-success badge-estado">Aprobado</span>
+                                    <span class="status-pill status-success">Aprobado</span>
                                 {% elif tr.estado == 'rechazado' %}
-                                    <span class="badge bg-danger badge-estado">Rechazado</span>
+                                    <span class="status-pill status-danger">Rechazado</span>
                                 {% elif tr.estado == 'en_revision' %}
-                                    <span class="badge bg-warning text-dark badge-estado">En Revisión</span>
+                                    <span class="status-pill status-warning">En Revisión</span>
                                 {% else %}
-                                    <span class="badge bg-secondary badge-estado">Iniciado</span>
+                                    <span class="status-pill status-neutral">Iniciado</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -257,25 +338,30 @@
             </div>
             {% endfor %}
         {% else %}
-        <div class="alert alert-light text-center py-5 border">
-            <h5 class="text-muted">No hay trámites registrados en el sistema.</h5>
-        </div>
+            <div style="text-align: center; padding: 40px; border: 1px dashed #ccc;">
+                No existen registros documentales válidos para incluir en este reporte.
+            </div>
         {% endif %}
 
         <!-- Firmas -->
-        <div class="signatures">
-            <div class="signature-line">
-                <p>{{ current_user.nombre_completo }}</p>
-                <span>Firma de Responsabilidad<br>Generador del Reporte</span>
+        <div class="official-signatures">
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <div class="signature-name">{{ current_user.nombre_completo }}</div>
+                <div class="signature-role">Funcionario Responsable</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line" style="border-bottom: 1px dotted #ccc;">
+                    <i class="fas fa-stamp" style="font-size: 2rem; color: rgba(182,139,32,0.2); margin-top: 15px;"></i>
+                </div>
+                <div class="signature-name">Sello Institucional</div>
+                <div class="signature-role">Secretaría SmartCampus</div>
             </div>
         </div>
         
-        <div style="text-align: center; margin-top: 50px; font-size: 0.8rem; color: #888;">
-            Documento generado automáticamente por el sistema SmartCampus UTA. Válido únicamente con firma y sello.
+        <div class="footer-legal">
+            <strong>AVISO LEGAL:</strong> La información contenida en este documento goza de presunción de veracidad al ser generada y extraída directamente desde los servidores de base de datos de la plataforma institucional SmartCampus UTA. Cualquier alteración, reproducción parcial o uso indebido de este documento será sancionado conforme a los reglamentos universitarios vigentes. Para validar la autenticidad, escanee el código QR integrado en el encabezado.
         </div>
     </div>
-
-    <!-- Script para imprimir automáticamente opcional -->
-    <!-- <script> window.onload = function() { window.print(); } </script> -->
 </body>
 </html>

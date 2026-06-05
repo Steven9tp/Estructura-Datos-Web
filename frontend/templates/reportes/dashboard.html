@@ -121,15 +121,28 @@
         <h4 class="fw-bold mb-1">Centro de Reportes y Trazabilidad</h4>
         <p class="text-muted mb-0" style="font-size:.85rem;">Métricas en tiempo real alineadas a las estructuras de datos y requerimientos del SmartCampus.</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+        <!-- Formulario para Reporte Individual -->
+        <form action="#" method="GET" class="d-flex gap-2 align-items-center me-3" id="formReporteIndividual" onsubmit="event.preventDefault(); var estId = document.getElementById('selectEstudiante').value; if(estId) { window.open('/reportes/imprimir_individual/' + estId, '_blank'); } else { alert('Seleccione un estudiante'); }">
+            <select class="form-select form-select-sm" id="selectEstudiante" style="width: 250px; border-color: var(--border); background-color: var(--bg-card); color: var(--text-primary);">
+                <option value="">-- Seleccionar Estudiante --</option>
+                {% for est in lista_estudiantes %}
+                <option value="{{ est.id }}">{{ est.apellidos }} {{ est.nombres }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="export-btn" style="padding: 5px 12px;">
+                <i class="fas fa-user-graduate text-info"></i> R. Individual
+            </button>
+        </form>
+
         <a href="{{ url_for('reportes.imprimir') }}" class="export-btn" target="_blank">
-            <i class="fas fa-file-pdf text-danger"></i> Imprimir PDF
+            <i class="fas fa-file-pdf text-danger"></i> R. General
         </a>
         <a href="{{ url_for('reportes.exportar', tipo='turnos') }}" class="export-btn">
-            <i class="fas fa-file-csv text-success"></i> Exportar Turnos
+            <i class="fas fa-file-csv text-success"></i> Turnos
         </a>
         <a href="{{ url_for('reportes.exportar', tipo='tramites') }}" class="export-btn">
-            <i class="fas fa-file-csv text-primary"></i> Exportar Trámites
+            <i class="fas fa-file-csv text-primary"></i> Trámites
         </a>
     </div>
 </div>
